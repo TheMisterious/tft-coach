@@ -1,4 +1,4 @@
-# TFT Coach
+# coachv
 
 An [Overwolf](https://www.overwolf.com/) app that watches your Teamfight Tactics
 match locally and, once it ends, produces a round-by-round coaching report —
@@ -11,7 +11,7 @@ no account, no telemetry. Everything runs on your machine.
 ## What it does
 
 Overwolf's Game Events Provider (GEP) streams raw TFT match state (health,
-gold, board, shop, augments, ...) while you play. TFT Coach:
+gold, board, shop, augments, ...) while you play. coachv:
 
 1. **Captures** that raw event stream into a ledger (`src/capture/`, `src/ledger/`).
 2. **Reconstructs** it into a round-by-round snapshot of the match.

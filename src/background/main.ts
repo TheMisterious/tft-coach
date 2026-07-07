@@ -35,6 +35,8 @@ import { buildBrief }             from '../coach/brief-builder';
 import { generateCoachingReport } from '../coach/report-generator';
 import { saveMatch, loadMatch, listRecentMatches } from '../persistence/db';
 import { summarizeLedgerCoverage, formatLedgerCoverage, sampleRawValues, formatRawSamples } from '../ledger/diagnostics';
+import { ensureWindowOnScreen } from './window-position';
+import { readHotkeyBinding } from '../shared/hotkey';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -318,7 +320,9 @@ async function runCoachingPipeline(): Promise<void> {
 
     // 8. Push to UI.
     state.latestReport = report;
-    showInGameToast('Coaching report ready — press Ctrl+F to view');
+    readHotkeyBinding((binding) => {
+      showInGameToast(`Coaching report ready — press ${binding ?? '(hotkey not set)'} to view`);
+    });
     console.log('[bg] pipeline step 8: opening desktop window');
     openDesktopWindow(report);
 
@@ -344,22 +348,24 @@ function openDesktopWindow(report: any): void {
       console.error('[bg] failed to obtain desktop window:', result.error);
       return;
     }
-    overwolf.windows.restore(result.window.id, (restoreResult: any) => {
-      console.log('[bg] restore(desktop):', JSON.stringify(restoreResult));
-      try {
-        const mw = (overwolf.windows.getMainWindow() as any);
-        if (typeof mw?.receiveReport === 'function') {
-          console.log('[bg] delivering report via receiveReport()');
-          mw.receiveReport(report);
-          return;
+    ensureWindowOnScreen(result.window, () => {
+      overwolf.windows.restore(result.window.id, (restoreResult: any) => {
+        console.log('[bg] restore(desktop):', JSON.stringify(restoreResult));
+        try {
+          const mw = (overwolf.windows.getMainWindow() as any);
+          if (typeof mw?.receiveReport === 'function') {
+            console.log('[bg] delivering report via receiveReport()');
+            mw.receiveReport(report);
+            return;
+          }
+          console.warn('[bg] receiveReport not found on main window — falling back to sendMessage');
+        } catch (e) {
+          console.error('[bg] getMainWindow() threw:', e);
         }
-        console.warn('[bg] receiveReport not found on main window — falling back to sendMessage');
-      } catch (e) {
-        console.error('[bg] getMainWindow() threw:', e);
-      }
-      console.log('[bg] delivering report via sendMessage');
-      overwolf.windows.sendMessage(result.window.id, 'new_report', report, (msgResult: any) => {
-        console.log('[bg] sendMessage(new_report):', JSON.stringify(msgResult));
+        console.log('[bg] delivering report via sendMessage');
+        overwolf.windows.sendMessage(result.window.id, 'new_report', report, (msgResult: any) => {
+          console.log('[bg] sendMessage(new_report):', JSON.stringify(msgResult));
+        });
       });
     });
   });
@@ -381,7 +387,7 @@ overwolf.hotkeys?.onHotkeyDown?.addListener((result: any) => {
       if (res.window.stateEx === 'normal' || res.window.stateEx === 'maximized') {
         overwolf.windows.minimize(res.window.id);
       } else {
-        overwolf.windows.restore(res.window.id);
+        ensureWindowOnScreen(res.window, () => overwolf.windows.restore(res.window.id));
       }
     });
   }
@@ -390,9 +396,11 @@ overwolf.hotkeys?.onHotkeyDown?.addListener((result: any) => {
 // Open the desktop window and push the initial status once it's ready.
 overwolf.windows.obtainDeclaredWindow('desktop', (result: any) => {
   if (!result.success) return;
-  overwolf.windows.restore(result.window.id, () => {
-    // Small delay to let the desktop React tree mount before the first message arrives.
-    setTimeout(pushStatusToDesktop, 500);
+  ensureWindowOnScreen(result.window, () => {
+    overwolf.windows.restore(result.window.id, () => {
+      // Small delay to let the desktop React tree mount before the first message arrives.
+      setTimeout(pushStatusToDesktop, 500);
+    });
   });
 });
 

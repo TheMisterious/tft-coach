@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { CoachingReportView } from './CoachingReportView';
 import { StatusBar } from './StatusBar';
+import { AdBanner } from './AdBanner';
 import { useAppStore } from '../store';
 import { listRecentMatches, loadMatch } from '../../persistence/db';
 import type { CoachingReport, AppStatus } from '../../shared/types';
@@ -86,40 +87,21 @@ function DesktopApp() {
     }
   }
 
-  if (!currentReport) {
-    return (
-      <div style={{
-        display: 'flex', flexDirection: 'column', height: '100vh',
-        background: '#11111b', fontFamily: 'Segoe UI, system-ui, sans-serif',
-      }}>
-        <StatusBar status={appStatus} />
-        <div style={{
-          flex: 1, display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          color: '#6c7086', gap: 12,
-        }}>
-          <div style={{ fontSize: 18, fontWeight: 600, color: '#cdd6f4' }}>
-            No coaching report yet
-          </div>
-          <div style={{ fontSize: 13 }}>
-            Finish a TFT match to generate your first report.
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div style={{
+      display: 'flex', flexDirection: 'column', height: '100vh',
+      background: '#11111b', fontFamily: 'Segoe UI, system-ui, sans-serif',
+    }}>
       <StatusBar status={appStatus} />
-      <div style={{ flex: 1, overflow: 'auto' }}>
+      <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
         <CoachingReportView
-          report={currentReport}
+          report={currentReport ?? undefined}
           history={matchHistory}
           onSelectMatch={handleSelectMatch}
           activeMatchId={activeMatchId}
         />
       </div>
+      <AdBanner />
     </div>
   );
 }

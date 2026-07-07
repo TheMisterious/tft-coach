@@ -5,6 +5,7 @@
 // or any dynamic suggestions. Static reference tables are explicitly permitted.
 
 import React, { useEffect, useState } from 'react';
+import { useHotkeyBinding } from '../useHotkeyBinding';
 
 interface TraitBreakpoint {
   trait: string;
@@ -20,6 +21,7 @@ function detectActiveSet(): string {
 export function InGameOverlay() {
   const [traits, setTraits] = useState<TraitBreakpoint[]>([]);
   const [collapsed, setCollapsed] = useState(false);
+  const binding = useHotkeyBinding();
 
   useEffect(() => {
     const setId = detectActiveSet();
@@ -41,7 +43,7 @@ export function InGameOverlay() {
           fontFamily: 'Segoe UI, system-ui, sans-serif', fontSize: 12,
         }}
       >
-        TFT Coach
+        coachv
       </button>
     );
   }
@@ -60,7 +62,7 @@ export function InGameOverlay() {
       boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <strong style={{ fontSize: 13 }}>TFT Coach — Trait Reference</strong>
+        <strong style={{ fontSize: 13 }}>coachv — Trait Reference</strong>
         <button
           onClick={() => setCollapsed(true)}
           style={{ background: 'none', border: 'none', color: '#6c7086', cursor: 'pointer', fontSize: 16 }}
@@ -90,7 +92,7 @@ export function InGameOverlay() {
       </table>
 
       <div style={{ marginTop: 8, color: '#6c7086', fontSize: 10 }}>
-        Press Ctrl+F after match for full coaching report
+        Press {binding ?? '(hotkey not set)'} after match for full coaching report
       </div>
     </div>
   );

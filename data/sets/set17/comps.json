@@ -1,0 +1,11 @@
+[
+  {
+    "id": "anima_reroll",
+    "name": "Anima Reroll",
+    "type": "reroll",
+    "optimal_level": 6,
+    "primary_carry_ids": ["TFT17_Jinx"],
+    "key_traits": ["Anima"],
+    "notes": "Stay level 6, roll for 3-stars. Loss-streak for Anima Tech."
+  }
+]

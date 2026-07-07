@@ -1,0 +1,323 @@
+// Central type definitions — the only file imported across all layers.
+// Data flows: capture → ledger → enrichment → coach → UI
+// No layer imports a later layer; this file is the only cross-layer dependency.
+
+// ─── Ledger ──────────────────────────────────────────────────────────────────
+
+export type LedgerEntry =
+  | { ts: number; kind: 'info'; feature: string; key: string; value: unknown }
+  | { ts: number; kind: 'event'; name: string; data: unknown };
+
+// ─── GEP shapes (parsed from stringified JSON) ───────────────────────────────
+
+export interface Cell {
+  name: string;   // e.g. "TFT17_Ahri"
+  level: number;  // star level (1, 2, 3)
+  item_1: string; // item ID or "0" for empty
+  item_2: string;
+  item_3: string;
+}
+
+export type BoardState = Record<string, Cell>; // cellId → Cell
+
+export interface PlayerState {
+  summoner_name?: string;
+  health: number;
+  gold: number;
+  level: number;
+  rank?: number;
+}
+
+export interface RoundInfo {
+  stage: string;         // e.g. "3-2"
+  type: 'PVP' | 'PVE' | 'realm_of_the_gods' | 'unknown';
+  outcome?: 'win' | 'loss' | 'draw';
+}
+
+// ─── Per-round snapshot ───────────────────────────────────────────────────────
+
+export interface RoundSnapshot {
+  label: string;                      // "3-2"
+  type: 'PVP' | 'PVE' | 'realm_of_the_gods' | 'unknown';
+  outcome?: 'win' | 'loss' | 'draw';
+  goldStart: number;
+  goldEnd: number;
+  health: number;
+  level: number;
+  rollsSpent: number;
+  xpBought: boolean;
+  board: BoardState;
+  bench: BoardState;
+  shop: string[];                     // champion IDs
+  augmentsPicked: string[];           // augment IDs picked so far this match
+  opponentBoard: BoardState;
+  interestEarned: number;
+  streakCount: number;
+  streakType: 'win' | 'loss' | 'none';
+  // Live standing among remaining players (me.rank from GEP) — updates throughout
+  // the match as players are eliminated. NOT the final placement (see me.placement
+  // in extractFinalPlacement). Undefined if GEP never delivered it for this round.
+  liveRank?: number;
+  // Set 17 — Realm of Gods (populated only for realm_of_the_gods rounds)
+  godChosen?: string;                 // e.g. "Ahri" | "Evelynn" | "Kayle" | "Thresh" | "Pengu"
+  godOfferingHpCost?: number;        // HP cost of the chosen Evelynn offering, if any
+}
+
+export interface MatchSnapshot {
+  pseudoMatchId: string;
+  setId: string;                      // "set17"
+  gameMode: 'tft' | 'lol' | 'unknown';
+  rounds: RoundSnapshot[];
+  finalPlacement: number;             // 1-8
+  finalBoard: BoardState;
+  augments: string[];                 // all picked augments
+  // Set 17 — collected god picks across all three god rounds (2-4, 3-4, 4-4)
+  godPicks: Array<{ round: string; god: string }>;
+}
+
+// ─── Rule engine ─────────────────────────────────────────────────────────────
+
+export type DecisionCategory =
+  | 'econ'
+  | 'streak'
+  | 'leveling'
+  | 'items'
+  | 'rolling'
+  | 'traits'
+  | 'augments'
+  | 'positioning'
+  | 'hp'
+  | 'board'
+  | 'comp'
+  | 'set_mechanic';
+
+export type Severity = 'minor' | 'moderate' | 'critical';
+
+// Best-effort (row, col) on a 4x7 hex board, resolved from a GEP cell_N id —
+// see shared/hex-grid.ts for the mapping and its caveats.
+export interface HexPosition {
+  side: 'own' | 'opponent';
+  row: number; // 0-3
+  col: number; // 0-6
+}
+
+// A resolved board occupant, for rendering the full board layout (not just a
+// single highlighted hex) on the positioning diagram.
+export interface BoardUnit extends HexPosition {
+  name: string; // friendly champion name
+  icon?: ChampionIcon;
+}
+
+export interface BoardSnapshot {
+  own: BoardUnit[];
+  opponent: BoardUnit[];
+}
+
+export interface DecisionPoint {
+  ruleId?: string;                    // links back to rules.core.json / rules.season.json unique_id
+  // 'core' = set-agnostic mechanic, 'season' = tied to this set's balance/comps.
+  // Populated by the rule engine from the rule registry when ruleId is set.
+  tier?: 'core' | 'season';
+  round: string;
+  category: DecisionCategory;
+  severity: Severity;
+  observed: string;
+  recommended: string;
+  reasonMetrics: Record<string, number | string>;
+  // When present, the rule engine has written the full coaching prose.
+  // brief-builder converts these directly to CoachingNotes.
+  coaching_text?: string;
+  // Set by positioning checks that reference a specific board hex.
+  hexPosition?: HexPosition;
+  // Set by positioning checks — the full board layout at the referenced round,
+  // so the diagram can show champion names, not just an empty highlighted hex.
+  boardSnapshot?: BoardSnapshot;
+}
+
+// ─── Coaching report ────────────────────────────────────────────────────────
+
+export interface CoachingNote {
+  round_label: string;
+  category: DecisionCategory;
+  severity: Severity;
+  tier?: 'core' | 'season';
+  what_happened: string;
+  what_should_have_happened: string;
+  why: string;
+  references?: {
+    units?: string[];
+    items?: string[];
+    augments?: string[];
+    hexPosition?: HexPosition;
+    boardSnapshot?: BoardSnapshot;
+  };
+}
+
+export interface RoundTrajectoryPoint {
+  round: string;
+  hp: number;
+  gold: number;
+  level: number;
+  rollGold: number;   // gold spent rolling this round (rollsSpent * 2)
+  liveRank?: number;  // standing among remaining players, if GEP delivered it
+}
+
+export interface CoachingReport {
+  overall_placement: number;
+  overall_grade: 'S' | 'A' | 'B' | 'C' | 'D';
+  tldr: string;
+  notes: CoachingNote[];
+  strengths: string[];
+  round_trajectory?: RoundTrajectoryPoint[];
+}
+
+// ─── Match brief (compact report input) ─────────────────────────────────────
+
+export interface MatchBrief {
+  placement: number;
+  setId: string;
+  roundTrajectory: RoundTrajectoryPoint[];
+  finalComp: Array<{ name: string; stars: number; items: string[] }>;
+  augments: string[];
+  godPicks: Array<{ round: string; god: string }>;
+  // Notes already narrated by the rule engine.
+  resolvedNotes: CoachingNote[];
+  // Decision points that still need report prose.
+  decisionPoints: DecisionPoint[];
+}
+
+// ─── App status ──────────────────────────────────────────────────────────────
+
+export type AppStatus =
+  | 'no_game'   // not in a TFT match
+  | 'in_match'; // TFT match in progress
+
+// ─── Persistence ─────────────────────────────────────────────────────────────
+
+export interface MatchRecord {
+  pseudoMatchId: string;
+  datePlayed: number;
+  setId: string;
+  placement: number;
+  lastRound: string;
+  ledger: LedgerEntry[];
+  brief?: MatchBrief;
+  coachingReport?: CoachingReport;
+}
+
+export interface MatchSummary {
+  pseudo_match_id: string;
+  date_played: number;
+  placement: number;
+  last_round: string;
+}
+
+// ─── Meta data (from data/sets/setN/*.json) ───────────────────────────────────
+
+export interface CarryBisEntry {
+  role: string;
+  items_bis: string[];
+  items_alt: string[];
+  components_priority: string[];
+  notes: string;
+}
+
+export interface TraitBreakpoint {
+  trait: string;
+  tiers: number[];  // e.g. [2, 4, 6]
+}
+
+export interface EconBenchmark {
+  round: string;
+  minGold: number;
+  notes: string;
+}
+
+// A standalone square champion tile icon (Community Dragon's `tileIcon` —
+// the same clean shop-tile art real-game TFT and sites like metatft.com use),
+// not Data Dragon's per-champion sprite crop, which is an off-center splash-art
+// crop too zoomed-in to recognize at hex-tile size.
+export interface ChampionIcon {
+  url: string;
+}
+
+export interface ChampionMeta {
+  name: string;
+  tier: number;
+  role: 'carry' | 'tank' | 'support' | 'flex';
+  traits: string[];
+  icon?: ChampionIcon;
+}
+
+// A curated comp archetype (data/sets/set{N}/comps.json) — used to detect when
+// a player is intentionally executing a known strategy (e.g. reroll) so
+// checkers can adjust their verdict instead of judging every game against a
+// single "standard curve" assumption.
+export interface CompArchetype {
+  id: string;
+  name: string;
+  type: 'reroll' | 'fast8' | 'fast9' | string;
+  optimal_level: number;
+  primary_carry_ids: string[];
+  key_traits: string[];
+  notes: string;
+}
+
+// An augment picked this match can change what "correct play" means for a
+// checker that otherwise reasons from static meta data. Each bucket below is
+// a distinct kind of override; see data/sets/set{N}/augment-modifiers.json.
+export interface AugmentItemOverride {
+  items: string[];  // item ids this augment makes BiS-equivalent, regardless of carry-bis.json
+  reason: string;    // short clause explaining why, used directly in coaching text
+}
+
+export interface AugmentTraitBonus {
+  trait: string;
+  bonus: number;     // additional effective trait count granted while this augment is active
+  reason: string;
+}
+
+export interface AugmentFrontlineExemption {
+  reason: string;    // why this augment substitutes for having a tank-role unit on board
+}
+
+export interface AugmentModifiers {
+  itemBisOverrides: Record<string, AugmentItemOverride>;
+  traitCountBonuses: Record<string, AugmentTraitBonus>;
+  frontlineExemptions: Record<string, AugmentFrontlineExemption>;
+}
+
+export interface MetaData {
+  carryBis: Record<string, CarryBisEntry>;
+  traitBreakpoints: TraitBreakpoint[];
+  econBenchmarks: EconBenchmark[];
+  champions: Record<string, ChampionMeta>;
+  // Core, set-agnostic item id -> friendly display name (data/core/items.json).
+  items: Record<string, string>;
+  // Augment ids grouped by category (data/sets/set{N}/augments.json).
+  augments: Record<string, string[]>;
+  // Core, auto-fetched augment id -> friendly display name (data/core/augment-names.json).
+  augmentNames: Record<string, string>;
+  // Augment picks that override another checker's rule path (data/sets/set{N}/augment-modifiers.json).
+  augmentModifiers: AugmentModifiers;
+  // Curated comp archetypes for this set (data/sets/set{N}/comps.json).
+  comps: CompArchetype[];
+}
+
+// ─── Match context ───────────────────────────────────────────────────────────
+// Situational signals computed once per match, shared across checkers, so a
+// checker can reason about "what kind of game is this" rather than judging
+// every round against one fixed standard-curve assumption in isolation.
+
+export interface MatchContext {
+  // True when the player's board matches a known reroll archetype from
+  // comps.json (see src/coach/match-context.ts for the detection heuristic).
+  isRerollComp: boolean;
+  matchedComp?: { id: string; name: string };
+  // Round labels where the player was in a stage-3+ HP crisis (health < 40).
+  // Used to suppress econ-discipline notes that would contradict "spend gold
+  // to survive" advice on the same round.
+  hpCrisisRounds: Set<string>;
+  // Plurality-vote active comp — unit names on board in >50% of PvP rounds.
+  activeComp: Set<string>;
+}

@@ -1,0 +1,8 @@
+[
+  { "round": "2-1", "minGold": 20, "notes": "Should have 20g after leveling to 4 — start econ streak" },
+  { "round": "2-5", "minGold": 30, "notes": "30g before buying L5 — if HP > 70 stay at 30+" },
+  { "round": "3-2", "minGold": 40, "notes": "40g benchmark before L6 — slam if HP < 50" },
+  { "round": "4-1", "minGold": 50, "notes": "50g target before rolling — standard level 7 round" },
+  { "round": "4-2", "minGold": 20, "notes": "After rolling at L7 you can be lower; 20g is the floor" },
+  { "round": "5-1", "minGold": 20, "notes": "Fast-9 needs 20g+ at 5-1 to safely level to 8" }
+]

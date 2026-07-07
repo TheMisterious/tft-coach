@@ -1,0 +1,229 @@
+{
+  "_comment": "Core rules — mechanics that are true regardless of set/patch (interest math, streak gold, HP damage formula fundamentals, bench management). Safe to reuse unmodified when a new set drops. Season-specific rules (comp/level/HP benchmarks that shift with balance patches) live in data/sets/set{N}/rules.season.json.",
+  "rules": [
+    {
+      "unique_id": "ECON_001",
+      "human_readable_name": "Missed Interest — End-of-Round Below Threshold",
+      "category": "economy",
+      "subcategory": "interest",
+      "short_summary": "Player ended a round 1-3g below a 10g interest bracket, forfeiting 1g interest that round.",
+      "source_tier": "official",
+      "severity": "medium",
+      "confidence": "high",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You ended {{missed_count}} round(s) just {{gap}}g short of a savings bonus! Holding a tiny bit more gold earns you free gold every round. You missed about {{cumulative_interest_missed}}g total.",
+        "mid_rank": "{{cumulative_interest_missed}}g forfeited across {{missed_count}} rounds from sub-threshold endings. Avoid 1g rolls or XP purchases that drop you below a bracket — that single gold costs you 1 interest.",
+        "high_rank": "{{cumulative_interest_missed}}g interest lost ({{missed_count}} rounds). Audit for impulse 1g rolls or XP buys that crossed a bracket."
+      }
+    },
+    {
+      "unique_id": "ECON_002",
+      "human_readable_name": "Interest Overcap — Excess Gold Above 50g Without Roll Plan",
+      "category": "economy",
+      "subcategory": "interest",
+      "short_summary": "Player held gold above the 50g interest cap for 3+ consecutive rounds without rolling or leveling.",
+      "source_tier": "mixed",
+      "severity": "minor",
+      "confidence": "medium",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You sat above 50g for {{consecutive_overcap_rounds}} rounds in a row without spending. Once you hit 50g you stop earning extra gold!",
+        "mid_rank": "{{consecutive_overcap_rounds}} idle rounds above 50g. Plan a spend — level up or roll down — when you are above cap and HP is stable.",
+        "high_rank": "{{consecutive_overcap_rounds}} rounds overcap without deploy. Match your gold stockpile to your stage-based level plan."
+      }
+    },
+    {
+      "unique_id": "ECON_003",
+      "human_readable_name": "Pre-Stage-3 Excessive Rolls — Unplanned Early Spending",
+      "category": "economy",
+      "subcategory": "roll_discipline",
+      "short_summary": "Player spent more than 10g on shop rolls before stage 3-1 without a deliberate reason.",
+      "source_tier": "community_inferred",
+      "severity": "high",
+      "confidence": "high",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You rolled {{total_gold_rolled_before_stage3}}g worth of shops before Stage 3! In most games, save your gold until Stage 4.",
+        "mid_rank": "{{total_gold_rolled_before_stage3}}g burned on pre-Stage-3 rolls. Unless playing a reroll comp, this gold was better held for interest and a Stage 4 rolldown.",
+        "high_rank": "{{total_gold_rolled_before_stage3}}g early roll spend (pre-3-1). Unless maintaining streak or executing an intentional reroll line, this damages your econ floor."
+      }
+    },
+    {
+      "unique_id": "ROLL_002",
+      "human_readable_name": "Under-Rolling at Stabilization Window — HP Crisis Unaddressed",
+      "category": "rolling",
+      "subcategory": "stabilization",
+      "short_summary": "Player was below 40 HP entering stage 4 but spent fewer than 20g rolling to stabilize.",
+      "source_tier": "community_inferred",
+      "severity": "high",
+      "confidence": "high",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You had only {{hp_at_4_1}} HP entering Stage 4 and barely rolled at all! Roll to upgrade your units and stop taking damage.",
+        "mid_rank": "{{hp_at_4_1}} HP at 4-1 but only {{roll_spend}}g spent on stabilization. With {{gold_available_4_1}}g available, rolling down was the correct play.",
+        "high_rank": "{{hp_at_4_1}} HP, {{roll_spend}}g stabilization spend at 4-1/4-2. Carry 2-stars at 4-2: {{carry_2star_count}}. HP bleed in stage 4 was preventable."
+      }
+    },
+    {
+      "unique_id": "ROLL_003",
+      "human_readable_name": "Post-Stabilization Over-Roll — Burning Cap Gold After Board Is Complete",
+      "category": "rolling",
+      "subcategory": "cap_conservation",
+      "short_summary": "Player continued rolling heavily after their board was stabilized, consuming gold needed for level 9.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "After your main units were upgraded, you kept rolling a lot ({{post_roll_waste}}g more). Save that gold to level up instead!",
+        "mid_rank": "{{post_roll_waste}}g spent rolling after board stabilization without completing a 3-star. That gold could fund a level 9 push.",
+        "high_rank": "Post-stabilization roll waste: {{post_roll_waste}}g across {{over_roll_rounds}} rounds, no 3-stars gained. Opportunity cost: partial level 9 funding."
+      }
+    },
+    {
+      "unique_id": "STREAK_001",
+      "human_readable_name": "Win Streak Break — Avoidable Loss That Reset a Streak >=3",
+      "category": "streak_management",
+      "subcategory": "win_streak",
+      "short_summary": "Player lost a combat round while on a win streak of 3+, forfeiting streak income.",
+      "source_tier": "official",
+      "severity": "medium",
+      "confidence": "high",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You were on a {{streak_length}}-game win streak at round {{round}} and lost! Each win in a row earns bonus gold.",
+        "mid_rank": "Win streak of {{streak_length}} broken at {{round}}. You were earning +{{streak_bonus}}g/round. Losing drops your income for future rounds.",
+        "high_rank": "Streak {{streak_length}} broken at {{round}}. Check item placement, frontline positioning, or trait activation at that round."
+      }
+    },
+    {
+      "unique_id": "STREAK_002",
+      "human_readable_name": "Loss Streak Not Committed — Partial Loss Streak Missing Bonus Gold",
+      "category": "streak_management",
+      "subcategory": "loss_streak",
+      "short_summary": "Player was on a loss streak of 2-4 but spent gold to improve their board without converting to a win.",
+      "source_tier": "mixed",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You spent {{spend}}g trying to stop your losing streak but still lost! Save that gold and collect bonus gold from the streak instead.",
+        "mid_rank": "You spent {{spend}}g to break your loss streak at {{round}} but still lost. Commit or convert — half-measures waste both econ and streak value.",
+        "high_rank": "Failed streak break at {{round}}: {{spend}}g spent, result still loss. Estimated forfeited streak gold vs. spend."
+      }
+    },
+    {
+      "unique_id": "STREAK_003",
+      "human_readable_name": "Streak Threshold Miss — Never Reached +2g/+3g Streak Level",
+      "category": "streak_management",
+      "subcategory": "streak_income",
+      "short_summary": "Player's streaks peaked at 2-4 all game, never reaching the +2g (5 streak) bonus tier.",
+      "source_tier": "official",
+      "severity": "minor",
+      "confidence": "high",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You never built a streak of 5 in this game! A 5-game streak (win or loss) earns you +2 gold per round.",
+        "mid_rank": "Max streak this game: {{max_streak}} ({{streak_type}}). Never reached the +2g threshold (5 streak). Without streak income you're leaving gold on the table.",
+        "high_rank": "No 5+ streak achieved (best: {{max_streak}}). Missed +2g tier entirely. Assess board decisions at streak break points."
+      }
+    },
+    {
+      "unique_id": "ITEM_001",
+      "human_readable_name": "Delayed Item Slam — Holding Components More Than 2 Stages",
+      "category": "itemization",
+      "subcategory": "item_timing",
+      "short_summary": "Player held 2+ component items on bench for 2+ full stages without combining them.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "high",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You had components sitting on your bench for {{stages_held}} stages without combining them! Combine them as soon as you can.",
+        "mid_rank": "{{component_count}} component(s) held for {{stages_held}} stages. Slam items on any reasonable holder if you don't have a target yet.",
+        "high_rank": "Item hold detected: {{component_names}} uncombined for {{stages_held}} stages. Power delta from holding vs. slamming on flex holder."
+      }
+    },
+    {
+      "unique_id": "ITEM_003",
+      "human_readable_name": "Under-Itemized Main Carry at Stage 4",
+      "category": "itemization",
+      "subcategory": "carry_readiness",
+      "short_summary": "Player's primary carry unit entered stage 4 with fewer than 2 completed items.",
+      "source_tier": "community_inferred",
+      "severity": "high",
+      "confidence": "high",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "Your main carry only had {{count}} item(s) at Stage 4! Carries need at least 2 items to win fights. Combine your components ASAP.",
+        "mid_rank": "Carry had only {{count}} completed item(s) at Stage 4 entry. Fully itemized carries deal dramatically more damage. Check: did you hold components too long?",
+        "high_rank": "Carry item deficit at 4-1: {{count}} items on carry. Two God rounds have occurred by this point — audit component choices."
+      }
+    },
+    {
+      "unique_id": "ITEM_004",
+      "human_readable_name": "Item Spread Too Thin — Items on 4+ Units at Stage 4",
+      "category": "itemization",
+      "subcategory": "item_concentration",
+      "short_summary": "Player spread completed items across 4 or more units, diluting carry power.",
+      "source_tier": "community_inferred",
+      "severity": "minor",
+      "confidence": "medium",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "Your items were spread across {{unit_count}} different units with none having 2+. Put all your best items on 1-2 main carry units.",
+        "mid_rank": "Items spread across {{unit_count}} units (max on any single unit: {{max_items}}). Multiplicative item interactions are lost when items are spread thin.",
+        "high_rank": "Item spread: {{unit_count}} units with items, max concentration {{max_items}}. Unless multi-carry archetype, consolidate to 1 primary (3 items) + 1 secondary (2 items)."
+      }
+    },
+    {
+      "unique_id": "BOARD_003",
+      "human_readable_name": "Unfilled Board Slots — Playing Below Max Units at Stage 3+",
+      "category": "board_strength",
+      "subcategory": "board_size",
+      "short_summary": "Player deployed fewer units than their level allows at stage 3 or later.",
+      "source_tier": "official",
+      "severity": "medium",
+      "confidence": "high",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You had {{empty}} empty board spot(s) at Stage {{stage}}! Put bench units on the board — even a 1-cost is better than nothing.",
+        "mid_rank": "{{empty}} board slot(s) unused at level {{level}} in Stage {{stage}}. Every deployed unit adds combat power and trait activations.",
+        "high_rank": "Empty board slots: {{empty}} (level {{level}}, stage {{stage}}). If persistent >2 rounds, this is a unit-acquisition failure. Were units on bench during these fights?"
+      }
+    },
+    {
+      "unique_id": "COMP_002",
+      "human_readable_name": "Bench Clutter — Excess Sell-Value Locked on Bench",
+      "category": "comp_commitment",
+      "subcategory": "bench_management",
+      "short_summary": "Player held 5+ off-comp units on bench for 3+ consecutive rounds.",
+      "source_tier": "community_inferred",
+      "severity": "minor",
+      "confidence": "medium",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You had {{count}} units on your bench that weren't part of your team! That's about {{gold}}g locked up. Sell them!",
+        "mid_rank": "Bench clutter: {{count}} off-comp units ({{gold}}g locked) for {{rounds}} rounds. That gold could have funded XP purchases or extra rolls.",
+        "high_rank": "Bench clutter: {{count}} off-comp units, {{gold}}g locked for {{rounds}} rounds. Opportunity cost at interest rate: {{interest_delta}}g."
+      }
+    },
+    {
+      "unique_id": "POSITION_001",
+      "human_readable_name": "Repeated Opponent Carry Position — No Counter-Positioning Adjustment",
+      "category": "positioning",
+      "subcategory": "counter_positioning",
+      "short_summary": "The same opponent's most-itemized unit stayed in the same hex across 2+ fights without the player adjusting their frontline or carry placement.",
+      "source_tier": "community_inferred",
+      "severity": "minor",
+      "confidence": "medium",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "The same opponent kept their strong unit in the same spot for {{fights}} fights and you didn't adjust! Move a frontline unit to block that spot next time.",
+        "mid_rank": "Opponent's {{carry}} stayed in {{hex}} for {{fights}} fights with no counter-positioning. Blocking that hex or repositioning your own carry is free win-rate.",
+        "high_rank": "Static opponent carry position: {{carry}} in {{hex}} for {{fights}} fights. Lobby scouting between rounds should catch this pattern immediately."
+      }
+    }
+  ]
+}

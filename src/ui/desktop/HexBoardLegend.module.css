@@ -1,0 +1,72 @@
+.root {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  background: #181825;
+  border-radius: 6px;
+  border: 1px solid #313244;
+}
+
+.sideLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #6c7086;
+  text-align: center;
+}
+
+.svg {
+  width: 100%;
+  max-width: 320px;
+  display: block;
+  margin: 2px auto;
+}
+
+.frontCell {
+  fill: #45475a;
+  stroke: #11111b;
+  stroke-width: 1.5;
+}
+
+.backCell {
+  fill: #313244;
+  stroke: #11111b;
+  stroke-width: 1.5;
+}
+
+.highlightCell {
+  fill: #f9a825;
+  stroke: #11111b;
+  stroke-width: 1.5;
+}
+
+.occupiedCell {
+  fill: #585b70;
+  stroke: #11111b;
+  stroke-width: 1.5;
+}
+
+.unitLabel {
+  fill: #cdd6f4;
+  font-size: 6.5px;
+  text-anchor: middle;
+  pointer-events: none;
+  user-select: none;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #9399b2;
+  margin-top: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}

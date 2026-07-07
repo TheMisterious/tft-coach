@@ -1,0 +1,32 @@
+{
+  "name": "tft-coach",
+  "version": "0.0.1",
+  "description": "Offline TFT post-match coaching app built on Overwolf",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "fetch:ddragon": "node scripts/fetch-ddragon.js",
+    "fetch:metatft": "node scripts/fetch-metatft.js",
+    "check:patch": "node scripts/check-patch-staleness.js"
+  },
+  "dependencies": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "css-loader": "^6.11.0",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.0",
+    "typescript": "^5.5.0",
+    "vitest": "^0.34.6",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.0"
+  }
+}

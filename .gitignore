@@ -1,0 +1,18 @@
+node_modules/
+dist/
+releases/
+.env
+*.opk
+*.log
+.DS_Store
+Thumbs.db
+
+# Unofficial MetaTFT data (scripts/fetch-metatft.js) — regenerate locally, don't commit.
+data/sets/*/meta-tiers.generated.json
+
+# Real recorded matches contain other players' Riot IDs (summoner name + tag
+# line) captured from the lobby roster — never publish someone else's data
+# without consent. Add your own locally for regression testing; only .gitkeep
+# is tracked.
+tests/goldens/*.jsonl
+!tests/goldens/.gitkeep

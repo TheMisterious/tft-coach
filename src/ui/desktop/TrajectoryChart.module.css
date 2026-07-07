@@ -1,0 +1,48 @@
+.root {
+  background: #181825;
+  border: 1px solid #313244;
+  border-radius: 6px;
+  padding: 8px 10px 6px;
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #9399b2;
+  margin-bottom: 2px;
+}
+
+.chartRow {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.yAxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #6c7086;
+  flex-shrink: 0;
+  text-align: right;
+  padding: 2px 0;
+}
+
+.svg {
+  width: 100%;
+  height: 70px;
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+
+.xAxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #6c7086;
+  margin-top: 2px;
+}

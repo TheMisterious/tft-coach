@@ -1,0 +1,69 @@
+{
+  "manifest_version": 1,
+  "type": "WebApp",
+  "meta": {
+    "name": "TFT Post-Match Coach",
+    "author": "TheMisterious",
+    "version": "0.0.1",
+    "minimum-overwolf-version": "0.224.0",
+    "minimum-gep-version": "302.0",
+    "description": "Round-by-round post-match TFT coaching with offline reports",
+    "dock_button_title": "TFT Coach",
+    "icon": "icons/IconMouseOver.png",
+    "icon_gray": "icons/IconMouseNormal.png",
+    "launcher_icon": "icons/desktop-icon.ico",
+    "window_icon": "icons/IconMouseOver.png"
+  },
+  "permissions": ["Hotkeys", "GameInfo", "Tray", "FileSystem"],
+  "data": {
+    "start_window": "desktop",
+    "game_targeting": { "type": "dedicated", "game_ids": [21570] },
+    "game_events": [21570, 5426],
+    "launch_events": [
+      {
+        "event": "GameLaunch",
+        "event_data": { "game_ids": [21570] },
+        "start_minimized": true
+      }
+    ],
+    "hotkeys": {
+      "tft_coach_toggle": {
+        "title": "Toggle TFT Coach",
+        "action-type": "toggle",
+        "default": "Ctrl+F"
+      }
+    },
+    "windows": {
+      "background": {
+        "file": "background/background.html",
+        "is_background_page": true,
+        "show_in_taskbar": false,
+        "transparent": false,
+        "resizable": false,
+        "size": { "width": 0, "height": 0 }
+      },
+      "desktop": {
+        "file": "desktop/desktop.html",
+        "transparent": false,
+        "resizable": true,
+        "native_window": true,
+        "show_in_taskbar": true,
+        "size": { "width": 1280, "height": 800 },
+        "min_size": { "width": 1024, "height": 600 },
+        "block_top_window_navigation": true
+      },
+      "in_game": {
+        "file": "in_game/in_game.html",
+        "transparent": true,
+        "resizable": false,
+        "in_game_only": true,
+        "clickthrough": false,
+        "size": { "width": 400, "height": 340 },
+        "block_top_window_navigation": true
+      }
+    },
+    "developer": {
+      "enable_auto_refresh": true
+    }
+  }
+}

@@ -1,0 +1,621 @@
+{
+  "TFT17_Teemo": {
+    "name": "Teemo",
+    "tier": 1,
+    "role": "support",
+    "traits": [
+      "Space Groove",
+      "Shepherd"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_teemo/hud/tft17_teemo_square.tft_set17.png"
+    }
+  },
+  "TFT17_Poppy": {
+    "name": "Poppy",
+    "tier": 1,
+    "role": "tank",
+    "traits": [
+      "Meeple",
+      "Bastion"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_poppy/hud/tft17_poppy_square.tft_set17.png"
+    }
+  },
+  "TFT17_Jax": {
+    "name": "Jax",
+    "tier": 2,
+    "role": "carry",
+    "traits": [
+      "Stargazer",
+      "Bastion"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_jax/hud/tft17_jax_square.tft_set17.png"
+    }
+  },
+  "TFT17_Blitzcrank": {
+    "name": "Blitzcrank",
+    "tier": 5,
+    "role": "tank",
+    "traits": [
+      "Party Animal",
+      "Space Groove",
+      "Vanguard"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_blitzcrank/hud/tft17_blitzcrank_square.tft_set17.png"
+    }
+  },
+  "TFT17_Shen": {
+    "name": "Shen",
+    "tier": 5,
+    "role": "tank",
+    "traits": [
+      "Bulwark",
+      "Bastion"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_shen/hud/tft17_shen_square.tft_set17.png"
+    }
+  },
+  "TFT17_Jinx": {
+    "name": "Jinx",
+    "tier": 2,
+    "role": "carry",
+    "traits": [
+      "Anima",
+      "Challenger"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_jinx/hud/tft17_jinx_square.tft_set17.png"
+    }
+  },
+  "TFT17_Caitlyn": {
+    "name": "Caitlyn",
+    "tier": 1,
+    "role": "carry",
+    "traits": [
+      "N.O.V.A.",
+      "Fateweaver"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_caitlyn/hud/tft17_caitlyn_square.tft_set17.png"
+    }
+  },
+  "TFT17_Viktor": {
+    "name": "Viktor",
+    "tier": 3,
+    "role": "carry",
+    "traits": [
+      "Psionic",
+      "Conduit"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_viktor/hud/tft17_viktor_square.tft_set17.png"
+    }
+  },
+  "TFT17_AurelionSol": {
+    "name": "Aurelion Sol",
+    "tier": 4,
+    "role": "carry",
+    "traits": [
+      "Mecha",
+      "Conduit"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_aurelionsol/hud/tft17_aurelionsol_square.tft_set17.png"
+    }
+  },
+  "TFT17_Briar": {
+    "name": "Briar",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_briar/hud/tft17_briar_square.tft_set17.png"
+    }
+  },
+  "TFT17_Belveth": {
+    "name": "Bel'Veth",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_belveth/hud/tft17_belveth_square.tft_set17.png"
+    }
+  },
+  "TFT17_MissFortune": {
+    "name": "Miss Fortune",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_missfortune/hud/tft17_missfortune_square.tft_set17.png"
+    }
+  },
+  "TFT17_Akali": {
+    "name": "Akali",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_akali/hud/tft17_akali_square.tft_set17.png"
+    }
+  },
+  "TFT17_Bard": {
+    "name": "Bard",
+    "tier": 5,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_bard/hud/tft17_bard_square.tft_set17.png"
+    }
+  },
+  "TFT17_Illaoi": {
+    "name": "Illaoi",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_illaoi/hud/tft17_illaoi_square.tft_set17.png"
+    }
+  },
+  "TFT17_Aurora": {
+    "name": "Aurora",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_aurora/hud/tft17_aurora_square.tft_set17.png"
+    }
+  },
+  "TFT17_Fiora": {
+    "name": "Fiora",
+    "tier": 5,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_fiora/hud/tft17_fiora_square.tft_set17.png"
+    }
+  },
+  "TFT17_Gnar": {
+    "name": "Gnar",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_gnar/hud/tft17_gnar_square.tft_set17.png"
+    }
+  },
+  "TFT17_Fizz": {
+    "name": "Fizz",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_fizz/hud/tft17_fizz_square.tft_set17.png"
+    }
+  },
+  "TFT17_Rammus": {
+    "name": "Rammus",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_rammus/hud/tft17_rammus_square.tft_set17.png"
+    }
+  },
+  "TFT17_Corki": {
+    "name": "Corki",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_corki/hud/tft17_corki_square.tft_set17.png"
+    }
+  },
+  "TFT17_Veigar": {
+    "name": "Veigar",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_veigar/hud/tft17_veigar_square.tft_set17.png"
+    }
+  },
+  "TFT17_Aatrox": {
+    "name": "Aatrox",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_aatrox/hud/tft17_aatrox_square.tft_set17.png"
+    }
+  },
+  "TFT17_Maokai": {
+    "name": "Maokai",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_maokai/hud/tft17_maokai_square.tft_set17.png"
+    }
+  },
+  "TFT17_Kindred": {
+    "name": "Kindred",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_kindred/hud/tft17_kindred_square.tft_set17.png"
+    }
+  },
+  "TFT17_Kaisa": {
+    "name": "Kai'Sa",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_kaisa/hud/tft17_kaisa_square.tft_set17.png"
+    }
+  },
+  "TFT17_Karma": {
+    "name": "Karma",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_karma/hud/tft17_karma_square.tft_set17.png"
+    }
+  },
+  "TFT17_Jhin": {
+    "name": "Jhin",
+    "tier": 5,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_jhin/hud/tft17_jhin_square.tft_set17.png"
+    }
+  },
+  "TFT17_Urgot": {
+    "name": "Urgot",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_urgot/hud/tft17_urgot_square.tft_set17.png"
+    }
+  },
+  "TFT17_Galio": {
+    "name": "The Mighty Mech",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_galio/hud/tft17_galio_square.tft_set17.png"
+    }
+  },
+  "TFT17_Pyke": {
+    "name": "Pyke",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_pyke/hud/tft17_pyke_square.tft_set17.png"
+    }
+  },
+  "TFT17_MasterYi": {
+    "name": "Master Yi",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_masteryi/hud/tft17_masteryi_square.tft_set17.png"
+    }
+  },
+  "TFT17_Gragas": {
+    "name": "Gragas",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_gragas/hud/tft17_gragas_square.tft_set17.png"
+    }
+  },
+  "TFT17_Nasus": {
+    "name": "Nasus",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_nasus/hud/tft17_nasus_square.tft_set17.png"
+    }
+  },
+  "TFT17_Gwen": {
+    "name": "Gwen",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_gwen/hud/tft17_gwen_square.tft_set17.png"
+    }
+  },
+  "TFT17_Samira": {
+    "name": "Samira",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_samira/hud/tft17_samira_square.tft_set17.png"
+    }
+  },
+  "TFT17_Ornn": {
+    "name": "Ornn",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_ornn/hud/tft17_ornn_square.tft_set17.png"
+    }
+  },
+  "TFT17_Nami": {
+    "name": "Nami",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_nami/hud/tft17_nami_square.tft_set17.png"
+    }
+  },
+  "TFT17_Sona": {
+    "name": "Sona",
+    "tier": 5,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_sona/hud/tft17_sona_square.tft_set17.png"
+    }
+  },
+  "TFT17_TwistedFate": {
+    "name": "Twisted Fate",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_twistedfate/hud/tft17_twistedfate_square.tft_set17.png"
+    }
+  },
+  "TFT17_Talon": {
+    "name": "Talon",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_talon/hud/tft17_talon_square.tft_set17.png"
+    }
+  },
+  "TFT17_Lulu": {
+    "name": "Lulu",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_lulu/hud/tft17_lulu_square.tft_set17.png"
+    }
+  },
+  "TFT17_Nunu": {
+    "name": "Nunu & Willump",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_nunu/hud/tft17_nunu_square.tft_set17.png"
+    }
+  },
+  "TFT17_Vex": {
+    "name": "Vex",
+    "tier": 5,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_vex/hud/tft17_vex_square.tft_set17.png"
+    }
+  },
+  "TFT17_Riven": {
+    "name": "Riven",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_riven/hud/tft17_riven_square.tft_set17.png"
+    }
+  },
+  "TFT17_Milio": {
+    "name": "Milio",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_milio/hud/tft17_milio_square.tft_set17.png"
+    }
+  },
+  "TFT17_Ezreal": {
+    "name": "Ezreal",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_ezreal/hud/tft17_ezreal_square.tft_set17.png"
+    }
+  },
+  "TFT17_Leona": {
+    "name": "Leona",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_leona/hud/tft17_leona_square.tft_set17.png"
+    }
+  },
+  "TFT17_Zoe": {
+    "name": "Zoe",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_zoe/hud/tft17_zoe_square.tft_set17.png"
+    }
+  },
+  "TFT17_Diana": {
+    "name": "Diana",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/ux/tft/championsplashes/patching/tft17_diana_teamplanner_splash.tft_set17.png"
+    }
+  },
+  "TFT17_Leblanc": {
+    "name": "LeBlanc",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_leblanc/hud/tft17_leblanc_square.tft_set17.png"
+    }
+  },
+  "TFT17_Chogath": {
+    "name": "Cho'Gath",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_chogath/hud/tft17_chogath_square.tft_set17.png"
+    }
+  },
+  "TFT17_Lissandra": {
+    "name": "Lissandra",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_lissandra/hud/tft17_lissandra_square.tft_set17.png"
+    }
+  },
+  "TFT17_Zed": {
+    "name": "Zed",
+    "tier": 5,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_zed/hud/tft17_zed_square.tft_set17.png"
+    }
+  },
+  "TFT17_IvernMinion": {
+    "name": "Meepsie",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_ivernminion/hud/tft17_ivernminion_square.tft_set17.png"
+    }
+  },
+  "TFT17_MissFortune_TraitClone": {
+    "name": "Miss Fortune",
+    "tier": 3,
+    "role": "flex",
+    "traits": []
+  },
+  "TFT17_Mordekaiser": {
+    "name": "Mordekaiser",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_mordekaiser/hud/tft17_mordekaiser_square.tft_set17.png"
+    }
+  },
+  "TFT17_Xayah": {
+    "name": "Xayah",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_xayah/hud/tft17_xayah_square.tft_set17.png"
+    }
+  },
+  "TFT17_Graves": {
+    "name": "Graves",
+    "tier": 5,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_graves/hud/tft17_graves_square.tft_set17.png"
+    }
+  },
+  "TFT17_TahmKench": {
+    "name": "Tahm Kench",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_tahmkench/hud/tft17_tahmkench_square.tft_set17.png"
+    }
+  },
+  "TFT17_Rhaast": {
+    "name": "Rhaast",
+    "tier": 3,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_rhaast/hud/tft17_kayn_slay_square.tft_set17.png"
+    }
+  },
+  "TFT17_RekSai": {
+    "name": "Rek'Sai",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_reksai/hud/tft17_reksai_square.tft_set17.png"
+    }
+  },
+  "TFT17_Pantheon": {
+    "name": "Pantheon",
+    "tier": 2,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_pantheon/hud/tft17_pantheon_square.tft_set17.png"
+    }
+  },
+  "TFT17_Morgana": {
+    "name": "Morgana",
+    "tier": 4,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_morgana/hud/tft17_morgana_square.tft_set17.png"
+    }
+  },
+  "TFT17_DarkStar_FakeUnit": {
+    "name": "Mini Black Hole",
+    "tier": 1,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_animasquadprop/tft17_darkstar_square.png"
+    }
+  },
+  "TFT17_Enemy_Aatrox": {
+    "name": "Apex Primordian",
+    "tier": 5,
+    "role": "flex",
+    "traits": [],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_enemy_aatrox/hud/tft17_enemy_aatrox_square.tft_set17.png"
+    }
+  }
+}

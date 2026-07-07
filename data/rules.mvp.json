@@ -1,0 +1,25 @@
+{
+  "_comment": "Priority ranking over the merged core + season rule catalog (data/core/rules.core.json + data/sets/set{N}/rules.season.json). Set-agnostic, so it lives at the data root rather than in either tier folder.",
+  "mvp_top_20": [
+    {"priority_rank": 1,  "rule_id": "ECON_001"},
+    {"priority_rank": 2,  "rule_id": "HP_002"},
+    {"priority_rank": 3,  "rule_id": "SET17_001"},
+    {"priority_rank": 4,  "rule_id": "ROLL_001"},
+    {"priority_rank": 5,  "rule_id": "LEVEL_001"},
+    {"priority_rank": 6,  "rule_id": "LEVEL_002"},
+    {"priority_rank": 7,  "rule_id": "ITEM_001"},
+    {"priority_rank": 8,  "rule_id": "STREAK_001"},
+    {"priority_rank": 9,  "rule_id": "ROLL_002"},
+    {"priority_rank": 10, "rule_id": "ITEM_003"},
+    {"priority_rank": 11, "rule_id": "ECON_003"},
+    {"priority_rank": 12, "rule_id": "STREAK_003"},
+    {"priority_rank": 13, "rule_id": "LEVEL_003"},
+    {"priority_rank": 14, "rule_id": "HP_003"},
+    {"priority_rank": 15, "rule_id": "BOARD_001"},
+    {"priority_rank": 16, "rule_id": "SET17_002"},
+    {"priority_rank": 17, "rule_id": "COMP_002"},
+    {"priority_rank": 18, "rule_id": "STREAK_002"},
+    {"priority_rank": 19, "rule_id": "ITEM_004"},
+    {"priority_rank": 20, "rule_id": "HP_001"}
+  ]
+}

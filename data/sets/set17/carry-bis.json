@@ -1,0 +1,23 @@
+{
+  "TFT17_Viktor": {
+    "role": "AP_carry",
+    "items_bis": ["TFT_Item_RabadonsDeathcap", "TFT_Item_BlueBuff", "TFT_Item_ArchangelsStaff"],
+    "items_alt": ["TFT_Item_JeweledGauntlet", "TFT_Item_SpearOfShojin"],
+    "components_priority": ["TFT_Item_NeedlesslyLargeRod", "TFT_Item_TearoftheGoddess"],
+    "notes": "Needs AP and mana. Blue Buff enables ability spam."
+  },
+  "TFT17_Jinx": {
+    "role": "AD_ranged_carry",
+    "items_bis": ["TFT_Item_InfinityEdge", "TFT_Item_LastWhisper", "TFT_Item_GiantSlayer"],
+    "items_alt": ["TFT_Item_RunaansHurricane", "TFT_Item_GuinsoosRageblade"],
+    "components_priority": ["TFT_Item_BFSword", "TFT_Item_RecurveBow", "TFT_Item_NegatronCloak"],
+    "notes": "Anima 2-cost reroll carry. 3-star is the target."
+  },
+  "TFT17_Shen": {
+    "role": "frontline_tank",
+    "items_bis": ["TFT_Item_GargoyleStoneplate", "TFT_Item_DragonsClaw", "TFT_Item_Redemption"],
+    "items_alt": ["TFT_Item_Sunfire", "TFT_Item_BrambleVest", "TFT_Item_WarmogArmor"],
+    "components_priority": ["TFT_Item_ChainVest", "TFT_Item_NegatronCloak", "TFT_Item_GiantsBelt"],
+    "notes": "Any tank items. Prioritize armor vs AD, MR vs AP."
+  }
+}

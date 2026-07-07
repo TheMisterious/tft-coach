@@ -1,0 +1,11 @@
+{
+  "_comment": "Hand-curated, like carry-bis.json — augment picks that change what 'correct play' means for another checker. Each bucket is a separate condition type; add entries as false positives are found in real reports. An empty bucket is fine — it just means no known augment changes that rule path yet.",
+  "itemBisOverrides": {
+    "TFT_Augment_TragicalBlade": {
+      "items": ["TFT_Item_Deathblade"],
+      "reason": "Deadlier Blades stacks bonus AD on the holder for every takedown, so Deathblade keeps scaling through the game well past its base stats — it's a legitimate carry item under this augment, not an off-BiS pick"
+    }
+  },
+  "traitCountBonuses": {},
+  "frontlineExemptions": {}
+}

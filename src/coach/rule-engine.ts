@@ -1,0 +1,119 @@
+// Rule engine — runs all checkers and returns a sorted list of decision points.
+// Every numeric claim originates here; the report generator only summarizes them.
+
+import type { MatchSnapshot, DecisionPoint, Severity, MetaData } from '../shared/types';
+import { checkEcon }             from './checkers/econ';
+import { checkLeveling }         from './checkers/leveling';
+import { checkStreak }           from './checkers/streak';
+import { checkItems }            from './checkers/items';
+import { checkRolling }          from './checkers/rolling';
+import { checkHp }               from './checkers/hp';
+import { checkBoard }            from './checkers/board';
+import { checkComp }             from './checkers/comp';
+import { checkSet17 }            from './checkers/set17';
+import { checkTraitBreakpoints } from './checkers/traits';
+import { checkAugments }         from './checkers/augments';
+import { checkPositioning }      from './checkers/positioning';
+import { getRuleTier, getRuleMeta, getMvpRules } from './rules-loader';
+import { buildMatchContext }     from './match-context';
+
+const SEVERITY_ORDER: Record<Severity, number> = {
+  critical: 0,
+  moderate: 1,
+  minor:    2,
+};
+
+// Econ-discipline rules that assume "hold gold" is always correct. Contradicts
+// crisis-response advice (roll down, spend everything) on the same round.
+const ECON_DISCIPLINE_RULES = new Set(['ECON_001', 'ECON_002']);
+
+// Rule priority within a match, by unique_id (data/rules.mvp.json). Lower index
+// = higher priority. Used only as a tiebreaker within a severity band so the
+// hand-curated "most pedagogically important" rules aren't buried under a pile
+// of same-severity but lower-value notes when the report gets truncated.
+const MVP_RANK: Map<string, number> = new Map(getMvpRules().map((id, i) => [id, i]));
+
+export function extractDecisionPoints(
+  match: MatchSnapshot,
+  meta: MetaData
+): DecisionPoint[] {
+  console.log('[rule-engine] running checkers on', match.rounds.length, 'rounds');
+
+  const context = buildMatchContext(match, meta);
+  if (context.isRerollComp) {
+    console.log(`[rule-engine] detected reroll archetype: ${context.matchedComp?.name}`);
+  }
+
+  const checkerResults: Array<[string, DecisionPoint[]]> = [
+    ['econ',       checkEcon(match, meta, context)],
+    ['hp',         checkHp(match)],
+    ['leveling',   checkLeveling(match)],
+    ['rolling',    checkRolling(match, meta)],
+    ['streak',     checkStreak(match)],
+    ['items',      checkItems(match, meta)],
+    ['board',      checkBoard(match, meta)],
+    ['comp',       checkComp(match)],
+    ['set17',      checkSet17(match)],
+    ['traits',     checkTraitBreakpoints(match, meta)],
+    ['augments',   checkAugments(match, meta)],
+    ['positioning',checkPositioning(match, meta)],
+  ];
+
+  const summary = checkerResults.map(([name, pts]) => `${name}:${pts.length}`).join(' ');
+  console.log('[rule-engine] checker counts —', summary);
+
+  let points = checkerResults.flatMap(([, pts]) => pts)
+    .map(p => (p.ruleId && !p.tier) ? { ...p, tier: getRuleTier(p.ruleId) } : p)
+    .map(applyConfidenceHedge);
+
+  points = suppressEconAdviceDuringHpCrisis(points, context);
+
+  console.log('[rule-engine] total decision points:', points.length);
+
+  // Sort: critical first, then MVP-curated priority, then chronologically by round.
+  return points.sort((a, b) => {
+    const severityDiff = SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity];
+    if (severityDiff !== 0) return severityDiff;
+    const rankA = a.ruleId ? MVP_RANK.get(a.ruleId) ?? Infinity : Infinity;
+    const rankB = b.ruleId ? MVP_RANK.get(b.ruleId) ?? Infinity : Infinity;
+    if (rankA !== rankB) return rankA - rankB;
+    return roundToNumber(a.round) - roundToNumber(b.round);
+  });
+}
+
+// A round already flagged as an HP crisis shouldn't also get "hold more gold"
+// or "you sat overcap" advice — the correct play there is spending to survive,
+// not econ discipline. See src/coach/match-context.ts for the crisis window.
+function suppressEconAdviceDuringHpCrisis(
+  points: DecisionPoint[],
+  context: ReturnType<typeof buildMatchContext>
+): DecisionPoint[] {
+  if (context.hpCrisisRounds.size === 0) return points;
+
+  return points.filter(p => {
+    if (!p.ruleId || !ECON_DISCIPLINE_RULES.has(p.ruleId)) return true;
+    if (!context.hpCrisisRounds.has(p.round)) return true;
+    console.log(`[rule-engine] suppressed ${p.ruleId} at ${p.round} — HP crisis at this round makes "hold gold" advice contradictory`);
+    return false;
+  });
+}
+
+// Rules the registry marks "confidence: medium" get a short caveat appended
+// so the coach doesn't assert community-derived heuristics with the same
+// certainty as official game mechanics. High-confidence rules are left as-is.
+function applyConfidenceHedge(p: DecisionPoint): DecisionPoint {
+  if (!p.ruleId || !p.coaching_text) return p;
+  const meta = getRuleMeta(p.ruleId);
+  if (meta?.confidence !== 'medium') return p;
+
+  const hedge = ' (This threshold is a community-derived guideline, not an official mechanic — treat it as directional.)';
+  if (p.coaching_text.endsWith(hedge)) return p;
+  return { ...p, coaching_text: p.coaching_text + hedge };
+}
+
+// Convert "3-2" → 302 for sorting. "match" (whole-game flags) sorts last.
+function roundToNumber(label: string): number {
+  if (label === 'match') return 9999;
+  const [stage, round] = label.split('-').map(Number);
+  return (stage ?? 0) * 100 + (round ?? 0);
+}

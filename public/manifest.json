@@ -14,7 +14,7 @@
     "launcher_icon": "icons/desktop-icon.ico",
     "window_icon": "icons/IconMouseOver.png"
   },
-  "permissions": ["Hotkeys", "GameInfo", "Tray", "FileSystem", "Extensions", "Streaming", "Profile", "Ads"],
+  "permissions": ["Hotkeys", "GameInfo", "Tray", "FileSystem", "Ads"],
   "data": {
     "start_window": "desktop",
     "game_targeting": { "type": "dedicated", "game_ids": [21570] },

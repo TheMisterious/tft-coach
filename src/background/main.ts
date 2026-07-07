@@ -304,7 +304,7 @@ async function runCoachingPipeline(): Promise<void> {
     const report   = await generateCoachingReport(brief);
     console.log('[bg] pipeline step 6: report generated — grade:', report.overall_grade, 'notes:', report.notes?.length);
 
-    // 7. Persist to SQLite.
+    // 7. Persist to localStorage (src/persistence/db.ts).
     const lastRound = snapshot.rounds.at(-1)?.label ?? 'unknown';
     saveMatch({
       pseudoMatchId:  matchId,

@@ -13,6 +13,7 @@ export const NEUTRAL_CONTEXT: MatchContext = {
   matchedComp: undefined,
   hpCrisisRounds: new Set(),
   activeComp: new Set(),
+  isFastTempo: false,
 };
 
 export function buildMatchContext(match: MatchSnapshot, meta: MetaData): MatchContext {
@@ -24,6 +25,7 @@ export function buildMatchContext(match: MatchSnapshot, meta: MetaData): MatchCo
     matchedComp,
     hpCrisisRounds: computeHpCrisisRounds(match),
     activeComp,
+    isFastTempo: computeIsFastTempo(match),
   };
 }
 
@@ -73,6 +75,19 @@ function detectRerollComp(
     if (twoStarByStage3) return { id: comp.id, name: comp.name };
   }
   return undefined;
+}
+
+// A level-timing signal only — deliberately not tied to any named comp
+// archetype (see MatchContext.isFastTempo doc comment for why). Reuses the
+// exact checkpoints checkers/leveling.ts's LEVEL_003/LEVEL_005 already treat
+// as "fast" (level 8 by 4-2, level 9 by 5-2), so this can't introduce a new,
+// unverified threshold — it's the same one already used elsewhere.
+function computeIsFastTempo(match: MatchSnapshot): boolean {
+  const at42 = match.rounds.find(r => r.label === '4-2');
+  const at52 = match.rounds.find(r => r.label === '5-2');
+  if (at42 && at42.level >= 8) return true;
+  if (at52 && at52.level >= 9) return true;
+  return false;
 }
 
 // Rounds at stage 3+ where health dropped below 40 — the same crisis

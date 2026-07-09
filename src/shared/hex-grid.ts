@@ -8,8 +8,17 @@
 // indices. Anything outside 0-55 (e.g. a Set 17 Realm of the Gods special hex)
 // is treated as unmappable rather than guessed.
 //
-// This is approximate, not verified against Riot/Overwolf documentation — treat
-// row 0 vs row 3 orientation as illustrative, not authoritative.
+// This is approximate, not verified against Riot/Overwolf documentation.
+//
+// Row-0 orientation confirmed (2026-07-08) via a real match + direct user
+// report: own-side row 0 (lowest local cell ids, 1-7) is the row closest to
+// the PLAYER'S OWN edge — i.e. back line — not the row closest to the
+// midline as originally assumed. Cross-checked against real ledger data:
+// tanks (Maokai, RekSai) landed in what the old code called "row 3/back";
+// carries (Jinx, Kindred) landed in "row 0/front" — backwards. Opponent-side
+// row 0 empirically DOES sit closest to the midline (their front line) —
+// the two sides' local numbering runs in opposite absolute directions, so
+// only 'own' is inverted here to correct it.
 
 import type { HexPosition } from './types';
 
@@ -33,7 +42,9 @@ export function resolveHexCell(rawCellId: string): HexPosition | null {
   const index = raw - 1;
   const side  = index < BOARD_SIZE ? 'own' : 'opponent';
   const local = side === 'own' ? index : index - BOARD_SIZE;
-  return { side, row: Math.floor(local / HEX_COLS), col: local % HEX_COLS };
+  const localRow = Math.floor(local / HEX_COLS);
+  const row = side === 'own' ? HEX_ROWS - 1 - localRow : localRow;
+  return { side, row, col: local % HEX_COLS };
 }
 
 // Short human-readable label used in coaching text instead of a raw "cell_42" id.

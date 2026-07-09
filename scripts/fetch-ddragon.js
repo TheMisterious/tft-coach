@@ -31,7 +31,7 @@ const LOCALE = 'en_US';
 
 function getJson(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'tft-coach-fetch-ddragon' } }, (res) => {
+    https.get(url, { headers: { 'User-Agent': 'coachv-fetch-ddragon' } }, (res) => {
       if (res.statusCode && res.statusCode >= 400) {
         reject(new Error(`GET ${url} -> ${res.statusCode}`));
         res.resume();
@@ -119,6 +119,66 @@ async function main() {
   }
   writeJson(itemsPath, nextItems);
   console.log(`[fetch-ddragon] items.json — ${itemsAdded} added, ${itemsChanged} renamed, ${Object.keys(itemsRes.data).length} total from Data Dragon`);
+
+  // ── Core: item-data.json — real composition + stat-derived tags ─────────────
+  // Community Dragon's item payload (fetched above for tile icons) carries a
+  // real `composition` array (the 2 component ids that build it) and a real
+  // `effects` stat map — unlike Data Dragon's tft-item.json, which is just
+  // id+name+icon with no mechanical data at all (confirmed by direct fetch).
+  // This replaces the two hand-maintained id lists items.ts used to rely on
+  // (COMPONENT_IDS, DAMAGE_ITEM_PREFIXES) with real fetched data.
+  const OFFENSE_KEYS = new Set(['AD', 'AP', 'CritChance', 'AS', 'AttackSpeed', 'AttackSpeedPerStack', 'Damage']);
+  const TANK_KEYS     = new Set(['Armor', 'MagicResist', 'Health', 'BonusPercentHP', 'PercentMaxHP']);
+  const SUSTAIN_KEYS  = new Set(['LifeSteal', 'StatOmnivamp', 'HealthRegenInterval', 'ShieldHealthPercent']);
+
+  function deriveTags(effects) {
+    const keys = Object.keys(effects ?? {});
+    const tags = [];
+    if (keys.some(k => OFFENSE_KEYS.has(k) && effects[k] > 0)) tags.push('offense');
+    if (keys.some(k => TANK_KEYS.has(k) && effects[k] > 0)) tags.push('tank');
+    if (keys.some(k => SUSTAIN_KEYS.has(k) && effects[k] > 0)) tags.push('sustain');
+    return tags;
+  }
+
+  // Only unambiguous, well-known-shape stat keys — excludes hashed/internal
+  // keys and situational mechanics (burn %, mana regen, ICD, stack caps, ...)
+  // that would need real per-item game knowledge to phrase correctly, which
+  // this project has already gotten burned by inventing once (fictional
+  // traits, 2026-07-04). Coaching text only ever cites keys from this list.
+  const KEY_STAT_KEYS = new Set([
+    'Health', 'Armor', 'MagicResist', 'LifeSteal', 'StatOmnivamp',
+    'BonusPercentHP', 'PercentMaxHP', 'AD', 'AP', 'CritChance', 'AS',
+  ]);
+
+  function extractKeyStats(effects) {
+    const out = {};
+    for (const [k, v] of Object.entries(effects ?? {})) {
+      if (KEY_STAT_KEYS.has(k) && typeof v === 'number' && v > 0) out[k] = v;
+    }
+    return out;
+  }
+
+  const nextItemData = {};
+  let itemDataCount = 0, componentCount = 0;
+  for (const item of cdragonTft.items ?? []) {
+    if (!item.apiName || !item.apiName.startsWith('TFT_Item_')) continue;
+    if (/Corrupted|Free|Unknown|Debug/.test(item.apiName)) continue;
+    if (!item.name) continue; // real junk entries exist (TFT_Item_Blank has name:null, TFT_Item_EmptyBag has name:'')
+    if (item.apiName in nextItemData) continue; // dedupe — keep first occurrence
+    const isComponent = item.composition.length === 0 && item.tags.includes('component');
+    nextItemData[item.apiName] = {
+      name: item.name,
+      isComponent,
+      composition: item.composition,
+      tags: deriveTags(item.effects),
+      keyStats: extractKeyStats(item.effects),
+    };
+    itemDataCount++;
+    if (isComponent) componentCount++;
+  }
+  const itemDataPath = path.join(DATA_ROOT, 'core', 'item-data.json');
+  writeJson(itemDataPath, nextItemData);
+  console.log(`[fetch-ddragon] item-data.json — ${itemDataCount} items (${componentCount} components) from Community Dragon`);
 
   // ── Core: augment names (id -> friendly name) — supplementary to augments.json's category buckets ──
   const augmentNamesPath = path.join(DATA_ROOT, 'core', 'augment-names.json');

@@ -6,22 +6,31 @@
 // AUGMENT_001: Economy augment chosen while critically low HP (<45) at pick round
 // AUGMENT_002: No augment data at all by stage 4 in a bottom-4 finish (data gap warning)
 
-import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData } from '../../shared/types';
+import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, MatchContext } from '../../shared/types';
 import { getAugmentName } from '../../enrichment/meta-lookup';
+import { NEUTRAL_CONTEXT } from '../match-context';
 
 const AUGMENT_PICK_ROUNDS = ['2-1', '3-2', '4-2'];
 
 const HP_CRISIS_THRESHOLD = 45;
 
-export function checkAugments(match: MatchSnapshot, meta: MetaData = {} as MetaData): DecisionPoint[] {
+export function checkAugments(
+  match: MatchSnapshot,
+  meta: MetaData = {} as MetaData,
+  context: MatchContext = NEUTRAL_CONTEXT
+): DecisionPoint[] {
   return [
-    ...checkEconAugmentOnCrisis(match, meta),
+    ...checkEconAugmentOnCrisis(match, meta, context),
     ...checkMissingAugmentData(match),
   ];
 }
 
-// AUGMENT_001 — picked an econ augment when already bleeding HP
-function checkEconAugmentOnCrisis(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
+// AUGMENT_001 — picked an econ augment when already bleeding HP. Fast-tempo
+// games (see MatchContext.isFastTempo) get a sharper message: that game
+// ended up leveling fast specifically because it forwent long-term econ for
+// board power, so an econ pick under HP pressure is doubly counter to how
+// the game actually played out, not just generically risky.
+function checkEconAugmentOnCrisis(match: MatchSnapshot, meta: MetaData, context: MatchContext): DecisionPoint[] {
   const points: DecisionPoint[] = [];
   const economyAugments = new Set(meta.augments?.economy ?? []);
 
@@ -38,6 +47,9 @@ function checkEconAugmentOnCrisis(match: MatchSnapshot, meta: MetaData): Decisio
       if (round.health >= HP_CRISIS_THRESHOLD) continue;
 
       const shortName = getAugmentName(aug, meta);
+      const tempoNote = context.isFastTempo
+        ? ` This game also ended up on a fast-leveling curve — once you're committed to buying levels instead of playing for long-term gold, an economy augment's payoff window shrinks even further than the HP alone suggests.`
+        : '';
 
       points.push({
         ruleId:   'AUGMENT_001',
@@ -48,8 +60,8 @@ function checkEconAugmentOnCrisis(match: MatchSnapshot, meta: MetaData): Decisio
         recommended: 'Below 45 HP, prioritise combat or item augments — econ augments pay off over time, but you may not have time',
         reasonMetrics: { augment: shortName, hp: round.health },
         coaching_text: byHp(round, {
-          low: `At only ${round.health} HP you chose ${shortName}, an economy augment. Economy augments compound over many rounds — but at ${round.health} HP you are likely to be eliminated before that income materialises. A combat augment here would have added immediate board strength when you needed it most.`,
-          mid: `You picked ${shortName} (econ augment) at ${round.health} HP — below the safe threshold. Econ augments are correct when you're healthy and econ'ing; at ${round.health} HP the priority shifts toward stabilising your board with a combat or item augment.`,
+          low: `At only ${round.health} HP you chose ${shortName}, an economy augment. Economy augments compound over many rounds — but at ${round.health} HP you are likely to be eliminated before that income materialises. A combat augment here would have added immediate board strength when you needed it most.${tempoNote}`,
+          mid: `You picked ${shortName} (econ augment) at ${round.health} HP — below the safe threshold. Econ augments are correct when you're healthy and econ'ing; at ${round.health} HP the priority shifts toward stabilising your board with a combat or item augment.${tempoNote}`,
         }),
       });
     }

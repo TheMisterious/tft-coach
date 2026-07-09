@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { CoachingReport, CoachingNote, Severity, DecisionCategory, MatchSummary } from '../../shared/types';
+import { ALL_CATEGORIES, CATEGORY_LABELS } from '../../coach/scoring';
 import { CoachingCard } from './CoachingCard';
 import { MatchTrajectoryCharts } from './MatchTrajectoryCharts';
 import { EmptyState } from './EmptyState';
@@ -91,6 +92,17 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
                 </span>
               </div>
               <p className={styles.tldr}>{report.tldr}</p>
+              <div className={styles.categoryGrid}>
+                {ALL_CATEGORIES.map(category => {
+                  const grade = report.category_grades[category];
+                  return (
+                    <div key={category} className={styles.categoryTile} title={`${CATEGORY_LABELS[category]}: ${grade}`}>
+                      <span className={`${styles.categoryBadge} ${styles[`grade-${grade}`]}`}>{grade}</span>
+                      <span className={styles.categoryLabel}>{CATEGORY_LABELS[category]}</span>
+                    </div>
+                  );
+                })}
+              </div>
               {report.round_trajectory && <MatchTrajectoryCharts data={report.round_trajectory} />}
             </header>
 

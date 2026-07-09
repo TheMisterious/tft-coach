@@ -2,8 +2,11 @@
 
 An [Overwolf](https://www.overwolf.com/) app that watches your Teamfight Tactics
 match locally and, once it ends, produces a round-by-round coaching report —
-what went wrong, when, and what to do instead. Entirely offline: no server,
-no account, no telemetry. Everything runs on your machine.
+what went wrong, when, and what to do instead. No server, no telemetry.
+Everything runs on your machine — the only outbound network calls are to
+Riot's own Data Dragon/Community Dragon CDNs for champion/item data, and,
+if you choose to link your own Riot API key, to `api.riotgames.com` (see
+[Linking a Riot account](#linking-a-riot-account-optional) below).
 
 > Not endorsed by Riot Games. TFT and Teamfight Tactics are trademarks of Riot
 > Games, Inc.
@@ -84,6 +87,49 @@ without a running game, and
 [`ow-events-recorder`](https://github.com/overwolf/ow-events-recorder) records
 a real session to a `.erp` file you can replay later. Neither is part of this
 repo.
+
+## Linking a Riot account (optional)
+
+Round-by-round coaching works fully offline with no setup. Linking a Riot
+account adds two extra things GEP can never see on its own: your current
+ranked tier/LP shown in the desktop window's status bar, and a background
+check that compares Riot's own record of your placement against what this
+app captured, flagging a mismatch if the two ever disagree.
+
+This does **not** replace GEP or change how coaching reports are generated —
+Riot's match API only returns a match's *final* result (placement, augments,
+final board), never the round-by-round timeline the rule engine reasons
+about.
+
+**Setup:**
+
+1. Go to [developer.riotgames.com](https://developer.riotgames.com) and sign
+   in with your Riot account.
+2. Copy your **personal API key** from the dashboard (starts with `RGAPI-`).
+   It's free, but expires after ~24 hours and needs regenerating — that's a
+   Riot limitation on personal keys, not something this app can avoid.
+3. In the app's desktop window, click the ⚙ (gear) icon in the status bar.
+4. Paste the API key, and your Riot ID split into two fields: the name part
+   (before the `#`) and the tag (after it, e.g. `NA1`).
+5. Pick your **continent** (routes account/match lookups — Americas, Europe,
+   or Asia) and **platform** (routes rank lookups — e.g. `na1`, `euw1`,
+   `kr` — pick the server your account actually plays on).
+6. Click **Save & Verify**. On success it shows your resolved Riot ID and
+   current rank; on failure it shows the specific error (bad key, Riot ID
+   not found, etc.) rather than failing silently.
+
+**Notes:**
+
+- The key is stored only in this app's local `localStorage`, never written
+  to disk elsewhere, never sent anywhere except `api.riotgames.com` itself,
+  and never committed if you're contributing to this repo.
+- There is deliberately no shared/hosted key — every user brings their own,
+  so no single key gets rate-limited or banned on everyone else's behalf,
+  and this app never has to hold a secret on your behalf. See
+  `src/enrichment/riot-api.ts` / `src/persistence/settings.ts` if you're
+  curious how it's implemented.
+- If your personal key expires, just repeat steps 1-2 and 6 — your Riot ID
+  and region settings are remembered.
 
 ## Scripts
 

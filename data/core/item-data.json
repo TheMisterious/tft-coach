@@ -1,0 +1,1809 @@
+{
+  "TFT_Item_RabadonsDeathcap": {
+    "name": "Rabadon's Deathcap",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NeedlesslyLargeRod",
+      "TFT_Item_NeedlesslyLargeRod"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 55
+    }
+  },
+  "TFT_Item_InfinityEdge": {
+    "name": "Infinity Edge",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_BFSword",
+      "TFT_Item_SparringGloves"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.3499999940395355,
+      "CritChance": 35
+    }
+  },
+  "TFT_Item_GrantCompletedAnvil": {
+    "name": "Completed Item Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrnnAnvil": {
+    "name": "Artifact Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrbs5": {
+    "name": "@OrbsToGive@ loot orbs",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrbs4": {
+    "name": "@OrbsToGive@ loot orbs",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrbs7": {
+    "name": "@OrbsToGive@ loot orbs",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrbs6": {
+    "name": "@OrbsToGive@ loot orbs",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrbs1": {
+    "name": "1 loot orb",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrbs3": {
+    "name": "@OrbsToGive@ loot orbs",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrbs2": {
+    "name": "@OrbsToGive@ loot orbs",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrbs9": {
+    "name": "@OrbsToGive@ loot orbs",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantOrbs8": {
+    "name": "@OrbsToGive@ loot orbs",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantTomeOfTraits": {
+    "name": "Tome of Traits",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponent2": {
+    "name": "@ItemsToGive@ components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponent3": {
+    "name": "@ItemsToGive@ components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponent1": {
+    "name": "1 component",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponent6": {
+    "name": "@ItemsToGive@ components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponent7": {
+    "name": "@ItemsToGive@ components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponent4": {
+    "name": "@ItemsToGive@ components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponent5": {
+    "name": "@ItemsToGive@ components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponent8": {
+    "name": "@ItemsToGive@ components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponent9": {
+    "name": "@ItemsToGive@ components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantComponentAnvil": {
+    "name": "Component Item Key",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantCompletedItem3": {
+    "name": "@ItemsToGive@ completed items",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantCompletedItem2": {
+    "name": "@ItemsToGive@ completed items",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_GrantCompletedItem1": {
+    "name": "1 completed item",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_LesserMirroredPersona": {
+    "name": "Lesser Mirrored Persona",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612,
+      "AP": 10,
+      "AS": 10,
+      "Armor": 10,
+      "Health": 100,
+      "MagicResist": 10
+    }
+  },
+  "TFT_Item_Artifact_InnervatingLocket": {
+    "name": "Innervating Locket",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_FrozenHeart": {
+    "name": "Protector's Vow",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_TearOfTheGoddess",
+      "TFT_Item_ChainVest"
+    ],
+    "tags": [
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "Armor": 25,
+      "MagicResist": 25
+    }
+  },
+  "TFT_Item_Artifact_TheIndomitable": {
+    "name": "The Indomitable",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 20,
+      "Health": 500,
+      "MagicResist": 20
+    }
+  },
+  "TFT_Item_Hush": {
+    "name": "tft_item_name_Hush",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "MagicResist": 25
+    }
+  },
+  "TFT_Item_Shroud": {
+    "name": "Shroud of Stillness",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_Redemption": {
+    "name": "Spirit Visage",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_TearOfTheGoddess",
+      "TFT_Item_GiantsBelt"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 300
+    }
+  },
+  "TFT_Item_BansheesVeil": {
+    "name": "Banshee's Veil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_Artifact_ShadowPuppet": {
+    "name": "Shadow Puppet",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 10,
+      "Armor": 10,
+      "MagicResist": 10
+    }
+  },
+  "TFT_Item_Zephyr": {
+    "name": "Zephyr",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_Hex_Ocean": {
+    "name": "tft_item_name_OceanHexBuff",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_WitheringRelic": {
+    "name": "Withered Relic",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 40,
+      "MagicResist": 40
+    }
+  },
+  "TFT_Item_TacticiansRing": {
+    "name": "Tactician's Cape",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_FryingPan"
+    ],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_EternalPact": {
+    "name": "Eternal Pact",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 40
+    }
+  },
+  "TFT_Item_BladeOfTheRuinedKing": {
+    "name": "TFT_item_name_BladeOfTheRuinedKing",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_ZekesHerald": {
+    "name": "Zeke's Herald",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_ThiefsGloves": {
+    "name": "Thief's Gloves",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_SparringGloves",
+      "TFT_Item_SparringGloves"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "CritChance": 20,
+      "Health": 150
+    }
+  },
+  "TFT_Item_GuinsoosRageblade": {
+    "name": "Guinsoo's Rageblade",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_RecurveBow",
+      "TFT_Item_NeedlesslyLargeRod"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 10,
+      "AS": 10
+    }
+  },
+  "TFT_Item_IonicSpark": {
+    "name": "Ionic Spark",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NeedlesslyLargeRod",
+      "TFT_Item_NegatronCloak"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 15,
+      "Health": 250,
+      "MagicResist": 35
+    }
+  },
+  "TFT_Item_Artifact_HellfireHatchet": {
+    "name": "Hellfire Hatchet",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "Health": 150,
+      "StatOmnivamp": 0.20000000298023224
+    }
+  },
+  "TFT_Item_SteraksGage": {
+    "name": "Sterak's Gage",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_BFSword",
+      "TFT_Item_GiantsBelt"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.44999998807907104,
+      "Health": 300
+    }
+  },
+  "TFT_Item_DragonsClaw": {
+    "name": "Dragon's Claw",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NegatronCloak",
+      "TFT_Item_NegatronCloak"
+    ],
+    "tags": [
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "MagicResist": 60,
+      "PercentMaxHP": 0.05999999865889549
+    }
+  },
+  "TFT_Item_Artifact_LichBane": {
+    "name": "Lich Bane",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 55,
+      "AS": 10
+    }
+  },
+  "TFT_Item_PhantomDancer": {
+    "name": "TFT_item_name_PhantomDancer",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 15,
+      "Armor": 25
+    }
+  },
+  "TFT_Item_PowerGauntlet": {
+    "name": "Striker's Flail",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_GiantsBelt",
+      "TFT_Item_SparringGloves"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 10,
+      "CritChance": 20,
+      "Health": 150
+    }
+  },
+  "TFT_Item_SentinelSwarm": {
+    "name": "Sentinel Swarm",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_ForbiddenIdol": {
+    "name": "Forbidden Idol",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 25,
+      "Health": 200,
+      "MagicResist": 25
+    }
+  },
+  "TFT_Item_Artifact_MirroredPersona": {
+    "name": "Mirrored Persona",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612,
+      "AP": 10,
+      "AS": 10,
+      "Armor": 10,
+      "Health": 100,
+      "MagicResist": 10
+    }
+  },
+  "TFT_Item_Thornmail": {
+    "name": "game_item_displayname_3075",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 50
+    }
+  },
+  "TFT_Item_Artifact_Fishbones": {
+    "name": "Fishbones",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.5,
+      "AS": 50
+    }
+  },
+  "TFT_Item_GargoyleStoneplate": {
+    "name": "Gargoyle Stoneplate",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_ChainVest",
+      "TFT_Item_NegatronCloak"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 25,
+      "Health": 100,
+      "MagicResist": 25
+    }
+  },
+  "TFT_Item_Artifact_TitanicHydra": {
+    "name": "Titanic Hydra",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AS": 20,
+      "Health": 300
+    }
+  },
+  "TFT_Item_BrambleVest": {
+    "name": "Bramble Vest",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_ChainVest",
+      "TFT_Item_ChainVest"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 50,
+      "PercentMaxHP": 0.05999999865889549
+    }
+  },
+  "TFT_Item_ChainVest": {
+    "name": "Chain Vest",
+    "isComponent": true,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 20
+    }
+  },
+  "TFT_Item_Artifact_AegisOfDusk": {
+    "name": "Aegis of Dusk",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 400,
+      "MagicResist": 70
+    }
+  },
+  "TFT_Item_IcebornGauntlet": {
+    "name": "tft_item_name_FrozenFist",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 25
+    }
+  },
+  "TFT_Item_SpellThiefsEdge": {
+    "name": "tft_item_name_SpellThiefsEdge",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_UnendingDespair": {
+    "name": "Unending Despair",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 40,
+      "Health": 350
+    }
+  },
+  "TFT_Item_Catalyst": {
+    "name": "TFT_item_name_Catalyst",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Hex_Wind": {
+    "name": "tft_item_name_WindHexBuff",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_RecurveBow": {
+    "name": "Recurve Bow",
+    "isComponent": true,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 10
+    }
+  },
+  "TFT_Item_MadredsBloodrazor": {
+    "name": "Giant Slayer",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_BFSword",
+      "TFT_Item_RecurveBow"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448,
+      "AP": 15,
+      "AS": 15
+    }
+  },
+  "TFT_Item_Hex_Inferno": {
+    "name": "tft_item_name_InfernoHexBuff",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_MendingEchoes": {
+    "name": "Mending Echoes",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 200
+    }
+  },
+  "TFT_Item_RedBuff": {
+    "name": "Sunfire Cape",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_ChainVest",
+      "TFT_Item_GiantsBelt"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 20,
+      "BonusPercentHP": 0.07999999821186066,
+      "Health": 150
+    }
+  },
+  "TFT_Item_RadiantVirtue": {
+    "name": "Virtue of the Martyr",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_ThiefsGloves_AcademyCopy1": {
+    "name": "Thief's Gloves",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "CritChance": 20,
+      "Health": 150
+    }
+  },
+  "TFT_Item_ThiefsGloves_AcademyCopy2": {
+    "name": "Thief's Gloves",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "CritChance": 20,
+      "Health": 150
+    }
+  },
+  "TFT_Item_SwordOfTheDivine": {
+    "name": "tft_item_name_SwordOfTheDivine2",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_UnstableConcoction": {
+    "name": "Hand Of Justice",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_TearOfTheGoddess",
+      "TFT_Item_SparringGloves"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "CritChance": 20
+    }
+  },
+  "TFT_Item_CursedBlade": {
+    "name": "tft_item_name_CursedBlade",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_CursedBlade",
+      "TFT_Item_CursedBlade"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 15,
+      "MagicResist": 25
+    }
+  },
+  "TFT_Item_GuardianAngel": {
+    "name": "Edge of Night",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_BFSword",
+      "TFT_Item_ChainVest"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612,
+      "AP": 10,
+      "AS": 15,
+      "Armor": 20
+    }
+  },
+  "TFT_Item_SeraphsEmbrace": {
+    "name": "Blue Buff",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 10
+    }
+  },
+  "TFT_Item_CrestOfCinders": {
+    "name": "Crest Of Cinders",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 250
+    }
+  },
+  "TFT_Item_TearOfTheGoddess": {
+    "name": "Tear of the Goddess",
+    "isComponent": true,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_CursedBlade": {
+    "name": "Cursed Blade",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 35,
+      "MagicResist": 20
+    }
+  },
+  "TFT_Item_MacaoMode_HextechSniper": {
+    "name": "Hextech Sniper Rifle",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_NegatronCloak": {
+    "name": "Negatron Cloak",
+    "isComponent": true,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "MagicResist": 20
+    }
+  },
+  "TFT_Item_TitansResolve": {
+    "name": "Titan's Resolve",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_ChainVest",
+      "TFT_Item_RecurveBow"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 10,
+      "Armor": 20
+    }
+  },
+  "TFT_Item_SupportKnightsVow": {
+    "name": "Knight's Vow",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 50
+    }
+  },
+  "TFT_Item_ChonccsChalice": {
+    "name": "Choncc's Chalice",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_LudensTempest": {
+    "name": "Luden's Tempest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.6000000238418579,
+      "AP": 60
+    }
+  },
+  "TFT_Item_Artifact_SpectralCutlass": {
+    "name": "Spectral Cutlass",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.4000000059604645,
+      "CritChance": 20,
+      "Health": 300
+    }
+  },
+  "TFT_Item_RunaansHurricane": {
+    "name": "Kraken's Fury",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NegatronCloak",
+      "TFT_Item_RecurveBow"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612,
+      "AS": 10,
+      "MagicResist": 20
+    }
+  },
+  "TFT_Item_IsYordle": {
+    "name": "tft_item_name_Mittens",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_SparringGloves": {
+    "name": "Sparring Gloves",
+    "isComponent": true,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "CritChance": 20
+    }
+  },
+  "TFT_Item_Artifact_RapidFirecannon": {
+    "name": "Rapid Firecannon",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 65
+    }
+  },
+  "TFT_Item_Bloodthirster": {
+    "name": "Bloodthirster",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_BFSword",
+      "TFT_Item_NegatronCloak"
+    ],
+    "tags": [
+      "offense",
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448,
+      "AP": 15,
+      "LifeSteal": 20,
+      "MagicResist": 20,
+      "StatOmnivamp": 0.20000000298023224
+    }
+  },
+  "TFT_Item_Artifact_StatikkShiv": {
+    "name": "Statikk Shiv",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 15,
+      "AS": 50
+    }
+  },
+  "TFT_Item_UnstableTreasureChest": {
+    "name": "Unstable Treasure Chest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_ArchangelsStaff": {
+    "name": "Archangel's Staff",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NeedlesslyLargeRod",
+      "TFT_Item_TearOfTheGoddess"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 30
+    }
+  },
+  "TFT_Item_Artifact_AegisOfDawn": {
+    "name": "Aegis of Dawn",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 50,
+      "Health": 400
+    }
+  },
+  "TFT_Item_KnightsVow": {
+    "name": "Knight's Vow",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_FrozenMallet": {
+    "name": "TFT_item_name_FrozenMallet",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_Dawncore": {
+    "name": "Dawncore",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448,
+      "AP": 15
+    }
+  },
+  "TFT_Item_TitanicHydra": {
+    "name": "Zz'Rot Portal",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 10,
+      "Health": 150
+    }
+  },
+  "TFT_Item_HextechChestguard": {
+    "name": "tft_item_name_HextechChestguard",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_HextechChestguard",
+      "TFT_Item_HextechChestguard"
+    ],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_EternalFlame": {
+    "name": "The Eternal Flame",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_Artifact_LightshieldCrest": {
+    "name": "Lightshield Crest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 55,
+      "MagicResist": 55
+    }
+  },
+  "TFT_Item_Darkin": {
+    "name": "tft_item_name_Darkin",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_SpearOfShojin": {
+    "name": "Spear of Shojin",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_BFSword",
+      "TFT_Item_TearOfTheGoddess"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448,
+      "AP": 15
+    }
+  },
+  "TFT_Item_YoumuusGhostblade": {
+    "name": "Youmuu's Ghostblade",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_SpectralGauntlet": {
+    "name": "Evenshroud",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NegatronCloak",
+      "TFT_Item_GiantsBelt"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 250,
+      "MagicResist": 20
+    }
+  },
+  "TFT_Item_Spatula": {
+    "name": "Spatula",
+    "isComponent": true,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_BlightingJewel": {
+    "name": "Blighting Jewel",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 60
+    }
+  },
+  "TFT_Item_Artifact_TalismanOfAscension": {
+    "name": "Talisman Of Ascension",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AP": 20,
+      "Health": 450
+    }
+  },
+  "TFT_Item_LocketOfTheIronSolari": {
+    "name": "Locket of the Iron Solari",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_Leviathan": {
+    "name": "Nashor's Tooth",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_RecurveBow",
+      "TFT_Item_GiantsBelt"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 15,
+      "AS": 10,
+      "CritChance": 20,
+      "Health": 150
+    }
+  },
+  "TFT_Item_Yuumi": {
+    "name": "TFT_item_name_Yuumi",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Artifact_SuspiciousTrenchCoat": {
+    "name": "Suspicious Trench Coat",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 15,
+      "Health": 100
+    }
+  },
+  "TFT_Item_Morellonomicon": {
+    "name": "Morellonomicon",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NeedlesslyLargeRod",
+      "TFT_Item_GiantsBelt"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 20,
+      "Health": 150
+    }
+  },
+  "TFT_Item_RapidFireCannon": {
+    "name": "Red Buff",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_RecurveBow",
+      "TFT_Item_RecurveBow"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 45
+    }
+  },
+  "TFT_Item_Crownguard": {
+    "name": "Crownguard",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NeedlesslyLargeRod",
+      "TFT_Item_ChainVest"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 20,
+      "Armor": 20,
+      "Health": 100
+    }
+  },
+  "TFT_Item_BFSword": {
+    "name": "B.F. Sword",
+    "isComponent": true,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612
+    }
+  },
+  "TFT_Item_Artifact_Mittens": {
+    "name": "Mittens",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 65
+    }
+  },
+  "TFT_Item_AdaptiveHelm": {
+    "name": "Adaptive Helm",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NegatronCloak",
+      "TFT_Item_TearOfTheGoddess"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "MagicResist": 20
+    }
+  },
+  "TFT_Item_Artifact_NavoriFlickerblades": {
+    "name": "Flickerblades",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 10,
+      "AS": 20
+    }
+  },
+  "TFT_Item_Spite": {
+    "name": "Spite",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_ZhonyasHourglass": {
+    "name": "TFT_item_name_ZhonyasHourglass",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 20,
+      "Armor": 25
+    }
+  },
+  "TFT_Item_BlueBuff": {
+    "name": "Blue Buff",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_TearOfTheGoddess",
+      "TFT_Item_TearOfTheGoddess"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448,
+      "AP": 15
+    }
+  },
+  "TFT_Item_Artifact_CursedVampiricScepter": {
+    "name": "Corrupt Vampiric Scepter",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 60
+    }
+  },
+  "TFT_Item_LastWhisper": {
+    "name": "Last Whisper",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_RecurveBow",
+      "TFT_Item_SparringGloves"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448,
+      "AS": 20,
+      "CritChance": 20
+    }
+  },
+  "TFT_Item_JeweledGauntlet": {
+    "name": "Jeweled Gauntlet",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_NeedlesslyLargeRod",
+      "TFT_Item_SparringGloves"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 35,
+      "CritChance": 35
+    }
+  },
+  "TFT_Item_GiantsBelt": {
+    "name": "Giant's Belt",
+    "isComponent": true,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_Artifact_WitsEnd": {
+    "name": "Wit's End",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 25,
+      "Armor": 20,
+      "Health": 400,
+      "MagicResist": 20
+    }
+  },
+  "TFT_Item_JammedSlot": {
+    "name": "Jammed!",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_NeedlesslyLargeRod": {
+    "name": "Needlessly Large Rod",
+    "isComponent": true,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 10
+    }
+  },
+  "TFT_Item_Artifact_HorizonFocus": {
+    "name": "Horizon Focus",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 20,
+      "Health": 250,
+      "MagicResist": 20
+    }
+  },
+  "TFT_Item_MortalReminder": {
+    "name": "game_item_displayname_3033",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_NightHarvester": {
+    "name": "Steadfast Heart",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_ChainVest",
+      "TFT_Item_SparringGloves"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 20,
+      "CritChance": 20,
+      "Health": 250
+    }
+  },
+  "TFT_Item_Artifact_ProwlersClaw": {
+    "name": "Prowler's Claw",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.3499999940395355,
+      "CritChance": 45,
+      "Health": 300
+    }
+  },
+  "TFT_Item_Moonstone": {
+    "name": "Moonstone Renewer",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_Vengeance": {
+    "name": "tft_item_name_SwordOfTheDivine2",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 15,
+      "CritChance": 20
+    }
+  },
+  "TFT_Item_FryingPan": {
+    "name": "Frying Pan",
+    "isComponent": true,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_ForceOfNature": {
+    "name": "Tactician's Crown",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_Spatula"
+    ],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_AegisOfTheLegion": {
+    "name": "Aegis of the Legion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_Quicksilver": {
+    "name": "Quicksilver",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_SparringGloves",
+      "TFT_Item_NegatronCloak"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 15,
+      "CritChance": 20,
+      "MagicResist": 20
+    }
+  },
+  "TFT_Item_Deathblade": {
+    "name": "Deathblade",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_BFSword",
+      "TFT_Item_BFSword"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.550000011920929
+    }
+  },
+  "TFT_Item_ChonccsCrown": {
+    "name": "Choncc's Crown",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_Chalice": {
+    "name": "Chalice of Power",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT_Item_Artifact_VoidGauntlet": {
+    "name": "Void Gauntlet",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 300
+    }
+  },
+  "TFT_Item_Artifact_SilvermereDawn": {
+    "name": "Silvermere Dawn",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 1.399999976158142,
+      "Armor": 80,
+      "MagicResist": 80
+    }
+  },
+  "TFT_Item_TacticiansScepter": {
+    "name": "Tactician's Shield",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_FryingPan",
+      "TFT_Item_FryingPan"
+    ],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_WarmogsArmor": {
+    "name": "Warmog's Armor",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_GiantsBelt",
+      "TFT_Item_GiantsBelt"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "BonusPercentHP": 0.18000000715255737,
+      "Health": 500
+    }
+  },
+  "TFT_Item_Artifact_SeekersArmguard": {
+    "name": "Seeker's Armguard",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "AP": 25,
+      "Armor": 10,
+      "MagicResist": 10,
+      "StatOmnivamp": 0.20000000298023224
+    }
+  },
+  "TFT_Item_StatikkShiv": {
+    "name": "Void Staff",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_RecurveBow",
+      "TFT_Item_TearOfTheGoddess"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 35,
+      "AS": 15
+    }
+  },
+  "TFT_Item_Artifact_CappaJuice": {
+    "name": "Cappa Juice",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.25,
+      "AP": 25,
+      "AS": 25
+    }
+  },
+  "TFT_Item_UnusableSlot": {
+    "name": "Unusable Slot",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_HextechGunblade": {
+    "name": "Hextech Gunblade",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_BFSword",
+      "TFT_Item_NeedlesslyLargeRod"
+    ],
+    "tags": [
+      "offense",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AP": 20,
+      "StatOmnivamp": 0.15000000596046448
+    }
+  },
+  "TFT_Item_Hex_Mountain": {
+    "name": "tft_item_name_MountainHexBuff",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Item_ChonccsSpork": {
+    "name": "Choncc's Spork",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30,
+      "Health": 350
+    }
+  },
+  "TFT_Item_CarouselOfChaos_TimeUndilator": {
+    "name": "Time Undilator",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  }
+}

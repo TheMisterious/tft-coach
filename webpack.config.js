@@ -39,7 +39,7 @@ module.exports = (env, argv) => {
     plugins: [
       new OwWebpackPlugin({
         // copies public/ (manifest.json, HTML, icons) into dist/
-        // and packages dist/ into releases/tft-coach-{version}.opk
+        // and packages dist/ into releases/{package.json name}-{version}.opk
         sourceDir:  path.resolve(__dirname, 'public'),
         outputDir:  path.resolve(__dirname, 'dist'),
         packageDir: path.resolve(__dirname, 'releases'),

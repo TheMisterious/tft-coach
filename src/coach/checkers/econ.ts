@@ -5,6 +5,7 @@
 
 import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, MatchContext } from '../../shared/types';
 import { NEUTRAL_CONTEXT } from '../match-context';
+import { boardChampionIds } from '../../ledger/merge';
 
 function byHp(round: RoundSnapshot, t: { low: string; mid: string; high: string }): string {
   if (round.health <= 40) return t.low;
@@ -21,8 +22,8 @@ export function checkEcon(
   context: MatchContext = NEUTRAL_CONTEXT
 ): DecisionPoint[] {
   const points: DecisionPoint[] = [
-    ...checkMissedInterest(match),
-    ...checkInterestOvercap(match),
+    ...checkMissedInterest(match, meta, context),
+    ...checkInterestOvercap(match, context),
     ...checkEarlyRolling(match, context),
     ...checkEconBenchmarks(match, meta),
   ];
@@ -58,10 +59,20 @@ function checkEconBenchmarks(match: MatchSnapshot, meta: MetaData): DecisionPoin
 }
 
 // ECON_001
-function checkMissedInterest(match: MatchSnapshot): DecisionPoint[] {
+// "Sell a bench unit" is only free advice for a standard comp. In a reroll
+// comp, bench copies of the primary carry ARE the strategy — selling one to
+// cross an interest bracket burns roll equity for +1g/round, a bad trade.
+// Only suppressed when the bench actually holds one of those carries at this
+// specific round (a reroll game can still have genuine bench junk to sell).
+function checkMissedInterest(
+  match: MatchSnapshot,
+  meta: MetaData,
+  context: MatchContext
+): DecisionPoint[] {
   const points: DecisionPoint[] = [];
-  let cumulative = 0;
-  const missedRounds: string[] = [];
+  const rerollCarryIds = context.isRerollComp
+    ? new Set(meta.comps?.find(c => c.id === context.matchedComp?.id)?.primary_carry_ids ?? [])
+    : new Set<string>();
 
   for (const round of match.rounds) {
     const gold = round.goldEnd;
@@ -70,20 +81,25 @@ function checkMissedInterest(match: MatchSnapshot): DecisionPoint[] {
     for (const tier of INTEREST_TIERS) {
       const gap = tier - gold;
       if (gap > 0 && gap <= 3) {
-        cumulative++;
-        missedRounds.push(round.label);
+        const benchHasRerollCarry = rerollCarryIds.size > 0 &&
+          boardChampionIds(round.bench).some(id => rerollCarryIds.has(id));
+        const sellHint = benchHasRerollCarry ? '' : ' (or sell a bench unit)';
+        const rerollNote = benchHasRerollCarry
+          ? ` Your bench copies are reroll fodder for this comp — don't sell into them just to cross a bracket.`
+          : '';
+
         points.push({
           ruleId:   'ECON_001',
           round:    round.label,
           category: 'econ',
           severity: gap === 1 ? 'critical' : 'moderate',
           observed: `Ended ${round.label} at ${gold}g — ${gap}g below the ${tier}g interest tier`,
-          recommended: `Hold ${gap}g more (or sell a bench unit) to cross the ${tier}g bracket and earn +1 interest`,
+          recommended: `Hold ${gap}g more${sellHint} to cross the ${tier}g bracket and earn +1 interest`,
           reasonMetrics: { goldEnd: gold, tier, gap },
           coaching_text: byHp(round, {
-            low:  `At ${round.label} you were ${gap}g short of the ${tier}g bracket — and already at ${round.health} HP. You cannot afford to lose fights AND give up interest income simultaneously. Immediately cross the ${tier}g line before spending anything else; that +1g per round is the cheapest form of comeback available to you.`,
-            mid:  `At ${round.label} you ended on ${gold}g — just ${gap}g short of the ${tier}g interest bracket. That single gold costs you +1 interest every round from here. At ${round.health} HP sub-bracket endings like this compound: you lose both income and the HP cushion to play for econ.`,
-            high: `At ${round.label} you ended on ${gold}g — ${gap}g below the ${tier}g bracket. At ${round.health} HP you have the luxury of playing the interest game properly; ending ${gap}g short is a pure inefficiency. Hold ${gap}g more before spending and this never costs you.`,
+            low:  `At ${round.label} you were ${gap}g short of the ${tier}g bracket — and already at ${round.health} HP. You cannot afford to lose fights AND give up interest income simultaneously. Immediately cross the ${tier}g line before spending anything else; that +1g per round is the cheapest form of comeback available to you.${rerollNote}`,
+            mid:  `At ${round.label} you ended on ${gold}g — just ${gap}g short of the ${tier}g interest bracket. That single gold costs you +1 interest every round from here. At ${round.health} HP sub-bracket endings like this compound: you lose both income and the HP cushion to play for econ.${rerollNote}`,
+            high: `At ${round.label} you ended on ${gold}g — ${gap}g below the ${tier}g bracket. At ${round.health} HP you have the luxury of playing the interest game properly; ending ${gap}g short is a pure inefficiency. Hold ${gap}g more before spending and this never costs you.${rerollNote}`,
           }),
         });
         break;
@@ -94,8 +110,11 @@ function checkMissedInterest(match: MatchSnapshot): DecisionPoint[] {
   return points;
 }
 
-// ECON_002
-function checkInterestOvercap(match: MatchSnapshot): DecisionPoint[] {
+// ECON_002 — reroll-aware: sitting overcap and idle is always a minor
+// inefficiency in a standard game, but it directly contradicts a reroll
+// comp's whole plan (gold should be funding rolls, not sitting idle), so it's
+// upgraded to moderate and the message names the strategy conflict directly.
+function checkInterestOvercap(match: MatchSnapshot, context: MatchContext): DecisionPoint[] {
   const points: DecisionPoint[] = [];
   let streak = 0;
   let streakStart = '';
@@ -119,15 +138,21 @@ function checkInterestOvercap(match: MatchSnapshot): DecisionPoint[] {
     // sitting on 80g+ but barely rolling). Resetting streak after each fire
     // requires 3 more idle-overcap rounds before the next one can fire.
     if (streak === 3) {
+      const rerollNote = context.isRerollComp
+        ? ` You're running ${context.matchedComp?.name ?? 'a reroll comp'} — that gold has one job here: funding rolls toward your 3-star, not sitting idle. Holding it past the cap isn't a normal econ slip, it's working against the strategy you already committed to.`
+        : '';
+
       points.push({
         ruleId:   'ECON_002',
         round:    r.label,
         category: 'econ',
-        severity: 'minor',
+        severity: context.isRerollComp ? 'moderate' : 'minor',
         observed: `Held ${r.goldEnd}g (above the ${INTEREST_CAP}g cap) for ${streak} consecutive rounds without rolling or leveling`,
-        recommended: 'Plan a spend — level up or roll down — when you are above the 50g interest cap and HP is stable',
+        recommended: context.isRerollComp
+          ? 'You are playing a reroll comp — spend this gold rolling for your carry, not holding it above the interest cap'
+          : 'Plan a spend — level up or roll down — when you are above the 50g interest cap and HP is stable',
         reasonMetrics: { goldEnd: r.goldEnd, streak, streakStartRound: streakStart },
-        coaching_text: `You sat above ${INTEREST_CAP}g for ${streak} rounds in a row (starting ${streakStart}) without rolling or buying XP. Interest caps at 50g — every gold above that earns nothing extra. Plan a level-up or rolldown spike when you are overcap and your HP is not critical.`,
+        coaching_text: `You sat above ${INTEREST_CAP}g for ${streak} rounds in a row (starting ${streakStart}) without rolling or buying XP. Interest caps at 50g — every gold above that earns nothing extra. Plan a level-up or rolldown spike when you are overcap and your HP is not critical.${rerollNote}`,
       });
       streak = 0;
     }

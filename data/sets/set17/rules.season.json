@@ -297,18 +297,18 @@
     },
     {
       "unique_id": "ITEM_005",
-      "human_readable_name": "Off-BiS Final Carry Build",
+      "human_readable_name": "Component Conversion Opportunity",
       "category": "itemization",
       "subcategory": "item_selection",
-      "short_summary": "Player's main carry finished the match with 3+ completed items where at least one falls outside the set-curated BiS/alt list for that champion (data/sets/set{N}/carry-bis.json), and no picked augment excuses the deviation.",
-      "source_tier": "community_inferred",
+      "short_summary": "Player held 2 unbuilt components that form a real completed item (per data/core/item-data.json, Community Dragon composition/stat data) for 3+ consecutive rounds, instead of slamming them into a build matching the round's actual situation (HP crisis -> tank/sustain stats, otherwise -> offense stats).",
+      "source_tier": "official",
       "severity": "medium",
-      "confidence": "medium",
-      "patch_sensitivity": "high",
+      "confidence": "high",
+      "patch_sensitivity": "low",
       "coaching_message_templates": {
-        "low_rank": "Your {{carry}} finished with {{off_bis_count}} item(s) that aren't the best fit! The ideal build is {{bis_items}}.",
-        "mid_rank": "{{carry}} carried {{off_bis_count}} off-BiS item(s). Curated build: {{bis_items}}. Off-kit items lose synergy damage.",
-        "high_rank": "Off-BiS build on {{carry}}: {{off_bis_count}} item(s) outside {{bis_items}}. Check whether an augment this match should have been logged as an excuse."
+        "low_rank": "You held {{components}} unbuilt for 3+ rounds! Combine them into {{result_item}} for {{stats}}.",
+        "mid_rank": "{{components}} sat unbuilt for 3+ consecutive rounds. Combined they make {{result_item}} ({{stats}}) — real stats left on the bench.",
+        "high_rank": "Unbuilt recipe held 3+ rounds: {{components}} -> {{result_item}} ({{stats}}). Compare against the round's actual need before deciding what to slam next time."
       }
     },
     {

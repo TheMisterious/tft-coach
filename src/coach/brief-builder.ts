@@ -7,6 +7,7 @@
 
 import type { MatchSnapshot, DecisionPoint, MatchBrief, CoachingNote, MetaData, RoundTrajectoryPoint } from '../shared/types';
 import { getChampionName, getItemName } from '../enrichment/meta-lookup';
+import { overallGrade, categoryGrades, capRepeats } from './scoring';
 
 // Maximum decision points (resolved + pending combined) before truncating.
 const MAX_POINTS = 20;
@@ -16,9 +17,17 @@ export function buildBrief(
   points: DecisionPoint[],
   meta: MetaData
 ): MatchBrief {
-  const topPoints = points.slice(0, MAX_POINTS); // already severity-sorted
+  // Cap repeat firings of the same rule before truncation. Without this, a
+  // rule that legitimately fires many times in one match (e.g. ECON_001 "1g
+  // short of a bracket", which can trip on nearly every round) eats the whole
+  // MAX_POINTS budget and crowds out rules that only fired once but matter
+  // more (e.g. an off-BiS item note). Same cap scoring.ts uses for grading —
+  // see capRepeats() there for why that matters too.
+  const diversified = capRepeats(points);
+
+  const topPoints = diversified.slice(0, MAX_POINTS); // already severity-sorted
   if (points.length > MAX_POINTS) {
-    console.log(`[brief] truncated ${points.length} → ${MAX_POINTS} decision points`);
+    console.log(`[brief] truncated ${points.length} → ${MAX_POINTS} decision points (${points.length - diversified.length} dropped by per-rule cap)`);
   }
 
   const resolvedNotes: CoachingNote[] = [];
@@ -43,6 +52,10 @@ export function buildBrief(
     godPicks:       match.godPicks,
     resolvedNotes,
     decisionPoints: pendingPoints,
+    // Graded from the FULL `points` list (pre-truncation) and normalized by
+    // round count — see src/coach/scoring.ts for why both matter.
+    overallGrade:    overallGrade(match.finalPlacement, points, match.rounds.length),
+    categoryGrades:  categoryGrades(points, match.rounds.length),
   };
 }
 

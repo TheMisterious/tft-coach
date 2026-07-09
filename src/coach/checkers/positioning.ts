@@ -3,10 +3,10 @@
 // POSITION_001: Unchanged opponent carry position across multiple fights
 // POSITION_002: No tank-role unit on board at stage 4+ PvP (carry exposed)
 
-import type { MatchSnapshot, DecisionPoint, MetaData, BoardSnapshot, BoardState } from '../../shared/types';
-import { boardChampionIds } from '../../ledger/merge';
+import type { MatchSnapshot, DecisionPoint, MetaData, BoardSnapshot, BoardState, RoundSnapshot } from '../../shared/types';
+import { boardChampionIds, isNonChampionToken, identifyCarry } from '../../ledger/merge';
 import { getChampionName, getFrontlineExemption } from '../../enrichment/meta-lookup';
-import { resolveHexCell, describeHexPosition } from '../../shared/hex-grid';
+import { resolveHexCell, describeHexPosition, HEX_ROWS, HEX_COLS } from '../../shared/hex-grid';
 
 const REPEAT_THRESHOLD = 2;
 
@@ -16,12 +16,40 @@ const REPEAT_THRESHOLD = 2;
 function buildBoardSnapshot(board: BoardState, opponentBoard: BoardState, meta: MetaData): BoardSnapshot {
   const toUnits = (b: BoardState) =>
     Object.entries(b).flatMap(([hex, cell]) => {
-      if (!cell?.name || cell.name === '0' || cell.name.includes('_PVE_')) return [];
+      if (!cell?.name || cell.name === '0' || cell.name.includes('_PVE_') || isNonChampionToken(cell.name)) return [];
       const pos = resolveHexCell(hex);
       if (!pos) return [];
       return [{ ...pos, name: getChampionName(cell.name, meta), icon: meta.champions?.[cell.name]?.icon }];
     });
   return { own: toUnits(board), opponent: toUnits(opponentBoard) };
+}
+
+// Names a concrete own-side unit + destination instead of generic "move your
+// frontline" text. Prefers a curated tank-role unit to block the opponent
+// carry's column (columns aren't mirrored left/right between sides — see
+// HexBoardLegend.tsx's render loop — so the same col index lines up); falls
+// back to null (omitted from coaching text) if no tank-role unit is on board,
+// since most of the roster is still uncurated role:'flex' and guessing a
+// "tank" would risk naming the wrong unit.
+function suggestCounterPosition(
+  round: RoundSnapshot,
+  meta: MetaData,
+  oppCol: number
+): { frontlineName: string | null; carryName: string | null; blockSpot: string; safeSpot: string } {
+  const ownEntries = Object.entries(round.board).filter(
+    ([, c]) => c?.name && c.name !== '0' && !isNonChampionToken(c.name)
+  );
+  const tankEntry  = ownEntries.find(([, c]) => meta.champions?.[c.name]?.role === 'tank');
+  const carryCell  = ownEntries.length > 0 ? identifyCarry(ownEntries.map(([, c]) => c), meta) : null;
+  const carryEntry = ownEntries.find(([, c]) => c === carryCell);
+
+  const safeCol = HEX_COLS - 1 - oppCol;
+  return {
+    frontlineName: tankEntry ? getChampionName(tankEntry[1].name, meta) : null,
+    carryName:     carryEntry ? getChampionName(carryEntry[1].name, meta) : null,
+    blockSpot:     describeHexPosition({ side: 'own', row: 0, col: oppCol }),
+    safeSpot:      describeHexPosition({ side: 'own', row: HEX_ROWS - 1, col: safeCol }),
+  };
 }
 
 export function checkPositioning(match: MatchSnapshot, meta: MetaData = {} as MetaData): DecisionPoint[] {
@@ -66,6 +94,14 @@ function checkRepeatedOpponentCarry(match: MatchSnapshot, meta: MetaData): Decis
       if (seenCarries[key].count >= REPEAT_THRESHOLD) {
         const pos      = resolveHexCell(hex);
         const spotName = pos ? `the ${describeHexPosition(pos)} of the board` : `hex ${hex}`;
+        const suggestion = pos ? suggestCounterPosition(round, meta, pos.col) : null;
+
+        const moveClause = suggestion?.frontlineName
+          ? `Move ${suggestion.frontlineName} to your ${suggestion.blockSpot} to intercept it`
+          : `Move a frontline unit to your ${suggestion?.blockSpot ?? 'front row in the same column'} to intercept it — you don't have a curated tank-role unit on this board to name specifically`;
+        const carrySafetyClause = suggestion?.carryName
+          ? ` Keep ${suggestion.carryName} in your ${suggestion.safeSpot}, away from that column.`
+          : '';
 
         points.push({
           ruleId:   'POSITION_001',
@@ -73,9 +109,11 @@ function checkRepeatedOpponentCarry(match: MatchSnapshot, meta: MetaData): Decis
           category: 'positioning',
           severity: 'minor',
           observed: `Opponent's ${carryName} was in ${spotName} for ${seenCarries[key].count} fights`,
-          recommended: `Counter-position against ${carryName} — move your frontline to block that spot`,
+          recommended: suggestion?.frontlineName
+            ? `Move ${suggestion.frontlineName} to your ${suggestion.blockSpot} to block ${carryName}`
+            : `Counter-position against ${carryName} — move your frontline to your ${suggestion?.blockSpot ?? 'front row in the same column'}`,
           reasonMetrics: { carry: carryName, hex, fights: seenCarries[key].count },
-          coaching_text: `You've fought the same opponent with their ${carryName} planted in ${spotName} for ${seenCarries[key].count} fights in a row without adjusting your positioning. Scouting the lobby before each round and moving a frontline unit to intercept the carry — or positioning your own carry in the opposite corner — is a free win-rate improvement that costs nothing.`,
+          coaching_text: `You've fought the same opponent with their ${carryName} planted in ${spotName} for ${seenCarries[key].count} fights in a row without adjusting your positioning. ${moveClause}.${carrySafetyClause} Scouting the lobby before each round is what makes this adjustment possible — it's a free win-rate improvement that costs nothing.`,
           hexPosition: pos ?? undefined,
           boardSnapshot: buildBoardSnapshot(round.board, round.opponentBoard, meta),
         });

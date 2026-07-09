@@ -1,64 +1,45 @@
-// ITEM_001: Delayed item slam — 2+ components on bench for 2+ stages
+// ITEM_001: Delayed item slam — 2+ components on bench for 3+ consecutive rounds
 // ITEM_002: Carry items on tank units (requires champion role data)
 // ITEM_003: Under-itemised carry at stage 4 (<2 completed items)
 // ITEM_004: Items spread across 4+ units with no unit holding 2+
+// ITEM_005: A real, buildable completed item was left as unbuilt components
+//           for 3+ consecutive rounds — see data/core/item-data.json
 
-import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, Cell } from '../../shared/types';
-import { getChampionName, getItemName, getAugmentItemOverride } from '../../enrichment/meta-lookup';
+import type { MatchSnapshot, DecisionPoint, MetaData, MatchContext, Cell, ItemData } from '../../shared/types';
+import { getChampionName, getItemName } from '../../enrichment/meta-lookup';
+import { NEUTRAL_CONTEXT } from '../match-context';
+import { boardItemIds, identifyCarry } from '../../ledger/merge';
 
 function byHp(hp: number, t: { low: string; mid: string; high: string }): string {
   if (hp <= 40) return t.low;
   if (hp >= 70) return t.high;
   return t.mid;
 }
-import { boardItemIds } from '../../ledger/merge';
 
-const COMPONENT_IDS = new Set([
-  'TFT_Item_BFSword', 'TFT_Item_ChainVest', 'TFT_Item_GiantsBelt',
-  'TFT_Item_NeedlesslyLargeRod', 'TFT_Item_NegatronCloak', 'TFT_Item_RecurveBow',
-  'TFT_Item_SparringGloves', 'TFT_Item_Spatula', 'TFT_Item_TearoftheGoddess',
-]);
+function isComponent(id: string, meta: MetaData): boolean {
+  return !!meta.itemData[id]?.isComponent;
+}
 
-// Items whose primary purpose is damage/offense.
-const DAMAGE_ITEM_PREFIXES = [
-  'TFT_Item_InfinityEdge', 'TFT_Item_GuinsoosRageblade', 'TFT_Item_JeweledGauntlet',
-  'TFT_Item_GiantSlayer', 'TFT_Item_Deathblade', 'TFT_Item_Bloodthirster',
-  'TFT_Item_HandOfJustice', 'TFT_Item_BlueBuff', 'TFT_Item_NashorsTooth',
-  'TFT_Item_RabadonsDeathcap', 'TFT_Item_SpearOfShojin', 'TFT_Item_ArchangelsStaff',
-  'TFT_Item_RunaansHurricane', 'TFT_Item_LastWhisper',
-];
-const DAMAGE_ITEMS = new Set(DAMAGE_ITEM_PREFIXES);
-
-function isDamageItem(id: string): boolean {
-  return DAMAGE_ITEMS.has(id);
+function isOffenseItem(id: string, meta: MetaData): boolean {
+  return !!meta.itemData[id]?.tags.includes('offense');
 }
 
 function unitItems(cell: Cell): string[] {
   return [cell.item_1, cell.item_2, cell.item_3].filter(i => i && i !== '0');
 }
 
-function identifyCarry(units: Cell[]): Cell {
-  return units.reduce((best, u) => {
-    const uItems = unitItems(u).length;
-    const bItems = unitItems(best).length;
-    if (u.level > best.level) return u;
-    if (u.level === best.level && uItems > bItems) return u;
-    return best;
-  });
-}
-
-export function checkItems(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
+export function checkItems(match: MatchSnapshot, meta: MetaData, context: MatchContext = NEUTRAL_CONTEXT): DecisionPoint[] {
   return [
-    ...checkSlamTiming(match),
+    ...checkSlamTiming(match, meta),
     ...checkCarryItemsOnTank(match, meta),
     ...checkUnderItemisedCarry(match, meta),
-    ...checkItemSpread(match),
-    ...checkOffBisCarry(match, meta),
+    ...checkItemSpread(match, meta),
+    ...checkComponentConversionOpportunity(match, meta, context),
   ];
 }
 
 // ITEM_001 — components held for 3+ consecutive rounds (was 2-stage threshold)
-function checkSlamTiming(match: MatchSnapshot): DecisionPoint[] {
+function checkSlamTiming(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
   const points: DecisionPoint[] = [];
   let consecutiveHolding = 0;
 
@@ -66,7 +47,7 @@ function checkSlamTiming(match: MatchSnapshot): DecisionPoint[] {
     const [stageStr] = round.label.split('-');
     if (Number(stageStr) < 2) continue;
 
-    const benchComps = boardItemIds(round.bench).filter(id => COMPONENT_IDS.has(id));
+    const benchComps = boardItemIds(round.bench).filter(id => isComponent(id, meta));
     if (benchComps.length >= 2) {
       consecutiveHolding++;
       if (consecutiveHolding === 3) {
@@ -78,7 +59,7 @@ function checkSlamTiming(match: MatchSnapshot): DecisionPoint[] {
           observed: `${benchComps.length} unbuilt component(s) held for 3+ consecutive rounds`,
           recommended: 'Slam components into serviceable items — any completed item outperforms raw components on the bench',
           reasonMetrics: { components: benchComps.length, consecutiveRounds: consecutiveHolding },
-          coaching_text: `You kept ${benchComps.length} unbuilt components on your bench for at least 3 rounds in a row. Every fight you played with those components unslammed was a fight where your board was weaker than it needed to be. Slam items on any reasonable holder — even an off-BiS completed item provides more combat power than components waiting for the "perfect" recipient.`,
+          coaching_text: `You kept ${benchComps.length} unbuilt components on your bench for at least 3 rounds in a row. Every fight you played with those components unslammed was a fight where your board was weaker than it needed to be. Slam items on any reasonable holder — even an imperfect completed item provides more combat power than components waiting for the "perfect" recipient.`,
         });
       }
     } else {
@@ -88,7 +69,7 @@ function checkSlamTiming(match: MatchSnapshot): DecisionPoint[] {
   return points;
 }
 
-// ITEM_002 — damage items on tank-role units
+// ITEM_002 — offense-tagged items on tank-role units
 function checkCarryItemsOnTank(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
   const points: DecisionPoint[] = [];
   const lastRound = match.rounds.at(-1);
@@ -99,7 +80,7 @@ function checkCarryItemsOnTank(match: MatchSnapshot, meta: MetaData): DecisionPo
     const champMeta = meta.champions[cell.name];
     if (!champMeta || champMeta.role !== 'tank') continue;
 
-    const damageItems = unitItems(cell).filter(isDamageItem);
+    const damageItems = unitItems(cell).filter(id => isOffenseItem(id, meta));
     if (damageItems.length < 2) continue;
     const damageItemNames = damageItems.map(id => getItemName(id, meta));
 
@@ -125,9 +106,9 @@ function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData): Decision
   const units = Object.values(r41.board).filter(c => c?.name && c.name !== '0');
   if (units.length === 0) return [];
 
-  const carry      = identifyCarry(units);
+  const carry      = identifyCarry(units, meta);
   const carryName  = getChampionName(carry.name, meta);
-  const itemCount  = unitItems(carry).filter(id => !COMPONENT_IDS.has(id)).length;
+  const itemCount  = unitItems(carry).filter(id => !isComponent(id, meta)).length;
   if (itemCount >= 2) return [];
 
   return [{
@@ -147,12 +128,12 @@ function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData): Decision
 }
 
 // ITEM_004 — items spread across 4+ units at stage 4 with no unit holding 2+
-function checkItemSpread(match: MatchSnapshot): DecisionPoint[] {
+function checkItemSpread(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
   const r42 = match.rounds.find(r => r.label === '4-2');
   if (!r42) return [];
 
   const units = Object.values(r42.board).filter(c => c?.name && c.name !== '0');
-  const itemCounts = units.map(u => unitItems(u).filter(id => !COMPONENT_IDS.has(id)).length);
+  const itemCounts = units.map(u => unitItems(u).filter(id => !isComponent(id, meta)).length);
   const unitsWithItems = itemCounts.filter(n => n >= 1).length;
   const maxItems       = Math.max(0, ...itemCounts);
 
@@ -170,52 +151,138 @@ function checkItemSpread(match: MatchSnapshot): DecisionPoint[] {
   }];
 }
 
-// Off-BiS carry detection (existing logic, migrated here)
-function checkOffBisCarry(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
-  const lastRound = match.rounds.at(-1);
-  if (!lastRound) return [];
+// ── ITEM_005 — component conversion opportunity ────────────────────────────
+// Real recipe/stat data only (data/core/item-data.json, fetched from Community
+// Dragon — see scripts/fetch-ddragon.js). No BiS list, no per-champion curation:
+// this looks at exactly what components the player held and what real
+// completed item they could build from them, judged against the round's
+// actual situation (HP crisis -> defense/sustain need, otherwise -> offense).
 
-  const units = Object.values(lastRound.board).filter(c => c?.name && c.name !== '0');
-  if (units.length === 0) return [];
+type Need = 'offense' | 'tank' | 'sustain';
 
-  const carry     = identifyCarry(units);
-  const carryName = getChampionName(carry.name, meta);
-  const bisEntry  = meta.carryBis[carry.name];
-  if (!bisEntry) return [];
+const NEED_STAT_KEYS: Record<Need, string[]> = {
+  offense: ['AD', 'AP', 'CritChance', 'AS'],
+  tank:    ['Health', 'Armor', 'MagicResist', 'BonusPercentHP', 'PercentMaxHP'],
+  sustain: ['LifeSteal', 'StatOmnivamp'],
+};
 
-  const actual  = unitItems(carry).filter(id => !COMPONENT_IDS.has(id));
-  if (actual.length < 3) return [];
+const STAT_LABELS: Record<string, string> = {
+  Health: 'Health', Armor: 'Armor', MagicResist: 'Magic Resist',
+  LifeSteal: 'Life Steal', StatOmnivamp: 'Omnivamp',
+  BonusPercentHP: 'Bonus Max HP', PercentMaxHP: 'Bonus Max HP',
+  AD: 'Attack Damage', AP: 'Ability Power', CritChance: 'Crit Chance', AS: 'Attack Speed',
+};
 
-  const bisSet  = new Set(bisEntry.items_bis);
-  const altSet  = new Set(bisEntry.items_alt);
-  const rawOffBis = actual.filter(i => !bisSet.has(i) && !altSet.has(i));
-  if (rawOffBis.length === 0) return [];
+// Community Dragon stores some stats as a flat number (Health: 500) and others
+// as a fraction of a percentage (AD: 0.15 -> +15% bonus AD) — cross-checked
+// against known real item values (B.F. Sword AD:10 flat, Bloodthirster
+// AD:0.15 = the real known +15% bonus AD), not guessed.
+function formatStat(key: string, value: number): string {
+  const label = STAT_LABELS[key] ?? key;
+  if (value < 1) return `+${Math.round(value * 100)}% ${label}`;
+  return `+${Math.round(value)} ${label}`;
+}
 
-  // An augment picked this match (e.g. Deadlier Blades → Deathblade) can make an
-  // otherwise off-BiS item a legitimate choice. Don't penalise those — they aren't
-  // mistakes, they're a different correct build for this specific match.
-  const excused: string[] = [];
-  const offBis = rawOffBis.filter(id => {
-    const override = getAugmentItemOverride(id, match.augments, meta);
-    if (override) { excused.push(id); return false; }
-    return true;
-  });
-  if (offBis.length === 0) return [];
+// Describes the completed item's stats most relevant to `need`, falling back
+// to whatever real stats it has if none of the need-specific keys are present.
+function describeStatsForNeed(data: ItemData, need: Need): string {
+  const wanted  = NEED_STAT_KEYS[need].filter(k => data.keyStats[k] !== undefined);
+  const chosen  = (wanted.length > 0 ? wanted : Object.keys(data.keyStats)).slice(0, 2);
+  return chosen.map(k => formatStat(k, data.keyStats[k])).join(', ');
+}
 
-  const offBisNames = offBis.map(id => getItemName(id, meta));
-  const bisNames    = bisEntry.items_bis.map(id => getItemName(id, meta));
-  const excusedNote = excused.length > 0
-    ? ` (${excused.map(id => getItemName(id, meta)).join(', ')} is/are fine this match — an augment you picked upgrades it.)`
-    : '';
+function matchesNeed(data: ItemData, need: Need): boolean {
+  if (need === 'offense') return data.tags.includes('offense');
+  return data.tags.includes('tank') || data.tags.includes('sustain');
+}
 
-  return [{
-    ruleId:   'ITEM_005',
-    round:    lastRound.label,
-    category: 'items',
-    severity: 'moderate',
-    observed: `${carryName} finished with ${offBis.length} off-BiS item(s): ${offBisNames.join(', ')}`,
-    recommended: `BiS for ${carryName}: ${bisNames.join(', ')}`,
-    reasonMetrics: { carry: carryName, offBisCount: offBis.length },
-    coaching_text: `Your final ${carryName} carried ${offBis.length} item(s) outside its optimal build. The BiS is ${bisNames.join(', ')}. Off-BiS items don't synergise with the kit, which reduces damage output in the fights that decide final placement.${excusedNote}`,
-  }];
+// Finds the real completed item built from exactly these 2 components
+// (order-independent), or undefined if no such recipe exists in item-data.json.
+function findCompletedItem(compA: string, compB: string, meta: MetaData): string | undefined {
+  const wanted = [compA, compB].sort().join('+');
+  for (const [id, data] of Object.entries(meta.itemData)) {
+    if (data.isComponent || data.composition.length !== 2) continue;
+    if ([...data.composition].sort().join('+') === wanted) return id;
+  }
+  return undefined;
+}
+
+interface BuildablePair {
+  pairKey: string;
+  comps: [string, string];
+  resultId: string;
+}
+
+// Every real recipe reachable from the held components right now, accounting
+// for holding 2 of the same component (e.g. 2x Chain Vest -> Bramble Vest).
+function findBuildablePairs(heldComponentIds: string[], meta: MetaData): BuildablePair[] {
+  const counts = new Map<string, number>();
+  for (const id of heldComponentIds) counts.set(id, (counts.get(id) ?? 0) + 1);
+  const unique = [...counts.keys()];
+
+  const pairs: BuildablePair[] = [];
+  for (let i = 0; i < unique.length; i++) {
+    for (let j = i; j < unique.length; j++) {
+      const a = unique[i], b = unique[j];
+      if (a === b && (counts.get(a) ?? 0) < 2) continue;
+      const resultId = findCompletedItem(a, b, meta);
+      if (!resultId) continue;
+      pairs.push({ pairKey: [a, b].sort().join('+'), comps: [a, b], resultId });
+    }
+  }
+  return pairs;
+}
+
+function checkComponentConversionOpportunity(match: MatchSnapshot, meta: MetaData, context: MatchContext): DecisionPoint[] {
+  const points: DecisionPoint[] = [];
+  const streaks    = new Map<string, number>();
+  const firedPairs = new Set<string>();
+
+  for (const round of match.rounds) {
+    const [stageStr] = round.label.split('-');
+    if (Number(stageStr) < 2) continue;
+
+    const benchComps = boardItemIds(round.bench).filter(id => isComponent(id, meta));
+    const pairs       = findBuildablePairs(benchComps, meta);
+    const currentKeys = new Set(pairs.map(p => p.pairKey));
+
+    for (const key of [...streaks.keys()]) {
+      if (!currentKeys.has(key)) streaks.delete(key);
+    }
+
+    for (const pair of pairs) {
+      const streak = (streaks.get(pair.pairKey) ?? 0) + 1;
+      streaks.set(pair.pairKey, streak);
+      if (streak !== 3 || firedPairs.has(pair.pairKey)) continue;
+      firedPairs.add(pair.pairKey);
+
+      const resultData = meta.itemData[pair.resultId];
+      if (!resultData) continue;
+      const inCrisis = context.hpCrisisRounds.has(round.label);
+      const need: Need = inCrisis ? 'tank' : 'offense';
+      const fits = matchesNeed(resultData, need);
+      const resultName = getItemName(pair.resultId, meta);
+      const compNames   = pair.comps.map(id => getItemName(id, meta)).join(' + ');
+      // If the buildable item doesn't fit the round's need, still describe its
+      // real stats (whatever tag it actually has) rather than the need's stats.
+      const describeNeed = fits ? need : (resultData.tags[0] as Need | undefined) ?? need;
+      const statText = describeStatsForNeed(resultData, describeNeed);
+
+      points.push({
+        ruleId:   'ITEM_005',
+        round:    round.label,
+        category: 'items',
+        severity: fits ? 'moderate' : 'minor',
+        observed: `Held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? ` during an HP crisis (${round.health} HP)` : ''}`,
+        recommended: fits
+          ? `Combine into ${resultName} (${statText}) — matches what your board needed right then`
+          : `Combine into ${resultName} (${statText}) — real value, just not the kind this round's situation called for`,
+        reasonMetrics: { components: compNames, result: resultName, consecutiveRounds: streak },
+        coaching_text: fits
+          ? `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Combined, those build ${resultName} (${statText}) — exactly the kind of stats your board needed at that point. Sitting on the raw components instead of slamming them cost you that value for multiple fights.`
+          : `You held ${compNames} unbuilt for 3+ consecutive rounds. Combined, those build ${resultName} (${statText}) — real value left on the bench, though it isn't what this specific round's situation called for. Still better to slam it than let the components sit idle.`,
+      });
+    }
+  }
+  return points;
 }

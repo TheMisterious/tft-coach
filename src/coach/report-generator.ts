@@ -3,6 +3,7 @@
 // engine's DecisionPoints. See instruction.md's "Implementation status" note.
 
 import type { MatchBrief, CoachingReport, CoachingNote, DecisionPoint, DecisionCategory } from '../shared/types';
+import { CATEGORY_LABELS } from './scoring';
 
 export async function generateCoachingReport(brief: MatchBrief): Promise<CoachingReport> {
   const notes = [...brief.resolvedNotes, ...brief.decisionPoints.map(toCoachingNote)]
@@ -10,7 +11,8 @@ export async function generateCoachingReport(brief: MatchBrief): Promise<Coachin
 
   return {
     overall_placement: brief.placement,
-    overall_grade: gradeFromPlacement(brief.placement, notes),
+    overall_grade: brief.overallGrade,
+    category_grades: brief.categoryGrades,
     tldr: buildTldr(brief, notes),
     notes,
     strengths: buildStrengths(brief, notes),
@@ -91,21 +93,6 @@ function buildStrengths(brief: MatchBrief, notes: CoachingNote[]): string[] {
   return strengths.slice(0, 3);
 }
 
-function gradeFromPlacement(placement: number, notes: CoachingNote[]): CoachingReport['overall_grade'] {
-  const severityPenalty = notes.reduce((sum, note) => {
-    if (note.severity === 'critical') return sum + 1.5;
-    if (note.severity === 'moderate') return sum + 0.75;
-    return sum + 0.25;
-  }, 0);
-
-  const score = placement + severityPenalty;
-  if (score <= 2.5) return 'S';
-  if (score <= 4.0) return 'A';
-  if (score <= 5.5) return 'B';
-  if (score <= 7.0) return 'C';
-  return 'D';
-}
-
 function topCategories(notes: CoachingNote[]): string[] {
   const counts = new Map<DecisionCategory, { count: number; firstIndex: number }>();
 
@@ -127,21 +114,6 @@ function topCategories(notes: CoachingNote[]): string[] {
     .slice(0, 3)
     .map(([category]) => CATEGORY_LABELS[category]);
 }
-
-const CATEGORY_LABELS: Record<DecisionCategory, string> = {
-  econ: 'economy',
-  streak: 'streak management',
-  leveling: 'leveling',
-  items: 'itemization',
-  rolling: 'rolling',
-  traits: 'traits',
-  augments: 'augments',
-  positioning: 'positioning',
-  hp: 'HP management',
-  board: 'board strength',
-  comp: 'comp direction',
-  set_mechanic: 'set mechanics',
-};
 
 function lowercaseFirst(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1);

@@ -18,7 +18,7 @@ const setId = process.argv[2] || 'set17';
 
 function getJson(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'tft-coach-check-patch-staleness' } }, (res) => {
+    https.get(url, { headers: { 'User-Agent': 'coachv-check-patch-staleness' } }, (res) => {
       if (res.statusCode && res.statusCode >= 400) {
         reject(new Error(`GET ${url} -> ${res.statusCode}`));
         res.resume();

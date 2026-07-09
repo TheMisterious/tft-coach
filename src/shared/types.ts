@@ -162,9 +162,15 @@ export interface RoundTrajectoryPoint {
   liveRank?: number;  // standing among remaining players, if GEP delivered it
 }
 
+export type Grade = 'S' | 'A' | 'B' | 'C' | 'D';
+
 export interface CoachingReport {
   overall_placement: number;
-  overall_grade: 'S' | 'A' | 'B' | 'C' | 'D';
+  overall_grade: Grade;
+  // Per-category grade, computed from ALL decision points the rule engine
+  // found in that category for the full match — not just the ones that
+  // survived truncation into `notes` below. See src/coach/scoring.ts.
+  category_grades: Record<DecisionCategory, Grade>;
   tldr: string;
   notes: CoachingNote[];
   strengths: string[];
@@ -184,6 +190,11 @@ export interface MatchBrief {
   resolvedNotes: CoachingNote[];
   // Decision points that still need report prose.
   decisionPoints: DecisionPoint[];
+  // Grades computed from the full, pre-truncation decision-point list (see
+  // rule-engine.ts) — deliberately independent of what made it into
+  // resolvedNotes/decisionPoints after the MAX_POINTS/MAX_PER_RULE cuts.
+  overallGrade: Grade;
+  categoryGrades: Record<DecisionCategory, Grade>;
 }
 
 // ─── App status ──────────────────────────────────────────────────────────────
@@ -203,6 +214,33 @@ export interface MatchRecord {
   ledger: LedgerEntry[];
   brief?: MatchBrief;
   coachingReport?: CoachingReport;
+  // Best-effort ground-truth check against Riot's match-v1, when a Riot
+  // account is linked in settings. Diagnostic only — never overwrites
+  // `placement`, which stays sourced from GEP. See src/enrichment/riot-api.ts.
+  riotCrossCheck?: RiotCrossCheck;
+}
+
+// ─── Riot API (bring-your-own-key, see src/enrichment/riot-api.ts) ───────────
+
+export interface RiotAccount {
+  puuid: string;
+  gameName: string;
+  tagLine: string;
+}
+
+export interface RiotLeagueEntry {
+  queueType: string;
+  tier: string;
+  rank: string;        // division, e.g. "II" (absent for apex tiers)
+  leaguePoints: number;
+  wins: number;
+  losses: number;
+}
+
+export interface RiotCrossCheck {
+  riotPlacement: number;
+  matched: boolean;
+  checkedAt: number;
 }
 
 export interface MatchSummary {
@@ -239,6 +277,23 @@ export interface EconBenchmark {
 // crop too zoomed-in to recognize at hex-tile size.
 export interface ChampionIcon {
   url: string;
+}
+
+// Real composition + stat-derived tags for a single item (data/core/item-data.json,
+// auto-fetched from Community Dragon — see scripts/fetch-ddragon.js). Replaces the
+// hand-maintained component/damage-item id lists items.ts used to carry.
+export interface ItemData {
+  name: string;
+  isComponent: boolean;
+  composition: string[]; // the 2 component ids that build this item; [] for components
+  tags: Array<'offense' | 'tank' | 'sustain'>;
+  // Filtered subset of real Community Dragon stat effects — only unambiguous,
+  // well-known-shape keys (Health, Armor, MagicResist, LifeSteal, StatOmnivamp,
+  // BonusPercentHP, PercentMaxHP, AD, AP, CritChance, AS). Values >=1 are flat
+  // (e.g. Health: 500), values <1 are fractional percentages (e.g. AD: 0.15 =
+  // +15% bonus AD) — a consistent Riot data convention cross-checked against
+  // known real item values (B.F. Sword AD:10 flat, Bloodthirster AD:0.15=15%).
+  keyStats: Record<string, number>;
 }
 
 export interface ChampionMeta {
@@ -294,6 +349,8 @@ export interface MetaData {
   champions: Record<string, ChampionMeta>;
   // Core, set-agnostic item id -> friendly display name (data/core/items.json).
   items: Record<string, string>;
+  // Core, set-agnostic item id -> real composition/stat data (data/core/item-data.json).
+  itemData: Record<string, ItemData>;
   // Augment ids grouped by category (data/sets/set{N}/augments.json).
   augments: Record<string, string[]>;
   // Core, auto-fetched augment id -> friendly display name (data/core/augment-names.json).
@@ -320,4 +377,13 @@ export interface MatchContext {
   hpCrisisRounds: Set<string>;
   // Plurality-vote active comp — unit names on board in >50% of PvP rounds.
   activeComp: Set<string>;
+  // True when leveling hit the same fast-tempo checkpoints LEVEL_003/LEVEL_005
+  // already use (level 8 by 4-2, or level 9 by 5-2) — a level-timing signal,
+  // not a named comp archetype. Deliberately NOT tied to specific carries or
+  // traits: most of the Set 17 roster is still uncurated role:'flex' data
+  // (see champions.json), and this project has twice already shipped invented
+  // Set 17 comp/trait data that turned out to be wrong. Level timing is a
+  // verifiable game mechanic; "this is a Fast 9 comp" is not, without real
+  // per-archetype curation this project doesn't have yet.
+  isFastTempo: boolean;
 }

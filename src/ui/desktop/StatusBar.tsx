@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import type { AppStatus } from '../../shared/types';
 import { useHotkeyBinding, HOTKEY_NAME, GAME_ID } from '../useHotkeyBinding';
+import { SettingsPanel } from './SettingsPanel';
+import { loadSettings, hasLinkedAccount } from '../../persistence/settings';
+import { getLeagueEntriesByPuuid, formatRiotRank } from '../../enrichment/riot-api';
 
 declare const overwolf: any;
+
+// Cheap TTL cache so rank isn't re-fetched on every StatusBar re-render —
+// the background pipeline also pushes a fresh value after each match via
+// receiveRiotRank (see background/main.ts), this is just the on-open fetch.
+const RANK_TTL_MS = 10 * 60 * 1000;
+let rankCache: { label: string; fetchedAt: number } | null = null;
 
 interface StatusConfig {
   label: string;
@@ -18,6 +27,29 @@ export function StatusBar({ status }: { status: AppStatus }) {
   const { label, color } = CFG[status];
   const binding = useHotkeyBinding();
   const [capturing, setCapturing] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [rankLabel, setRankLabel] = useState<string | null>(rankCache?.label ?? null);
+
+  useEffect(() => {
+    // Exposed so background/main.ts can push a fresh rank right after a match
+    // finishes, same pattern as receiveReport/receiveStatusUpdate.
+    (window as any).receiveRiotRank = (label: string) => {
+      rankCache = { label, fetchedAt: Date.now() };
+      setRankLabel(label);
+    };
+
+    const settings = loadSettings();
+    if (!hasLinkedAccount(settings)) return;
+    if (rankCache && Date.now() - rankCache.fetchedAt < RANK_TTL_MS) return;
+
+    getLeagueEntriesByPuuid(settings.puuid!, settings.riotApiKey, settings.platform)
+      .then(entries => {
+        const formatted = formatRiotRank(entries);
+        rankCache = { label: formatted, fetchedAt: Date.now() };
+        setRankLabel(formatted);
+      })
+      .catch(e => console.warn('[StatusBar] rank fetch failed:', e));
+  }, []);
 
   useEffect(() => {
     if (!capturing) return;
@@ -62,6 +94,10 @@ export function StatusBar({ status }: { status: AppStatus }) {
 
       <span style={{ flex: 1 }} />
 
+      {rankLabel && (
+        <span style={{ color: '#f9e2af', fontWeight: 600 }}>{rankLabel}</span>
+      )}
+
       <span style={{ color: '#6c7086' }}>Toggle overlay:</span>
       {capturing ? (
         <span style={{ color: '#f9e2af', fontWeight: 600 }}>Press a key…</span>
@@ -78,6 +114,31 @@ export function StatusBar({ status }: { status: AppStatus }) {
       >
         Rebind
       </button>
+      <button
+        onClick={() => setSettingsOpen(true)}
+        title="Riot API settings"
+        style={{
+          background: 'transparent', border: '1px solid #45475a', borderRadius: 4,
+          color: '#9399b2', fontSize: 10, padding: '2px 8px', cursor: 'pointer',
+        }}
+      >
+        ⚙
+      </button>
+      {settingsOpen && (
+        <SettingsPanel onClose={() => {
+          setSettingsOpen(false);
+          // Re-check rank immediately if the user just linked/changed an account.
+          const settings = loadSettings();
+          if (!hasLinkedAccount(settings)) return;
+          getLeagueEntriesByPuuid(settings.puuid!, settings.riotApiKey, settings.platform)
+            .then(entries => {
+              const formatted = formatRiotRank(entries);
+              rankCache = { label: formatted, fetchedAt: Date.now() };
+              setRankLabel(formatted);
+            })
+            .catch(e => console.warn('[StatusBar] rank fetch failed:', e));
+        }} />
+      )}
     </div>
   );
 }

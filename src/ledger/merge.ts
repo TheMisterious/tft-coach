@@ -1,4 +1,4 @@
-import type { BoardState, Cell } from '../shared/types';
+import type { BoardState, Cell, MetaData } from '../shared/types';
 
 // Normalizes a board/bench/opponent-board GEP payload into a BoardState.
 //
@@ -32,10 +32,17 @@ export function normalizeBoardSnapshot(
   return next;
 }
 
+// Spell-effect/pet tokens (e.g. Shen's clone "TFT17_ShenProp", a generic
+// "TFT17_Summon") get tracked in board_pieces/opponent_board_pieces just like
+// real units but aren't champions — exclude them from every board reader.
+export function isNonChampionToken(name: string): boolean {
+  return /_Summon$|_Prop$|_Clone$/.test(name);
+}
+
 // Extract champion IDs present on a board (excluding empty/undefined cells).
 export function boardChampionIds(board: BoardState): string[] {
   return Object.values(board)
-    .filter(c => c?.name && c.name !== '0')
+    .filter(c => c?.name && c.name !== '0' && !isNonChampionToken(c.name))
     .map(c => c.name);
 }
 
@@ -44,4 +51,28 @@ export function boardItemIds(board: BoardState): string[] {
   return Object.values(board).flatMap(c =>
     [c.item_1, c.item_2, c.item_3].filter(i => i && i !== '0')
   );
+}
+
+function itemCount(c: Cell): number {
+  return [c.item_1, c.item_2, c.item_3].filter(i => i && i !== '0').length;
+}
+
+// Identifies "the carry" among a set of board units for itemization/roll
+// checks. Prefers a unit whose curated role is 'carry' — falls back to the
+// old "most-starred, then most items" heuristic only when no unit on board
+// has curated role data saying otherwise (a real gap: most of the Set 17
+// roster is still placeholder role:'flex' — see champions.json). Without
+// this, a flex/bruiser unit that happens to 3-star with items (e.g. a
+// jungler snowballing off PvE rounds) gets mistaken for the actual carry,
+// and the real carry's itemization mistakes go silently unevaluated.
+export function identifyCarry(units: Cell[], meta: MetaData): Cell {
+  const taggedCarries = units.filter(u => meta.champions?.[u.name]?.role === 'carry');
+  const pool = taggedCarries.length > 0 ? taggedCarries : units;
+  return pool.reduce((best, u) => {
+    const uItems = itemCount(u);
+    const bItems = itemCount(best);
+    if (u.level > best.level) return u;
+    if (u.level === best.level && uItems > bItems) return u;
+    return best;
+  });
 }

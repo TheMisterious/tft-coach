@@ -2,7 +2,9 @@
 // ROLL_002: Under-rolling at stabilization window (HP <40 at 4-1, <20g rolled)
 // ROLL_003: Post-stabilization over-roll after board is complete
 
-import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData } from '../../shared/types';
+import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, MatchContext } from '../../shared/types';
+import { NEUTRAL_CONTEXT } from '../match-context';
+import { identifyCarry } from '../../ledger/merge';
 
 // Shop odds indexed by [carry_cost - 1][level - 1] (levels 1-10, costs 1-5).
 // Source: lolchess.gg/guide/reroll, Set 17.
@@ -20,28 +22,33 @@ function oddsAt(level: number, cost: number): number {
   return SHOP_ODDS[costIdx][levelIdx];
 }
 
-// Infer most likely carry cost from the most-itemised unit, using meta for tier lookup.
+// Infer most likely carry cost, using meta for both role-aware carry
+// identification (see ledger/merge.ts) and tier lookup.
 function inferCarryCost(round: RoundSnapshot, meta: MetaData): number {
   const units = Object.values(round.board).filter(c => c?.name && c.name !== '0');
   if (units.length === 0) return 3;
-  const carry = units.reduce((best, u) => {
-    const uItems = [u.item_1, u.item_2, u.item_3].filter(i => i && i !== '0').length;
-    const bItems = [best.item_1, best.item_2, best.item_3].filter(i => i && i !== '0').length;
-    return uItems > bItems || (uItems === bItems && u.level > best.level) ? u : best;
-  });
+  const carry = identifyCarry(units, meta);
   return meta.champions[carry.name]?.tier ?? 3;
 }
 
-export function checkRolling(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
+export function checkRolling(
+  match: MatchSnapshot,
+  meta: MetaData,
+  context: MatchContext = NEUTRAL_CONTEXT
+): DecisionPoint[] {
   return [
-    ...checkOverRollBadOdds(match, meta),
+    ...checkOverRollBadOdds(match, meta, context),
     ...checkUnderRollCrisis(match),
-    ...checkPostStabilizationRoll(match),
+    ...checkPostStabilizationRoll(match, context),
   ];
 }
 
-// ROLL_001 — heavy rolling (>15g) at a level where carry odds ≤10%
-function checkOverRollBadOdds(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
+// ROLL_001 — heavy rolling (>15g) at a level where carry odds ≤10%. Suppressed
+// for a detected reroll archetype: a real reroll line intentionally sits at a
+// fixed low level rolling for its (cheap) target, and inferCarryCost's "most
+// itemised unit" heuristic is unreliable mid-reroll before items are slammed.
+function checkOverRollBadOdds(match: MatchSnapshot, meta: MetaData, context: MatchContext): DecisionPoint[] {
+  if (context.isRerollComp) return [];
   const points: DecisionPoint[] = [];
   for (const round of match.rounds) {
     const goldRolled = round.rollsSpent * 2;
@@ -97,8 +104,14 @@ function checkUnderRollCrisis(match: MatchSnapshot): DecisionPoint[] {
   }];
 }
 
-// ROLL_003 — rolling >20g in a round 2+ rounds after board stabilisation, no 3-star result
-function checkPostStabilizationRoll(match: MatchSnapshot): DecisionPoint[] {
+// ROLL_003 — rolling >20g in a round 2+ rounds after board stabilisation, no
+// 3-star result. Suppressed for a detected reroll archetype: continuing to
+// roll after the carry hits 2-star, hunting for a 3-star, IS the reroll
+// strategy — it routinely takes many rounds of rolling per 3-star, so
+// penalising "no 3-star result this round" would flag correct reroll play as
+// a mistake on nearly every round of the game.
+function checkPostStabilizationRoll(match: MatchSnapshot, context: MatchContext): DecisionPoint[] {
+  if (context.isRerollComp) return [];
   const rounds = match.rounds;
 
   // Find stabilisation round: first round where ≥2 item-bearing units are 2-star.

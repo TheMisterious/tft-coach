@@ -37,6 +37,8 @@ import { saveMatch, loadMatch, listRecentMatches } from '../persistence/db';
 import { summarizeLedgerCoverage, formatLedgerCoverage, sampleRawValues, formatRawSamples } from '../ledger/diagnostics';
 import { ensureWindowOnScreen } from './window-position';
 import { readHotkeyBinding } from '../shared/hotkey';
+import { loadSettings, hasLinkedAccount } from '../persistence/settings';
+import { getLeagueEntriesByPuuid, getMatchIdsByPuuid, getMatchById, formatRiotRank } from '../enrichment/riot-api';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -305,10 +307,11 @@ async function runCoachingPipeline(): Promise<void> {
     console.log('[bg] pipeline step 6: report generated — grade:', report.overall_grade, 'notes:', report.notes?.length);
 
     // 7. Persist to localStorage (src/persistence/db.ts).
-    const lastRound = snapshot.rounds.at(-1)?.label ?? 'unknown';
+    const lastRound  = snapshot.rounds.at(-1)?.label ?? 'unknown';
+    const datePlayed = Date.now();
     saveMatch({
       pseudoMatchId:  matchId,
-      datePlayed:     Date.now(),
+      datePlayed,
       setId,
       placement:      snapshot.finalPlacement,
       lastRound,
@@ -325,6 +328,10 @@ async function runCoachingPipeline(): Promise<void> {
     });
     console.log('[bg] pipeline step 8: opening desktop window');
     openDesktopWindow(report);
+
+    // 9-10. Optional Riot API enrichment — fire-and-forget, never blocks or
+    // risks the already-delivered local report on a network/key failure.
+    runRiotEnrichment(matchId, snapshot.finalPlacement, datePlayed);
 
     console.log('[bg] pipeline complete — placement:', snapshot.finalPlacement);
   } catch (e) {
@@ -376,6 +383,65 @@ function showInGameToast(message: string): void {
     if (!result.success) return;
     overwolf.windows.sendMessage(result.window.id, 'toast', message, () => {});
   });
+}
+
+// ─── Optional Riot API enrichment ──────────────────────────────────────────
+// Bring-your-own-key (see src/persistence/settings.ts). Both steps are
+// best-effort: a bad/missing key, rate limit, or network failure here must
+// never affect the core local pipeline above, which already fully succeeded
+// by the time this runs.
+
+async function runRiotEnrichment(matchId: string, finalPlacement: number, datePlayed: number): Promise<void> {
+  const settings = loadSettings();
+  if (!hasLinkedAccount(settings)) return;
+  const { riotApiKey, puuid, continent, platform } = settings;
+
+  // Step 9: rank refresh, pushed to the desktop window's StatusBar.
+  try {
+    const entries = await getLeagueEntriesByPuuid(puuid!, riotApiKey, platform);
+    const label = formatRiotRank(entries);
+    const mw = (overwolf.windows.getMainWindow() as any);
+    if (typeof mw?.receiveRiotRank === 'function') mw.receiveRiotRank(label);
+    console.log('[bg] riot step 9: rank refreshed —', label);
+  } catch (e) {
+    console.warn('[bg] riot step 9: rank refresh failed —', e);
+  }
+
+  // Step 10: placement cross-check against tft-match-v1 (final result only,
+  // no round-by-round data — see enrichment/riot-api.ts). Diagnostic only,
+  // never overwrites the GEP-derived finalPlacement.
+  try {
+    const matchIds = await getMatchIdsByPuuid(puuid!, riotApiKey, continent, 1);
+    const riotMatchId = matchIds[0];
+    if (!riotMatchId) return;
+    const match = await getMatchById(riotMatchId, riotApiKey, continent);
+
+    // Skip if this is clearly a different (later) match than the one we just
+    // processed — e.g. the user already queued into a new game before this
+    // async call resolved.
+    const driftMs = Math.abs(match.info.game_datetime - datePlayed);
+    if (driftMs > 5 * 60 * 1000) {
+      console.log('[bg] riot step 10: skipped — most recent Riot match is', Math.round(driftMs / 1000), 's away from local match end');
+      return;
+    }
+
+    const participant = match.info.participants.find(p => p.puuid === puuid);
+    if (!participant) return;
+
+    const record = loadMatch(matchId);
+    if (!record) return;
+    saveMatch({
+      ...record,
+      riotCrossCheck: {
+        riotPlacement: participant.placement,
+        matched: participant.placement === finalPlacement,
+        checkedAt: Date.now(),
+      },
+    });
+    console.log('[bg] riot step 10: placement cross-check —', 'local:', finalPlacement, 'riot:', participant.placement);
+  } catch (e) {
+    console.warn('[bg] riot step 10: placement cross-check failed —', e);
+  }
 }
 
 // ─── Hotkey listener ──────────────────────────────────────────────────────────

@@ -23,9 +23,13 @@ const SEVERITY_ORDER: Record<Severity, number> = {
   minor:    2,
 };
 
-// Econ-discipline rules that assume "hold gold" is always correct. Contradicts
-// crisis-response advice (roll down, spend everything) on the same round.
-const ECON_DISCIPLINE_RULES = new Set(['ECON_001', 'ECON_002']);
+// Rules that assume "hold gold" / "don't spend" is always correct. Contradicts
+// crisis-response advice (roll down, spend everything) on the same round —
+// e.g. ROLL_002 explicitly tells a <40 HP player entering stage 4 to spend
+// 20-40g stabilising; STREAK_002 would otherwise flag that exact spend as
+// "wasted gold, should have committed to the loss streak instead" if the
+// stabilising roll didn't win the very next fight.
+const HOLD_GOLD_RULES = new Set(['ECON_001', 'ECON_002', 'STREAK_002']);
 
 // Rule priority within a match, by unique_id (data/rules.mvp.json). Lower index
 // = higher priority. Used only as a tiebreaker within a severity band so the
@@ -48,14 +52,14 @@ export function extractDecisionPoints(
     ['econ',       checkEcon(match, meta, context)],
     ['hp',         checkHp(match)],
     ['leveling',   checkLeveling(match)],
-    ['rolling',    checkRolling(match, meta)],
+    ['rolling',    checkRolling(match, meta, context)],
     ['streak',     checkStreak(match)],
-    ['items',      checkItems(match, meta)],
+    ['items',      checkItems(match, meta, context)],
     ['board',      checkBoard(match, meta)],
     ['comp',       checkComp(match)],
     ['set17',      checkSet17(match)],
     ['traits',     checkTraitBreakpoints(match, meta)],
-    ['augments',   checkAugments(match, meta)],
+    ['augments',   checkAugments(match, meta, context)],
     ['positioning',checkPositioning(match, meta)],
   ];
 
@@ -66,7 +70,7 @@ export function extractDecisionPoints(
     .map(p => (p.ruleId && !p.tier) ? { ...p, tier: getRuleTier(p.ruleId) } : p)
     .map(applyConfidenceHedge);
 
-  points = suppressEconAdviceDuringHpCrisis(points, context);
+  points = suppressHoldGoldAdviceDuringHpCrisis(points, context);
 
   console.log('[rule-engine] total decision points:', points.length);
 
@@ -82,16 +86,17 @@ export function extractDecisionPoints(
 }
 
 // A round already flagged as an HP crisis shouldn't also get "hold more gold"
-// or "you sat overcap" advice — the correct play there is spending to survive,
-// not econ discipline. See src/coach/match-context.ts for the crisis window.
-function suppressEconAdviceDuringHpCrisis(
+// / "you sat overcap" / "you should have banked the loss streak" advice — the
+// correct play there is spending to survive, not gold discipline. See
+// src/coach/match-context.ts for the crisis window.
+function suppressHoldGoldAdviceDuringHpCrisis(
   points: DecisionPoint[],
   context: ReturnType<typeof buildMatchContext>
 ): DecisionPoint[] {
   if (context.hpCrisisRounds.size === 0) return points;
 
   return points.filter(p => {
-    if (!p.ruleId || !ECON_DISCIPLINE_RULES.has(p.ruleId)) return true;
+    if (!p.ruleId || !HOLD_GOLD_RULES.has(p.ruleId)) return true;
     if (!context.hpCrisisRounds.has(p.round)) return true;
     console.log(`[rule-engine] suppressed ${p.ruleId} at ${p.round} — HP crisis at this round makes "hold gold" advice contradictory`);
     return false;

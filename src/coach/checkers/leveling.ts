@@ -65,12 +65,15 @@ function checkLevel7(match: MatchSnapshot): DecisionPoint[] {
   }];
 }
 
-// LEVEL_003 — flag only if player had ≥50g at 4-1 (had the resources)
+// LEVEL_003 — flag only if player had ≥50g at 4-1 AND HP to spare (had the
+// resources AND leveling, not rolling for board survival, was the correct
+// priority). Mirrors the HP guard LEVEL_005 already applies.
 function checkLevel8(match: MatchSnapshot): DecisionPoint[] {
   const at41 = snapAt(match, '4-1');
   const at42 = snapAt(match, '4-2');
   if (!at42 || at42.level >= 8) return [];
   if (!at41 || at41.goldEnd < 50) return []; // not enough gold to flag
+  if (at41.health < 30) return []; // HP crisis — rolling for board survival outranks leveling
   return [{
     ruleId:   'LEVEL_003',
     round:    '4-2',

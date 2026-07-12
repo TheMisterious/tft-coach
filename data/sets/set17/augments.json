@@ -1,5 +1,5 @@
 {
-  "_comment": "Category buckets for augment ids, classified from real Data Dragon tft-augments.json name+description text (457 non-tutorial augments, 2026-07-03). Only economy is currently consumed by any checker (AUGMENT_001, src/coach/checkers/augments.ts) — combat/items/units were unused placeholders until this pass, now filled with the same rigor for whenever a rule needs them. Classification method: units = augment text grants a specific named champion (cross-referenced against all champion names bundled in Data Dragon tft-champion.json across every set, not just the local Set 17 roster, since Data Dragon bundles historical/recycled augment+champion content together); items = augment text grants a specific named item (cross-referenced against real item names in data/core/items.json, restricted to ids containing the canonical _Item_ segment — items.json turned out to contain a lot of non-equippable noise: TFT_Assist_/MarketOffering gold-and-cost reward tokens, debug items, trait-activator tokens, this pass excludes all of that) or uses generic item-grant language (component/anvil/emblem/artifact/radiant item/reforger); combat = grants a raw combat stat (Attack Damage/AP/Attack Speed/Health/Armor/MR/Crit/Omnivamp/etc) with no champion or item grant. Excluded entirely from all three buckets: ids already in economy, and Set 17 god/hex/realm/blessing/ascension mechanic augments (including the *_GodAugment_* subsystem) since those are a separate drafted-per-game-state mechanic, not a normal augment pool entry. Many real augments (~100) are intentionally left unclassified because they grant generic random rewards (random champion, random component, gold, XP) that do not cleanly fit any one bucket — that is a correct outcome, not a gap.",
+  "_comment": "Category buckets for augment ids, classified from real Data Dragon tft-augments.json name+description text (457 non-tutorial augments, 2026-07-03). Only economy is currently consumed by any checker (AUGMENT_001, src/coach/checkers/augments.ts) — combat/items/units were unused placeholders until this pass, now filled with the same rigor for whenever a rule needs them. Classification method: units = augment text grants a specific named champion (cross-referenced against all champion names bundled in Data Dragon tft-champion.json across every set, not just the local Set 17 roster, since Data Dragon bundles historical/recycled augment+champion content together); items = augment text grants a specific named item (cross-referenced against real item names in data/core/items.json, restricted to ids containing the canonical _Item_ segment — items.json turned out to contain a lot of non-equippable noise: TFT_Assist_/MarketOffering gold-and-cost reward tokens, debug items, trait-activator tokens, this pass excludes all of that) or uses generic item-grant language (component/anvil/emblem/artifact/radiant item/reforger); combat = grants a raw combat stat (Attack Damage/AP/Attack Speed/Health/Armor/MR/Crit/Omnivamp/etc) with no champion or item grant. Excluded entirely from all three buckets: ids already in economy, and Set 17 god/hex/realm/blessing/ascension mechanic augments (including the *_GodAugment_* subsystem) since those are a separate drafted-per-game-state mechanic, not a normal augment pool entry. Many real augments (~100) are intentionally left unclassified because they grant generic random rewards (random champion, random component, gold, XP) that do not cleanly fit any one bucket — that is a correct outcome, not a gap. 2026-07-11 follow-up pass: found via real-ledger audit (13/51 real picks across 19 matches were uncategorized) that economy's actual boundary, confirmed against existing entries' real descriptions (Survivor/CalledShot/GoldForDummies grant literal gold; Commander_RollingForDays grants only free rerolls with no gold), is 'grants real spendable gold and/or shop rerolls' — not yet stated explicitly above. Added on that basis: PatienceIsAVirtue, Waverider, HeroicGrabBag, ExclusiveCustomization (reroll and/or literal gold grants) to economy; ItemSpiritVisage (grants TFT_Item_Redemption, a real named item) to items. Left unclassified per the existing 'generic random reward' rule above (verified, not skipped): ExplosiveGrowth (XP only, not gold), PowerUp (raises next augment's tier, no gold/item/champion/stat grant), BoosterPackPlusPlus and Expedition and AuraFarming (grant a random/generic-tier champion, not one specific named champion — same shape as the already-excluded 'random champion' case), Calltochaos (explicitly 'a powerful and random reward').",
   "economy": [
     "TFT6_Augment_GachaAddict",
     "TFT9_Augment_YoungAndWildAndFree",
@@ -42,7 +42,11 @@
     "TFT_Augment_AdvancedLoan",
     "TFT_Augment_AdvancedLoanPlus",
     "TFT_Augment_CognitiveTaxPlus",
-    "TFT6_Augment_ThriftShop"
+    "TFT6_Augment_ThriftShop",
+    "TFT_Augment_PatienceIsAVirtue",
+    "TFT_Augment_Waverider",
+    "TFT10_Augment_HeroicGrabBag",
+    "TFT_Augment_ExclusiveCustomization"
   ],
   "combat": [
     "TFT10_Augment_LittleBuddies",
@@ -278,7 +282,8 @@
     "TFT_Augment_UrfsGambit",
     "TFT_Augment_WandOverflow",
     "TFT_Augment_WarmogsBuckle",
-    "TFT_Augment_WeStickTogether"
+    "TFT_Augment_WeStickTogether",
+    "TFT_Augment_ItemSpiritVisage"
   ],
   "units": [
     "TFT15_Augment_Bastion_RaidBoss",

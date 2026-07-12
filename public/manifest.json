@@ -58,8 +58,8 @@
         "transparent": true,
         "resizable": false,
         "in_game_only": true,
-        "clickthrough": false,
-        "size": { "width": 400, "height": 340 },
+        "clickthrough": true,
+        "size": { "width": 320, "height": 80 },
         "block_top_window_navigation": true
       }
     },

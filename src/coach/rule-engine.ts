@@ -71,6 +71,7 @@ export function extractDecisionPoints(
     .map(applyConfidenceHedge);
 
   points = suppressHoldGoldAdviceDuringHpCrisis(points, context);
+  points = mergeEconShortfallsAtSameRound(points);
 
   console.log('[rule-engine] total decision points:', points.length);
 
@@ -101,6 +102,54 @@ function suppressHoldGoldAdviceDuringHpCrisis(
     console.log(`[rule-engine] suppressed ${p.ruleId} at ${p.round} — HP crisis at this round makes "hold gold" advice contradictory`);
     return false;
   });
+}
+
+// ECON_001 ("missed interest bracket") and ECON_004 ("below econ benchmark")
+// both key off the same round's ending gold, just measured against two
+// different targets — the universal 10/20/30/40/50g interest ladder vs. a
+// set-curated checkpoint benchmark. Whenever both fire on the same round
+// they're really one observation ("you were short on gold here") read twice,
+// even when the two gaps differ (e.g. 3g under the 10g interest tier AND 13g
+// under a 20g checkpoint benchmark — previously only suppressed when the two
+// numbers happened to match exactly, which left the common case where they
+// don't showing as two near-identical cards). Merge into a single econ note
+// per round instead.
+function mergeEconShortfallsAtSameRound(points: DecisionPoint[]): DecisionPoint[] {
+  const econ001ByRound = new Map<string, DecisionPoint>();
+  const econ004ByRound = new Map<string, DecisionPoint>();
+  for (const p of points) {
+    if (p.ruleId === 'ECON_001') econ001ByRound.set(p.round, p);
+    if (p.ruleId === 'ECON_004') econ004ByRound.set(p.round, p);
+  }
+
+  const merged = new Map<string, DecisionPoint>();
+  for (const [round, e001] of econ001ByRound) {
+    const e004 = econ004ByRound.get(round);
+    if (!e004) continue;
+
+    const gold    = e001.reasonMetrics.goldEnd as number;
+    const tier    = e001.reasonMetrics.tier as number;
+    const gap     = e001.reasonMetrics.gap as number;
+    const bench   = e004.reasonMetrics.benchmark as number;
+    const deficit = e004.reasonMetrics.deficit as number;
+    const severity: Severity =
+      SEVERITY_ORDER[e001.severity] <= SEVERITY_ORDER[e004.severity] ? e001.severity : e004.severity;
+
+    console.log(`[rule-engine] merged ECON_001+ECON_004 at ${round} — same ${gold}g ending, two targets (${gap}g/${deficit}g short)`);
+
+    merged.set(round, {
+      ...e001,
+      severity,
+      observed: `Ended ${round} at ${gold}g — ${gap}g below the ${tier}g interest tier and ${deficit}g below the ${bench}g benchmark for this checkpoint`,
+      recommended: `${e001.recommended} ${e004.recommended}`,
+      reasonMetrics: { ...e001.reasonMetrics, ...e004.reasonMetrics },
+      coaching_text: `At ${round} you ended on ${gold}g — short of both the ${tier}g interest bracket (by ${gap}g) and the ${bench}g benchmark expected for this checkpoint (by ${deficit}g). ${e004.recommended}`,
+    });
+  }
+
+  return points
+    .filter(p => !(merged.has(p.round) && (p.ruleId === 'ECON_001' || p.ruleId === 'ECON_004')))
+    .concat([...merged.values()]);
 }
 
 // Rules the registry marks "confidence: medium" get a short caveat appended

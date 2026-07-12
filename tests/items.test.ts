@@ -22,6 +22,7 @@ function makeRound(overrides: Partial<RoundSnapshot>): RoundSnapshot {
     xpBought: false,
     board: {},
     bench: {},
+    benchItems: [],
     shop: [],
     augmentsPicked: [],
     opponentBoard: {},
@@ -154,11 +155,29 @@ describe('ITEM_005 — component conversion opportunity', () => {
 describe('ITEM_001 — delayed item slam (real component data)', () => {
   it('fires when 2+ real components sit on the bench for 3+ consecutive rounds', () => {
     const meta = makeMeta();
+    // A different pair each round (no single pair persists 3 rounds, so
+    // ITEM_005 never reaches its own streak) — isolates ITEM_001's case of
+    // "components sitting unbuilt in general" from ITEM_005's "this exact
+    // buildable pair sat unbuilt," which is suppressed once ITEM_005 fires
+    // for the same round (see checkItems' conversionRounds dedup).
+    const rounds = [
+      makeRound({ label: '2-2', bench: benchWith(['TFT_Item_GiantsBelt', 'TFT_Item_RecurveBow']) }),
+      makeRound({ label: '2-3', bench: benchWith(['TFT_Item_RecurveBow', 'TFT_Item_ChainVest']) }),
+      makeRound({ label: '2-4', bench: benchWith(['TFT_Item_ChainVest', 'TFT_Item_GiantsBelt']) }),
+    ];
+    const points = checkItems(makeMatch(rounds), meta);
+    expect(points.some(p => p.ruleId === 'ITEM_001')).toBe(true);
+    expect(points.some(p => p.ruleId === 'ITEM_005')).toBe(false);
+  });
+
+  it('is suppressed when ITEM_005 already covers the same round with a specific buildable pair', () => {
+    const meta = makeMeta();
     const rounds = ['2-2', '2-3', '2-4'].map(label =>
       makeRound({ label, bench: benchWith(['TFT_Item_GiantsBelt', 'TFT_Item_RecurveBow']) })
     );
     const points = checkItems(makeMatch(rounds), meta);
-    expect(points.some(p => p.ruleId === 'ITEM_001')).toBe(true);
+    expect(points.some(p => p.ruleId === 'ITEM_005')).toBe(true);
+    expect(points.some(p => p.ruleId === 'ITEM_001')).toBe(false);
   });
 });
 

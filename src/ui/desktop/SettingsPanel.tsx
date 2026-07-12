@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { loadSettings, saveSettings, type RiotSettings, type RiotContinent, type RiotPlatform } from '../../persistence/settings';
+import React, { useState, useRef, useEffect } from 'react';
+import { loadSettings, saveSettings, accountContinentForPlatform, type RiotSettings, type RiotPlatform } from '../../persistence/settings';
 import { getAccountByRiotId, getLeagueEntriesByPuuid, formatRiotRank, RiotApiError } from '../../enrichment/riot-api';
 
-const CONTINENTS: RiotContinent[] = ['americas', 'europe', 'asia'];
 const PLATFORMS: RiotPlatform[] = [
-  'na1', 'br1', 'la1', 'la2', 'oc1',
+  'na1', 'br1', 'la1', 'la2',
   'euw1', 'eun1', 'tr1', 'ru',
   'kr', 'jp1',
+  'oc1', 'vn2', 'sg2', 'th2', 'tw2', 'ph2',
 ];
 
 const inputStyle: React.CSSProperties = {
@@ -18,6 +18,62 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   display: 'block', color: '#9399b2', fontSize: 11, marginBottom: 4,
 };
+
+// Native <select> popups can render outside Overwolf's small frameless CEF
+// window bounds (no real OS chrome to clip against), which made the
+// 16-option Platform list appear to "overflow through the screen" instead of
+// scrolling in place. A self-rendered dropdown stays inside our own DOM, so
+// it's fully containable with a plain max-height + overflow-y.
+function PlatformSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onDocClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{ ...inputStyle, textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+      >
+        <span>{value}</span>
+        <span style={{ color: '#6c7086', fontSize: 10 }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4,
+          maxHeight: 180, overflowY: 'auto',
+          background: '#11111b', border: '1px solid #45475a', borderRadius: 4,
+          zIndex: 10,
+        }}>
+          {PLATFORMS.map(p => (
+            <div
+              key={p}
+              onClick={() => { onChange(p); setOpen(false); }}
+              style={{
+                padding: '6px 8px', fontSize: 12, cursor: 'pointer',
+                background: p === value ? '#313244' : 'transparent',
+                color: '#cdd6f4',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = '#313244')}
+              onMouseLeave={e => (e.currentTarget.style.background = p === value ? '#313244' : 'transparent')}
+            >
+              {p}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState<RiotSettings>(() => loadSettings());
@@ -36,7 +92,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   async function handleVerify() {
     setStatus({ kind: 'checking' });
     try {
-      const account = await getAccountByRiotId(form.gameName.trim(), form.tagLine.trim(), form.riotApiKey.trim(), form.continent);
+      const account = await getAccountByRiotId(form.gameName.trim(), form.tagLine.trim(), form.riotApiKey.trim(), accountContinentForPlatform(form.platform));
       let rankLabel = 'Unranked';
       try {
         const entries = await getLeagueEntriesByPuuid(account.puuid, form.riotApiKey.trim(), form.platform);
@@ -118,24 +174,13 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           Name <code>Faker</code>, Tag Line <code>NA1</code>.
         </div>
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Continent</label>
-            <select style={inputStyle} value={form.continent} onChange={e => update('continent', e.target.value as RiotContinent)}>
-              {CONTINENTS.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Platform</label>
-            <select style={inputStyle} value={form.platform} onChange={e => update('platform', e.target.value as RiotPlatform)}>
-              {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
-          </div>
+        <label style={labelStyle}>Platform</label>
+        <div style={{ marginBottom: 4 }}>
+          <PlatformSelect value={form.platform} onChange={v => update('platform', v as RiotPlatform)} />
         </div>
         <div style={{ fontSize: 10, color: '#6c7086', marginBottom: 14 }}>
-          Continent routes match/account lookups (Americas/Europe/Asia).
-          Platform is your actual server (na1, euw1, kr, ...) and routes rank
-          lookups.
+          Your actual server (na1, euw1, kr, vn2, ...) — routes rank lookups
+          directly, and account/match lookups indirectly (handled for you).
         </div>
 
         {status.kind === 'ok' && (

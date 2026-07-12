@@ -2,7 +2,7 @@
 // this template-fills the CoachingReport shape directly from the rule
 // engine's DecisionPoints. See instruction.md's "Implementation status" note.
 
-import type { MatchBrief, CoachingReport, CoachingNote, DecisionPoint, DecisionCategory } from '../shared/types';
+import type { MatchBrief, CoachingReport, CoachingNote, DecisionPoint, DecisionCategory, PriorityFix, Grade, Severity } from '../shared/types';
 import { CATEGORY_LABELS } from './scoring';
 
 export async function generateCoachingReport(brief: MatchBrief): Promise<CoachingReport> {
@@ -14,9 +14,41 @@ export async function generateCoachingReport(brief: MatchBrief): Promise<Coachin
     overall_grade: brief.overallGrade,
     category_grades: brief.categoryGrades,
     tldr: buildTldr(brief, notes),
+    priority_fix: buildPriorityFix(brief, notes),
     notes,
     strengths: buildStrengths(brief, notes),
     round_trajectory: brief.roundTrajectory,
+  };
+}
+
+const GRADE_RANK: Record<Grade, number> = { D: 4, C: 3, B: 2, A: 1, S: 0 };
+const SEVERITY_RANK: Record<Severity, number> = { critical: 0, moderate: 1, minor: 2 };
+
+// Picks the single category dragging the match down the most (worst grade,
+// ties broken by note count), then the most severe note within it — reduces
+// a scattered note list to the one thing worth changing next game.
+function buildPriorityFix(brief: MatchBrief, notes: CoachingNote[]): PriorityFix | undefined {
+  const byCategory = new Map<DecisionCategory, CoachingNote[]>();
+  for (const note of notes) {
+    const list = byCategory.get(note.category) ?? [];
+    list.push(note);
+    byCategory.set(note.category, list);
+  }
+  if (byCategory.size === 0) return undefined;
+
+  const [category, categoryNotes] = [...byCategory.entries()].sort(([catA, notesA], [catB, notesB]) => {
+    const gradeDiff = GRADE_RANK[brief.categoryGrades[catB]] - GRADE_RANK[brief.categoryGrades[catA]];
+    if (gradeDiff !== 0) return gradeDiff;
+    return notesB.length - notesA.length;
+  })[0];
+
+  const topNote = [...categoryNotes].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity])[0];
+
+  return {
+    category,
+    occurrences: categoryNotes.length,
+    action: topNote.what_should_have_happened,
+    why: topNote.why,
   };
 }
 

@@ -92,6 +92,13 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
                 </span>
               </div>
               <p className={styles.tldr}>{report.tldr}</p>
+              {report.priority_fix && (
+                <div className={styles.priorityFix}>
+                  <span className={styles.priorityFixLabel}>Priority fix — {CATEGORY_LABELS[report.priority_fix.category]}</span>
+                  <p className={styles.priorityFixAction}>{report.priority_fix.action}</p>
+                  <p className={styles.priorityFixWhy}>{report.priority_fix.why}</p>
+                </div>
+              )}
               <div className={styles.categoryGrid}>
                 {ALL_CATEGORIES.map(category => {
                   const grade = report.category_grades[category];

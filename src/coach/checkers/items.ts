@@ -16,25 +16,45 @@ function byHp(hp: number, t: { low: string; mid: string; high: string }): string
   return t.mid;
 }
 
-function isComponent(id: string, meta: MetaData): boolean {
+export function isComponent(id: string, meta: MetaData): boolean {
   return !!meta.itemData[id]?.isComponent;
 }
 
+// Thief's Gloves is real-data-tagged 'offense' (Community Dragon gives it a
+// baseline 20% crit chance + 150 health, so it lands in both 'offense' and
+// 'tank') but that baseline isn't what the item actually is — its entire
+// value is the 2 random items it rolls each combat, which land on offense,
+// defense, or utility with equal likelihood. It's commonly built ON tanks
+// specifically because you don't want to gamble your carry's itemization,
+// so flagging it as a "damage item on a tank" mistake is backwards. Excluded
+// by id rather than by a general "dual offense+tank tag" rule, since that
+// heuristic hasn't been checked against every other item and shouldn't be
+// guessed at.
+const RANDOM_ITEM_IDS = new Set(['TFT_Item_ThiefsGloves']);
+
 function isOffenseItem(id: string, meta: MetaData): boolean {
+  if (RANDOM_ITEM_IDS.has(id)) return false;
   return !!meta.itemData[id]?.tags.includes('offense');
 }
 
-function unitItems(cell: Cell): string[] {
+export function unitItems(cell: Cell): string[] {
   return [cell.item_1, cell.item_2, cell.item_3].filter(i => i && i !== '0');
 }
 
 export function checkItems(match: MatchSnapshot, meta: MetaData, context: MatchContext = NEUTRAL_CONTEXT): DecisionPoint[] {
+  const conversionPoints = checkComponentConversionOpportunity(match, meta, context);
+  // ITEM_005 already says "held these unbuilt for 3+ rounds, here's the exact
+  // item you should've slammed" for a round — ITEM_001's generic "you held
+  // components unbuilt" for that same round is strictly less useful and just
+  // repeats the same observation, so skip it wherever ITEM_005 already fired.
+  const conversionRounds = new Set(conversionPoints.map(p => p.round));
+
   return [
-    ...checkSlamTiming(match, meta),
+    ...checkSlamTiming(match, meta).filter(p => !conversionRounds.has(p.round)),
     ...checkCarryItemsOnTank(match, meta),
     ...checkUnderItemisedCarry(match, meta),
     ...checkItemSpread(match, meta),
-    ...checkComponentConversionOpportunity(match, meta, context),
+    ...conversionPoints,
   ];
 }
 
@@ -47,7 +67,10 @@ function checkSlamTiming(match: MatchSnapshot, meta: MetaData): DecisionPoint[] 
     const [stageStr] = round.label.split('-');
     if (Number(stageStr) < 2) continue;
 
-    const benchComps = boardItemIds(round.bench).filter(id => isComponent(id, meta));
+    // Components live in two places: equipped on a benched (not yet fielded)
+    // champion, or loose in the item tray (round.benchItems — the far more
+    // common real case; see rounds.ts's item_bench handling).
+    const benchComps = [...boardItemIds(round.bench), ...round.benchItems].filter(id => isComponent(id, meta));
     if (benchComps.length >= 2) {
       consecutiveHolding++;
       if (consecutiveHolding === 3) {
@@ -242,12 +265,19 @@ function checkComponentConversionOpportunity(match: MatchSnapshot, meta: MetaDat
     const [stageStr] = round.label.split('-');
     if (Number(stageStr) < 2) continue;
 
-    const benchComps = boardItemIds(round.bench).filter(id => isComponent(id, meta));
+    const benchComps = [...boardItemIds(round.bench), ...round.benchItems].filter(id => isComponent(id, meta));
     const pairs       = findBuildablePairs(benchComps, meta);
     const currentKeys = new Set(pairs.map(p => p.pairKey));
 
     for (const key of [...streaks.keys()]) {
-      if (!currentKeys.has(key)) streaks.delete(key);
+      if (!currentKeys.has(key)) {
+        streaks.delete(key);
+        // Once the pair stops being buildable (built, sold, or broken up),
+        // clear the fired-flag too — a genuine later recurrence of holding
+        // the same two components unbuilt for 3+ rounds should be able to
+        // fire again, not be silently eaten for the rest of the match.
+        firedPairs.delete(key);
+      }
     }
 
     for (const pair of pairs) {

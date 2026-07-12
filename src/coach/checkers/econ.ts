@@ -16,6 +16,15 @@ function byHp(round: RoundSnapshot, t: { low: string; mid: string; high: string 
 const INTEREST_CAP = 50;
 const INTEREST_TIERS = [10, 20, 30, 40, 50];
 
+// Interest is capped at 50g (5 interest) — 51g and 50g earn the exact same
+// interest, so being 1-3g over the cap isn't a real mistake to act on: the
+// recommended fix (roll for 2g, or buy XP for 4g) would drop you back BELOW
+// the bracket you're already sitting in, sacrificing the interest tier to
+// "fix" a problem that was costing nothing. XP is the pricier of the two
+// actions (4g) — require enough surplus that spending doesn't immediately
+// undo itself.
+const OVERCAP_ACTIONABLE_SURPLUS = 4;
+
 export function checkEcon(
   match: MatchSnapshot,
   meta: MetaData = {} as MetaData,
@@ -122,7 +131,7 @@ function checkInterestOvercap(match: MatchSnapshot, context: MatchContext): Deci
 
   for (let i = 0; i < rounds.length; i++) {
     const r = rounds[i];
-    const overCap = r.goldEnd > INTEREST_CAP;
+    const overCap = r.goldEnd >= INTEREST_CAP + OVERCAP_ACTIONABLE_SURPLUS;
     const idle    = r.rollsSpent === 0 && !r.xpBought;
 
     if (overCap && idle) {

@@ -68,8 +68,13 @@ function toCoachingNote(dp: DecisionPoint): CoachingNote {
     what_happened:             dp.observed,
     what_should_have_happened: dp.recommended,
     why:                       dp.coaching_text!,
-    references:                (dp.hexPosition || dp.boardSnapshot)
-      ? { hexPosition: dp.hexPosition, boardSnapshot: dp.boardSnapshot }
+    references:                (dp.hexPosition || dp.boardSnapshot || dp.recommendedPosition)
+      ? {
+          hexPosition: dp.hexPosition,
+          boardSnapshot: dp.boardSnapshot,
+          recommendedPosition: dp.recommendedPosition,
+          moveUnitName: dp.moveUnitName,
+        }
       : undefined,
   };
 }
@@ -81,7 +86,6 @@ function buildRoundTrajectory(match: MatchSnapshot): RoundTrajectoryPoint[] {
     gold:     r.goldEnd,
     level:    r.level,
     rollGold: r.rollsSpent * 2,
-    liveRank: r.liveRank,
   }));
 }
 

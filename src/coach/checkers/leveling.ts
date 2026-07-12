@@ -2,6 +2,17 @@
 // LEVEL_002: Late level 7 — not at 7 by 4-1
 // LEVEL_003: Fast 8 delay — not at 8 by 4-2 despite having the gold
 // LEVEL_005: Late level 9 — not at 9 by 5-2 with gold ≥40 and HP ≥30
+// LEVEL_006: Streak-adjusted level targets — a real win/lose streak shifts
+// the standard checkpoints earlier (source: community rolldown-theory guides,
+// see rolling.ts's ROLL_004/005 for the same research pass). A 3+ win streak
+// should hit level 6 by 3-1 (one round earlier than the generic 3-2 target);
+// a 3+ loss streak should hit level 8 by 4-1 (one round earlier than the
+// generic 4-2 target) since a losing board needs its power spike sooner, not
+// later. The loss-streak check only fires at exactly level 7 at 4-1 — below
+// 7 is already caught by LEVEL_002's generic target, and duplicating that
+// observation as a second card would just repeat it (see rule-engine.ts's
+// ECON_001/ECON_004 merge for the same "don't double-report one shortfall"
+// principle applied there).
 
 import type { MatchSnapshot, DecisionPoint, RoundSnapshot } from '../../shared/types';
 
@@ -18,6 +29,7 @@ export function checkLeveling(match: MatchSnapshot): DecisionPoint[] {
     ...checkLevel8(match),
     ...checkLevel9(match),
     ...checkNakedLevel(match),
+    ...checkStreakAdjustedLevel(match),
   ];
 }
 
@@ -124,5 +136,45 @@ function checkNakedLevel(match: MatchSnapshot): DecisionPoint[] {
       });
     }
   }
+  return points;
+}
+
+// LEVEL_006 — streak-adjusted level targets (see file header comment).
+// STREAK_COUNT_THRESHOLD reuses the same "3+" bar STREAK_001 already treats
+// as a real, established streak (not a fresh coincidence), rather than
+// inventing a new threshold for this rule.
+const STREAK_COUNT_THRESHOLD = 3;
+
+function checkStreakAdjustedLevel(match: MatchSnapshot): DecisionPoint[] {
+  const points: DecisionPoint[] = [];
+
+  const winCheck = snapAt(match, '3-1');
+  if (winCheck && winCheck.streakType === 'win' && winCheck.streakCount >= STREAK_COUNT_THRESHOLD && winCheck.level < 6) {
+    points.push({
+      ruleId:   'LEVEL_006',
+      round:    '3-1',
+      category: 'leveling',
+      severity: 'moderate',
+      observed: `On a ${winCheck.streakCount}-win streak but still level ${winCheck.level} at 3-1 — streak-adjusted target is 6`,
+      recommended: 'On a real win streak, push level 6 by 3-1 (a round earlier than the standard 3-2 target) to press the advantage',
+      reasonMetrics: { actual: winCheck.level, target: 6, streakCount: winCheck.streakCount },
+      coaching_text: `You were on a ${winCheck.streakCount}-win streak at 3-1 but still level ${winCheck.level}. A real win streak means extra gold and HP cushion beyond the standard curve — the correct play is hitting level 6 a round earlier than usual (3-1, not 3-2) to press that advantage instead of banking it passively.`,
+    });
+  }
+
+  const loseCheck = snapAt(match, '4-1');
+  if (loseCheck && loseCheck.streakType === 'loss' && loseCheck.streakCount >= STREAK_COUNT_THRESHOLD && loseCheck.level === 7) {
+    points.push({
+      ruleId:   'LEVEL_006',
+      round:    '4-1',
+      category: 'leveling',
+      severity: 'moderate',
+      observed: `On a ${loseCheck.streakCount}-loss streak but still level 7 at 4-1 — streak-adjusted target is 8`,
+      recommended: 'On a real loss streak, push level 8 by 4-1 (a round earlier than the standard 4-2 target) — a losing board needs its power spike sooner',
+      reasonMetrics: { actual: loseCheck.level, target: 8, streakCount: loseCheck.streakCount },
+      coaching_text: `You were on a ${loseCheck.streakCount}-loss streak at 4-1, level 7. That clears the generic level-7 target but a real loss streak like this calls for reaching level 8 a round earlier than usual — the board needs its power spike now, not at 4-2, or the streak keeps bleeding HP in the meantime.`,
+    });
+  }
+
   return points;
 }

@@ -1,10 +1,10 @@
-// In-game overlay entry point — STATIC content only (Riot compliance requirement).
-// Shows item recipes and trait activation thresholds.
-// NO live board data. NO suggestions based on current game state.
+// In-game window entry point — carries only the toast popup (e.g. "Coaching
+// report ready — press <hotkey>") shown via showInGameToast() in
+// src/background/main.ts. No live board data, no suggestions, no persistent
+// panel — Riot compliance requires this window stay non-interactive with game state.
 
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { InGameOverlay } from './InGameOverlay';
 
 declare const overwolf: any;
 
@@ -23,7 +23,6 @@ function InGameApp() {
 
   return (
     <>
-      <InGameOverlay />
       {toast && (
         <div style={{
           position: 'fixed', bottom: 16, right: 16,

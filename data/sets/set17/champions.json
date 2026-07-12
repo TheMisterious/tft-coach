@@ -26,7 +26,7 @@
   "TFT17_Jax": {
     "name": "Jax",
     "tier": 2,
-    "role": "carry",
+    "role": "tank",
     "traits": [
       "Stargazer",
       "Bastion"

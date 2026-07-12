@@ -20,6 +20,22 @@ export interface Cell {
 
 export type BoardState = Record<string, Cell>; // cellId → Cell
 
+// Per-unit combat telemetry from a single fight, straight off GEP's
+// match_info.battle_stats (real damage/blocked/healed/shielded — not
+// inferred from item/HP deltas like the rest of this app's data).
+export interface CombatUnitStats {
+  name: string;
+  totalDamage: number;
+  totalBlocked: number;
+  healed: number;
+  shielded: number;
+}
+
+export interface BattleStats {
+  own: CombatUnitStats[];
+  opponent: CombatUnitStats[];
+}
+
 export interface PlayerState {
   summoner_name?: string;
   health: number;
@@ -48,19 +64,28 @@ export interface RoundSnapshot {
   xpBought: boolean;
   board: BoardState;
   bench: BoardState;
+  // Loose items/components sitting in the item tray, NOT equipped on any
+  // champion — from GEP's bench.item_bench (a separate feature from
+  // bench.bench_pieces, which only covers benched CHAMPIONS' equipped items).
+  // This is where most real component-hoarding actually happens.
+  benchItems: string[];
   shop: string[];                     // champion IDs
   augmentsPicked: string[];           // augment IDs picked so far this match
   opponentBoard: BoardState;
   interestEarned: number;
   streakCount: number;
   streakType: 'win' | 'loss' | 'none';
-  // Live standing among remaining players (me.rank from GEP) — updates throughout
-  // the match as players are eliminated. NOT the final placement (see me.placement
-  // in extractFinalPlacement). Undefined if GEP never delivered it for this round.
-  liveRank?: number;
   // Set 17 — Realm of Gods (populated only for realm_of_the_gods rounds)
   godChosen?: string;                 // e.g. "Ahri" | "Evelynn" | "Kayle" | "Thresh" | "Pengu"
   godOfferingHpCost?: number;        // HP cost of the chosen Evelynn offering, if any
+  // Real per-unit damage/blocked/healed/shielded from this round's fight
+  // (match_info.battle_stats) — undefined when GEP didn't send it for this
+  // round (e.g. a round with no combat) or the side split couldn't be
+  // resolved. See src/ledger/rounds.ts for how own/opponent are told apart.
+  battleStats?: BattleStats;
+  // The real display name of this round's opponent (match_info.opponent),
+  // when GEP reported one — undefined for PVE/no-opponent rounds.
+  opponentName?: string;
 }
 
 export interface MatchSnapshot {
@@ -127,11 +152,18 @@ export interface DecisionPoint {
   // When present, the rule engine has written the full coaching prose.
   // brief-builder converts these directly to CoachingNotes.
   coaching_text?: string;
-  // Set by positioning checks that reference a specific board hex.
+  // Set by positioning checks that reference a specific board hex — the
+  // opponent threat being reacted to (e.g. their carry's hex).
   hexPosition?: HexPosition;
   // Set by positioning checks — the full board layout at the referenced round,
   // so the diagram can show champion names, not just an empty highlighted hex.
   boardSnapshot?: BoardSnapshot;
+  // Own-side hex the checker recommends moving a unit TO. Paired with
+  // moveUnitName (the unit's current name, looked up in boardSnapshot.own to
+  // find its current cell) so the diagram can draw "move from here to here"
+  // instead of only marking the opponent's threat.
+  recommendedPosition?: HexPosition;
+  moveUnitName?: string;
 }
 
 // ─── Coaching report ────────────────────────────────────────────────────────
@@ -150,6 +182,8 @@ export interface CoachingNote {
     augments?: string[];
     hexPosition?: HexPosition;
     boardSnapshot?: BoardSnapshot;
+    recommendedPosition?: HexPosition;
+    moveUnitName?: string;
   };
 }
 
@@ -159,10 +193,20 @@ export interface RoundTrajectoryPoint {
   gold: number;
   level: number;
   rollGold: number;   // gold spent rolling this round (rollsSpent * 2)
-  liveRank?: number;  // standing among remaining players, if GEP delivered it
 }
 
 export type Grade = 'S' | 'A' | 'B' | 'C' | 'D';
+
+// The single highest-leverage fix for the match — the worst-graded category
+// (see src/coach/scoring.ts's categoryGrades), reduced to one concrete action
+// so a scattered note list doesn't leave the user without a clear takeaway.
+// Undefined when there are no notes at all (a clean game with nothing to fix).
+export interface PriorityFix {
+  category: DecisionCategory;
+  occurrences: number;
+  action: string; // what_should_have_happened from the category's most severe note
+  why: string;    // that note's why text
+}
 
 export interface CoachingReport {
   overall_placement: number;
@@ -172,6 +216,7 @@ export interface CoachingReport {
   // survived truncation into `notes` below. See src/coach/scoring.ts.
   category_grades: Record<DecisionCategory, Grade>;
   tldr: string;
+  priority_fix?: PriorityFix;
   notes: CoachingNote[];
   strengths: string[];
   round_trajectory?: RoundTrajectoryPoint[];

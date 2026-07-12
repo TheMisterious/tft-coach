@@ -1,6 +1,18 @@
 // ROLL_001: Over-rolling at wrong level for carry cost tier
 // ROLL_002: Under-rolling at stabilization window (HP <40 at 4-1, <20g rolled)
 // ROLL_003: Post-stabilization over-roll after board is complete
+// ROLL_004: Fast-8 lose-streak discipline broken — rolled at level 6 while on
+//           a real, healthy loss streak instead of banking for the level-8 push
+// ROLL_005: Slow-roll gold floor violation — dropped below the 50g interest
+//           cap for 3+ consecutive rounds while running a reroll comp
+//
+// ROLL_004/005 source: community rolldown-theory guides (Boosteria's economy
+// guide, BunnyMuffins' leveling guide) researched 2026-07-12 — "if you plan
+// to Fast 8, you should not roll down at all at level 6 and continue to
+// commit to your lose streak" and "Slow Roll is rolling gold little by
+// little while staying above 50 to maximize interest." Both community-
+// derived guidelines, not official mechanics — confidence: medium, same as
+// ROLL_003.
 
 import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, MatchContext } from '../../shared/types';
 import { NEUTRAL_CONTEXT } from '../match-context';
@@ -40,6 +52,8 @@ export function checkRolling(
     ...checkOverRollBadOdds(match, meta, context),
     ...checkUnderRollCrisis(match),
     ...checkPostStabilizationRoll(match, context),
+    ...checkFast8RollDiscipline(match, context),
+    ...checkSlowRollFloorViolation(match, context),
   ];
 }
 
@@ -154,4 +168,88 @@ function checkPostStabilizationRoll(match: MatchSnapshot, context: MatchContext)
     reasonMetrics: { totalWaste, wasteRounds, stabilisedRound: rounds[stabilisedIdx].label },
     coaching_text: `After your board stabilised you spent ${totalWaste}g rolling across ${wasteRounds} round(s) without completing a 3-star. Once the carry is 2-starred, additional rolls have diminishing returns — that gold was better saved toward pushing level 9 (which adds 15% 5-cost odds) or competing for a contested unit more efficiently at a higher level.`,
   }];
+}
+
+// ROLL_004 — rolling at level 6 while on a real (3+), non-crisis loss streak.
+// Committing to a loss streak toward Fast 8 only pays off if the gold
+// actually gets banked for the level-8 push — rolling it away at level 6
+// undercuts the plan currently in progress. Excludes HP-crisis rounds
+// (context.hpCrisisRounds) since rolling to survive there is the correct
+// call regardless of streak (same guard checkPostStabilizationRoll's reroll
+// exclusion and rule-engine.ts's HOLD_GOLD_RULES use). Fires once per fresh
+// streak episode, not every qualifying round, to avoid repeating the same
+// observation across a multi-round streak.
+function checkFast8RollDiscipline(match: MatchSnapshot, context: MatchContext): DecisionPoint[] {
+  const points: DecisionPoint[] = [];
+  let firedThisEpisode = false;
+
+  for (const round of match.rounds) {
+    const inEpisode = round.level === 6
+      && round.streakType === 'loss'
+      && round.streakCount >= 3
+      && !context.hpCrisisRounds.has(round.label);
+
+    if (!inEpisode) { firedThisEpisode = false; continue; }
+    if (firedThisEpisode) continue;
+
+    const goldRolled = round.rollsSpent * 2;
+    if (goldRolled < 8) continue;
+
+    firedThisEpisode = true;
+    points.push({
+      ruleId:   'ROLL_004',
+      round:    round.label,
+      category: 'rolling',
+      severity: 'moderate',
+      observed: `Spent ${goldRolled}g rolling at level 6 while on a healthy ${round.streakCount}-loss streak`,
+      recommended: 'On a deliberate loss streak toward Fast 8, hold rolls at level 6 — bank the gold for the level-8 push instead',
+      reasonMetrics: { goldRolled, streakCount: round.streakCount, level: round.level },
+      coaching_text: `You spent ${goldRolled}g rolling at level 6 while ${round.streakCount} rounds into a loss streak. A loss streak at healthy HP is usually a deliberate Fast-8 setup — the streak funds the level-8 push, and rolling that gold away at level 6 undercuts the exact plan already in motion. Hold rolls here and commit the gold to leveling instead.`,
+    });
+  }
+
+  return points;
+}
+
+// ROLL_005 — dropped below the 50g interest cap for 3+ consecutive rounds
+// while running a detected reroll comp (context.isRerollComp). A real
+// slow-roll keeps gold above 50g and spends only the excess each round —
+// dropping below the cap loses interest without actually committing to a
+// full hyper-roll dump, the "worst of both worlds" the source guide warns
+// against. Only evaluated from stage 3 on, since a reroll line's econ
+// discipline isn't meaningfully established before then.
+function checkSlowRollFloorViolation(match: MatchSnapshot, context: MatchContext): DecisionPoint[] {
+  if (!context.isRerollComp) return [];
+  const points: DecisionPoint[] = [];
+  let streak = 0;
+  let streakStart = '';
+
+  for (const round of match.rounds) {
+    const [stageStr] = round.label.split('-');
+    if (Number(stageStr) < 3) continue;
+
+    if (round.goldEnd < 50) {
+      if (streak === 0) streakStart = round.label;
+      streak++;
+    } else {
+      streak = 0;
+    }
+
+    if (streak === 3) {
+      const compName = context.matchedComp?.name ?? 'your reroll comp';
+      points.push({
+        ruleId:   'ROLL_005',
+        round:    round.label,
+        category: 'rolling',
+        severity: 'minor',
+        observed: `Held below the 50g interest cap for ${streak} consecutive rounds (since ${streakStart}) while running ${compName}`,
+        recommended: 'Slow-roll discipline means staying above 50g and spending only the excess each round — rebuild the buffer before rolling more',
+        reasonMetrics: { streak, streakStartRound: streakStart, goldEnd: round.goldEnd },
+        coaching_text: `You were below the 50g interest cap for ${streak} consecutive rounds (starting ${streakStart}) while playing ${compName}. A real slow roll stays above 50g, spending only the excess above the cap each round — dipping below it for multiple rounds running loses interest income without actually committing to a full rolldown. Rebuild the buffer to 50g+ before rolling further.`,
+      });
+      streak = 0;
+    }
+  }
+
+  return points;
 }

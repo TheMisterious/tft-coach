@@ -33,10 +33,46 @@
   stroke-width: 1.5;
 }
 
-.highlightCell {
+.enemyCell {
   fill: #f9a825;
   stroke: #11111b;
   stroke-width: 1.5;
+}
+
+.destRing {
+  fill: rgba(0, 230, 118, 0.28);
+  stroke: #00e676;
+  stroke-width: 3;
+  stroke-dasharray: 4 2;
+  paint-order: stroke;
+}
+
+.threatRing {
+  fill: rgba(249, 168, 37, 0.28);
+  stroke: #f9a825;
+  stroke-width: 3;
+  paint-order: stroke;
+}
+
+.diffRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.diffPanel {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.diffHeader {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #9399b2;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 2px;
 }
 
 .occupiedCell {
@@ -69,4 +105,14 @@
   width: 10px;
   height: 10px;
   border-radius: 2px;
+}
+
+.ringSwatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 2px dashed #00e676;
+  background: rgba(0, 230, 118, 0.28);
+  box-sizing: border-box;
 }

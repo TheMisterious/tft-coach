@@ -82,6 +82,38 @@
       }
     },
     {
+      "unique_id": "ROLL_004",
+      "human_readable_name": "Fast-8 Loss-Streak Discipline Broken",
+      "category": "rolling",
+      "subcategory": "streak_discipline",
+      "short_summary": "Player rolled meaningful gold at level 6 while on a real, non-crisis loss streak, undercutting a Fast-8 setup already in progress.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You rolled {{gold_rolled}}g at level 6 while {{streak_count}} rounds into a loss streak! Save that gold — the streak is setting up your level 8 push.",
+        "mid_rank": "{{gold_rolled}}g rolled at level 6 on a {{streak_count}}-loss streak. That gold was better banked for the level-8 spike the streak is funding.",
+        "high_rank": "Roll spend at level 6: {{gold_rolled}}g, {{streak_count}}-loss streak in progress. Fast-8 discipline calls for holding rolls until the level-8 push."
+      }
+    },
+    {
+      "unique_id": "ROLL_005",
+      "human_readable_name": "Slow-Roll Interest Floor Violation",
+      "category": "rolling",
+      "subcategory": "reroll_discipline",
+      "short_summary": "Player, while running a reroll comp, dropped below the 50g interest cap for 3+ consecutive rounds without committing to a full rolldown.",
+      "source_tier": "community_inferred",
+      "severity": "low",
+      "confidence": "medium",
+      "patch_sensitivity": "low",
+      "coaching_message_templates": {
+        "low_rank": "You dropped below 50g for {{streak}} rounds in a row! Slow rolling means staying above 50g and only spending the extra each round.",
+        "mid_rank": "Below the 50g cap for {{streak}} consecutive rounds ({{streak_start_round}} onward) while reroll-comp'ing. That loses interest without a real rolldown to show for it.",
+        "high_rank": "Interest-floor violation: sub-50g for {{streak}} rounds from {{streak_start_round}}. Slow-roll discipline requires holding the cap between spends."
+      }
+    },
+    {
       "unique_id": "STREAK_001",
       "human_readable_name": "Win Streak Break — Avoidable Loss That Reset a Streak >=3",
       "category": "streak_management",

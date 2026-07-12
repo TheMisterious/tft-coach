@@ -71,6 +71,22 @@
       }
     },
     {
+      "unique_id": "LEVEL_006",
+      "human_readable_name": "Streak-Adjusted Level Target Missed",
+      "category": "leveling",
+      "subcategory": "streak_timing",
+      "short_summary": "Player was on a real (3+) win or loss streak but missed the streak-adjusted level checkpoint, which is one round earlier than the generic target.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium",
+      "coaching_message_templates": {
+        "low_rank": "You were on a {{streak_count}}-streak but still level {{actual_level}} at {{round}}! A real streak means you should push levels a round earlier than usual.",
+        "mid_rank": "{{streak_count}}-streak at {{round}}, level {{actual_level}} (streak-adjusted target: {{target}}). The extra HP/gold cushion from the streak was there to push a round early.",
+        "high_rank": "Level {{actual_level}} at {{round}} on a {{streak_count}}-streak (target: {{target}}). Streak-adjusted timing is one round ahead of the generic curve."
+      }
+    },
+    {
       "unique_id": "ROLL_001",
       "human_readable_name": "Over-Rolling — Excessive Spend at Wrong Level for Carry Cost",
       "category": "rolling",
@@ -245,6 +261,38 @@
         "low_rank": "We couldn't see your augment picks this game, so we skipped augment coaching.",
         "mid_rank": "Augment picks weren't captured for this match. This usually happens on very short games or a GEP registration delay.",
         "high_rank": "Augment telemetry gap: 0 picks recorded, placement {{placement}}. Check GEP registration timing for early-elimination games."
+      }
+    },
+    {
+      "unique_id": "AUGMENT_003",
+      "human_readable_name": "Carry Augment Payoff Unrealised",
+      "category": "augments",
+      "subcategory": "augment_selection",
+      "short_summary": "Player picked a champion-specific carry augment, but that champion either never reached the final board or finished with fewer than 2 completed items.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium",
+      "coaching_message_templates": {
+        "low_rank": "You picked {{augment}}, built around {{champion}}, but {{champion}} didn't end up itemised on your final board. That augment's value went unused.",
+        "mid_rank": "{{augment}} boosts {{champion}} specifically — but {{champion}} wasn't a built, itemised part of your final board. Commit to the carry once you take an augment like this.",
+        "high_rank": "Carry-designating augment {{augment}} taken; {{champion}} finished under-realised on the final board. Either commit items to {{champion}} or skip these augments when the carry isn't reachable."
+      }
+    },
+    {
+      "unique_id": "AUGMENT_004",
+      "human_readable_name": "Item-Shaping Augment Without a Built Carry",
+      "category": "augments",
+      "subcategory": "augment_selection",
+      "short_summary": "Player picked an item-shaping augment (augments.json 'items' category) but no unit on the final board reached 2+ completed items.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium",
+      "coaching_message_templates": {
+        "low_rank": "You picked {{augment}}, an item-focused augment, but never fully itemised any single unit. Commit items to one carry to get value from picks like this.",
+        "mid_rank": "{{augment}} rewards a built carry — your best-itemised unit only had {{maxItems}} completed item(s). Concentrate items earlier when you take this kind of augment.",
+        "high_rank": "Item-shaping augment {{augment}} picked without a corresponding itemisation commitment (max {{maxItems}} completed items on any unit). Evaluate whether the augment matched your itemisation plan."
       }
     },
     {

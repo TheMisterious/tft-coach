@@ -37,8 +37,8 @@ import { saveMatch, loadMatch, listRecentMatches } from '../persistence/db';
 import { summarizeLedgerCoverage, formatLedgerCoverage, sampleRawValues, formatRawSamples } from '../ledger/diagnostics';
 import { ensureWindowOnScreen } from './window-position';
 import { readHotkeyBinding } from '../shared/hotkey';
-import { loadSettings, hasLinkedAccount } from '../persistence/settings';
-import { getLeagueEntriesByPuuid, getMatchIdsByPuuid, getMatchById, formatRiotRank } from '../enrichment/riot-api';
+import { loadSettings, hasLinkedAccount, matchContinentForPlatform } from '../persistence/settings';
+import { getLeagueEntriesByPuuid, getMatchIdsByPuuid, getMatchById, formatRiotRank, riotUnitsToBoardState, countBoardItems, RiotApiError } from '../enrichment/riot-api';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -147,9 +147,22 @@ function onGameClosed(): void {
 
   // Safety net: if match_end never fired (race, alt-F4, GEP late registration)
   // but we captured ledger data, run the pipeline now so the report isn't lost.
+  //
+  // Gate on state.matchActive, NOT getCurrentMatchId() — currentMatchId only
+  // gets set from a real pseudo_match_id/game_info.matchId GEP field, or from
+  // runCoachingPipeline's own forceMatchId() fallback. If GEP never delivers
+  // either match-id field for this match AND match_end/its info-fallback also
+  // never fire (both known-flaky — me.placement never fires at all), matchId
+  // stays null all game. flushSync() also gates on currentMatchId, so the
+  // ledger never even reaches disk — the buffered match sits only in memory
+  // and this branch used to skip it entirely, losing the match with zero
+  // trace. matchActive is set independently at match start, so it survives
+  // even when neither match-id field ever arrives. runCoachingPipeline
+  // already handles a null matchId (forceMatchId + flushSync) and aborts
+  // cleanly if the resulting ledger turns out empty.
   const matchId = getCurrentMatchId();
-  if (matchId && !state.isProcessing) {
-    console.log('[bg] game closed with pending match — triggering pipeline for:', matchId);
+  if (state.matchActive && !state.isProcessing) {
+    console.log('[bg] game closed with pending match — triggering pipeline (matchId:', matchId ?? '(none yet — will fall back)', ')');
     state.matchActive = false;
     state.appStatus   = computeStatus();
     pushStatusToDesktop();
@@ -286,6 +299,19 @@ async function runCoachingPipeline(): Promise<void> {
     // 2. Reconstruct per-round snapshots.
     const snapshot = reconstructSnapshots(ledger);
     console.log('[bg] pipeline step 2: snapshots reconstructed — rounds:', snapshot.rounds.length, 'placement:', snapshot.finalPlacement);
+    if (snapshot.rounds.length === 0) {
+      // A non-empty ledger with zero real rounds means GEP delivered a few
+      // stray info-updates but no round_start/round_end pair ever fired —
+      // e.g. staying in the post-game lobby to spectate other players can
+      // re-trigger onMatchStartedCb (any pseudo_match_id sighting counts,
+      // see listeners.ts) and then onGameClosed's safety net when you finally
+      // leave, with nothing but spectate noise buffered under a phantom
+      // matchId. Without this guard that produces a fake "8th place" report
+      // (extractFinalPlacement's last-resort default) with no real data
+      // behind it. A genuine match always reconstructs at least one round.
+      console.warn('[bg] ledger has', ledger.length, 'entries but zero reconstructed rounds — likely spectate/lobby noise, not a real match; aborting pipeline for matchId:', matchId);
+      return;
+    }
 
     // 3. Load meta data for this set.
     const setId    = detectSet(ledger);
@@ -378,10 +404,53 @@ function openDesktopWindow(report: any): void {
   });
 }
 
+// Toast duration must match index.tsx's own setTimeout(() => setToast(null), 5000)
+// so the window minimizes right as the toast finishes fading, not before/after.
+const TOAST_DURATION_MS = 5000;
+const IN_GAME_WINDOW_POSITIONED_KEY = 'tft:in-game-window-positioned';
+
+// The in_game window requires an explicit restore() before sendMessage —
+// Overwolf won't render a minimized/never-shown window's content even if a
+// message is delivered to it. Positioned bottom-right on first-ever call
+// (typical toast corner); Overwolf persists position after that, so later
+// calls just clamp it back on-screen via ensureWindowOnScreen. Minimized
+// again after TOAST_DURATION_MS so it isn't sitting restored (and blocking
+// game input over its full bounds) between toasts.
 function showInGameToast(message: string): void {
   overwolf.windows.obtainDeclaredWindow('in_game', (result: any) => {
-    if (!result.success) return;
-    overwolf.windows.sendMessage(result.window.id, 'toast', message, () => {});
+    if (!result.success) {
+      console.error('[bg] failed to obtain in_game window:', result.error);
+      return;
+    }
+    const win = result.window;
+
+    function send() {
+      overwolf.windows.restore(win.id, () => {
+        overwolf.windows.sendMessage(win.id, 'toast', message, () => {});
+        setTimeout(() => overwolf.windows.minimize(win.id), TOAST_DURATION_MS);
+      });
+    }
+
+    if (localStorage.getItem(IN_GAME_WINDOW_POSITIONED_KEY)) {
+      ensureWindowOnScreen(win, send);
+      return;
+    }
+
+    overwolf.utils.getMonitorsList((monitorsResult: any) => {
+      const monitors = monitorsResult?.success ? monitorsResult.displays ?? [] : [];
+      const primary  = monitors.find((m: any) => m.is_primary) ?? monitors[0];
+      localStorage.setItem(IN_GAME_WINDOW_POSITIONED_KEY, '1');
+
+      if (!primary) {
+        send();
+        return;
+      }
+
+      const margin = 20;
+      const left = Math.round(primary.x + primary.width - win.width - margin);
+      const top  = Math.round(primary.y + primary.height - win.height - margin);
+      overwolf.windows.changePosition(win.id, left, top, () => send());
+    });
   });
 }
 
@@ -394,7 +463,8 @@ function showInGameToast(message: string): void {
 async function runRiotEnrichment(matchId: string, finalPlacement: number, datePlayed: number): Promise<void> {
   const settings = loadSettings();
   if (!hasLinkedAccount(settings)) return;
-  const { riotApiKey, puuid, continent, platform } = settings;
+  const { riotApiKey, puuid, platform } = settings;
+  const matchContinent = matchContinentForPlatform(platform);
 
   // Step 9: rank refresh, pushed to the desktop window's StatusBar.
   try {
@@ -405,16 +475,23 @@ async function runRiotEnrichment(matchId: string, finalPlacement: number, datePl
     console.log('[bg] riot step 9: rank refreshed —', label);
   } catch (e) {
     console.warn('[bg] riot step 9: rank refresh failed —', e);
+    // A 401/403 usually means a free personal key's ~24h expiry — surface it
+    // in the status bar instead of only logging, so the user has a reason to
+    // know rank/cross-check silently stopped instead of just not updating.
+    if (e instanceof RiotApiError && (e.status === 401 || e.status === 403)) {
+      const mw = (overwolf.windows.getMainWindow() as any);
+      if (typeof mw?.receiveRiotRank === 'function') mw.receiveRiotRank('Riot key expired — renew in ⚙', true);
+    }
   }
 
   // Step 10: placement cross-check against tft-match-v1 (final result only,
   // no round-by-round data — see enrichment/riot-api.ts). Diagnostic only,
   // never overwrites the GEP-derived finalPlacement.
   try {
-    const matchIds = await getMatchIdsByPuuid(puuid!, riotApiKey, continent, 1);
+    const matchIds = await getMatchIdsByPuuid(puuid!, riotApiKey, matchContinent, 1);
     const riotMatchId = matchIds[0];
     if (!riotMatchId) return;
-    const match = await getMatchById(riotMatchId, riotApiKey, continent);
+    const match = await getMatchById(riotMatchId, riotApiKey, matchContinent);
 
     // Skip if this is clearly a different (later) match than the one we just
     // processed — e.g. the user already queued into a new game before this
@@ -439,6 +516,47 @@ async function runRiotEnrichment(matchId: string, finalPlacement: number, datePl
       },
     });
     console.log('[bg] riot step 10: placement cross-check —', 'local:', finalPlacement, 'riot:', participant.placement);
+
+    // Step 11: GEP's board_pieces is a live diff stream and its last update
+    // before the ledger ends can predate the player's final item slams (see
+    // rounds.ts's own board_pieces-vs-match_stats.board_players fallback for
+    // the same class of bug) — occasionally producing a finalBoard with
+    // fewer completed items than the player actually ended with, which
+    // throws off AUGMENT_003/004's "no unit had 2+ completed items" checks.
+    // Riot's match-v1 units array is the true final board (no round-by-round
+    // data, but this one snapshot is authoritative) — if it shows more
+    // equipped items than what GEP captured, reprocess the report with Riot's
+    // board substituted in and silently push the corrected version to the
+    // desktop window if it's still open. Still never touches finalPlacement
+    // (stays GEP-sourced) or any per-round data — only the final-board-only
+    // checks that read match.finalBoard.
+    try {
+      const riotBoard = riotUnitsToBoardState(participant.units ?? []);
+      const localSnapshot = reconstructSnapshots(record.ledger);
+      if (countBoardItems(riotBoard) <= countBoardItems(localSnapshot.finalBoard)) {
+        console.log('[bg] riot step 11: GEP finalBoard already at least as complete as Riot\'s — no reprocess needed');
+        return;
+      }
+
+      console.log('[bg] riot step 11: Riot\'s final board has more equipped items than GEP captured — reprocessing with corrected finalBoard');
+      const correctedSnapshot = { ...localSnapshot, finalBoard: riotBoard };
+      const setId  = detectSet(record.ledger);
+      const meta   = await loadMeta(setId);
+      const points = extractDecisionPoints(correctedSnapshot, meta);
+      const brief  = buildBrief(correctedSnapshot, points, meta);
+      const report = await generateCoachingReport(brief);
+
+      saveMatch({ ...record, riotCrossCheck: { riotPlacement: participant.placement, matched: participant.placement === finalPlacement, checkedAt: Date.now() }, brief, coachingReport: report });
+      (window as any).appState.latestReport = report;
+
+      const mw = (overwolf.windows.getMainWindow() as any);
+      if (typeof mw?.receiveReport === 'function') {
+        mw.receiveReport(report);
+        console.log('[bg] riot step 11: corrected report delivered');
+      }
+    } catch (e) {
+      console.warn('[bg] riot step 11: finalBoard reconciliation failed —', e);
+    }
   } catch (e) {
     console.warn('[bg] riot step 10: placement cross-check failed —', e);
   }

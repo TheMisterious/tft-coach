@@ -29,6 +29,8 @@ export function CoachingCard({ note }: Props) {
         <HexBoardLegend
           hexPosition={note.references?.hexPosition}
           boardSnapshot={note.references?.boardSnapshot}
+          recommendedPosition={note.references?.recommendedPosition}
+          moveUnitName={note.references?.moveUnitName}
         />
       )}
     </article>

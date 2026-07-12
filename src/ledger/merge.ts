@@ -58,21 +58,35 @@ function itemCount(c: Cell): number {
 }
 
 // Identifies "the carry" among a set of board units for itemization/roll
-// checks. Prefers a unit whose curated role is 'carry' — falls back to the
-// old "most-starred, then most items" heuristic only when no unit on board
-// has curated role data saying otherwise (a real gap: most of the Set 17
-// roster is still placeholder role:'flex' — see champions.json). Without
-// this, a flex/bruiser unit that happens to 3-star with items (e.g. a
-// jungler snowballing off PvE rounds) gets mistaken for the actual carry,
-// and the real carry's itemization mistakes go silently unevaluated.
+// checks. Prefers a unit whose curated role is 'carry' — falls back to a
+// cost-first heuristic only when no unit on board has curated role data
+// saying otherwise (a real gap: most of the Set 17 roster is still
+// placeholder role:'flex' — see champions.json).
+//
+// FIXED (2026-07-12, found reviewing a real match): the fallback used to
+// compare star level first, then item count only as an equal-level tiebreak.
+// Confirmed live this misidentifies the carry whenever a cheap unit happens
+// to star up early from ordinary buys — e.g. a real 4-1 board where a
+// 2-starred 1-cost Twisted Fate (holding only a trait emblem, no combat
+// item, and not even on the final board) beat a 1-starred, itemless 4-cost
+// Xayah (the actual eventual carry — final board had her 2-starred with a
+// full Kraken Slayer/Rapid Fire Cannon build) purely because level was
+// compared before cost. Star level on a cheap unit is incidental to normal
+// buying/rolling; cost is a structural, design-level signal — units are
+// gated behind higher cost specifically because they're meant to be carries.
+// Reordered to weight cost first, then item count, then level as tiebreakers.
 export function identifyCarry(units: Cell[], meta: MetaData): Cell {
   const taggedCarries = units.filter(u => meta.champions?.[u.name]?.role === 'carry');
   const pool = taggedCarries.length > 0 ? taggedCarries : units;
   return pool.reduce((best, u) => {
+    const uCost  = meta.champions?.[u.name]?.tier ?? 0;
+    const bCost  = meta.champions?.[best.name]?.tier ?? 0;
+    if (uCost !== bCost) return uCost > bCost ? u : best;
+
     const uItems = itemCount(u);
     const bItems = itemCount(best);
-    if (u.level > best.level) return u;
-    if (u.level === best.level && uItems > bItems) return u;
-    return best;
+    if (uItems !== bItems) return uItems > bItems ? u : best;
+
+    return u.level > best.level ? u : best;
   });
 }

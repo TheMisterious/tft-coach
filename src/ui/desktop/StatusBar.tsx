@@ -3,7 +3,9 @@ import type { AppStatus } from '../../shared/types';
 import { useHotkeyBinding, HOTKEY_NAME, GAME_ID } from '../useHotkeyBinding';
 import { SettingsPanel } from './SettingsPanel';
 import { loadSettings, hasLinkedAccount } from '../../persistence/settings';
-import { getLeagueEntriesByPuuid, formatRiotRank } from '../../enrichment/riot-api';
+import { getLeagueEntriesByPuuid, formatRiotRank, RiotApiError } from '../../enrichment/riot-api';
+
+const KEY_EXPIRED_LABEL = 'Riot key expired — renew in ⚙';
 
 declare const overwolf: any;
 
@@ -29,13 +31,19 @@ export function StatusBar({ status }: { status: AppStatus }) {
   const [capturing, setCapturing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [rankLabel, setRankLabel] = useState<string | null>(rankCache?.label ?? null);
+  const [rankIsError, setRankIsError] = useState(false);
 
   useEffect(() => {
-    // Exposed so background/main.ts can push a fresh rank right after a match
-    // finishes, same pattern as receiveReport/receiveStatusUpdate.
-    (window as any).receiveRiotRank = (label: string) => {
+    // Exposed so background/main.ts can push a fresh rank (or a key-expired
+    // notice) right after a match finishes, same pattern as
+    // receiveReport/receiveStatusUpdate. A 401/403 mid-session (most common
+    // for a free personal key, which expires every ~24h) previously only
+    // logged a console.warn — invisible unless the user had devtools open —
+    // so rank/cross-check silently stopped working with no indication why.
+    (window as any).receiveRiotRank = (label: string, isError = false) => {
       rankCache = { label, fetchedAt: Date.now() };
       setRankLabel(label);
+      setRankIsError(isError);
     };
 
     const settings = loadSettings();
@@ -47,8 +55,16 @@ export function StatusBar({ status }: { status: AppStatus }) {
         const formatted = formatRiotRank(entries);
         rankCache = { label: formatted, fetchedAt: Date.now() };
         setRankLabel(formatted);
+        setRankIsError(false);
       })
-      .catch(e => console.warn('[StatusBar] rank fetch failed:', e));
+      .catch(e => {
+        console.warn('[StatusBar] rank fetch failed:', e);
+        if (e instanceof RiotApiError && (e.status === 401 || e.status === 403)) {
+          rankCache = { label: KEY_EXPIRED_LABEL, fetchedAt: Date.now() };
+          setRankLabel(KEY_EXPIRED_LABEL);
+          setRankIsError(true);
+        }
+      });
   }, []);
 
   useEffect(() => {
@@ -95,7 +111,7 @@ export function StatusBar({ status }: { status: AppStatus }) {
       <span style={{ flex: 1 }} />
 
       {rankLabel && (
-        <span style={{ color: '#f9e2af', fontWeight: 600 }}>{rankLabel}</span>
+        <span style={{ color: rankIsError ? '#f38ba8' : '#f9e2af', fontWeight: 600 }}>{rankLabel}</span>
       )}
 
       <span style={{ color: '#6c7086' }}>Toggle overlay:</span>
@@ -135,8 +151,16 @@ export function StatusBar({ status }: { status: AppStatus }) {
               const formatted = formatRiotRank(entries);
               rankCache = { label: formatted, fetchedAt: Date.now() };
               setRankLabel(formatted);
+              setRankIsError(false);
             })
-            .catch(e => console.warn('[StatusBar] rank fetch failed:', e));
+            .catch(e => {
+              console.warn('[StatusBar] rank fetch failed:', e);
+              if (e instanceof RiotApiError && (e.status === 401 || e.status === 403)) {
+                rankCache = { label: KEY_EXPIRED_LABEL, fetchedAt: Date.now() };
+                setRankLabel(KEY_EXPIRED_LABEL);
+                setRankIsError(true);
+              }
+            });
         }} />
       )}
     </div>

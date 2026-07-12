@@ -10,7 +10,7 @@
 // see report-generator.ts / the ledger pipeline for that). spectator-tft-v5
 // and tft-status-v1 are deliberately not wired up — no concrete use yet.
 
-import type { RiotAccount, RiotLeagueEntry } from '../shared/types';
+import type { RiotAccount, RiotLeagueEntry, BoardState } from '../shared/types';
 import type { RiotContinent, RiotPlatform } from '../persistence/settings';
 
 export class RiotApiError extends Error {
@@ -106,9 +106,25 @@ export async function getMatchIdsByPuuid(
   return riotFetch<string[]>(url, apiKey);
 }
 
+// Confirmed live (2026-07-12) against 4 real VN2 matches: character_id uses
+// the same TFT{N}_<Champion> ids GEP does, itemNames uses the same
+// TFT_Item_*/TFT{N}_Item_* ids GEP does (no separate id space to map) —
+// e.g. { character_id: "TFT17_Samira", itemNames: ["TFT_Item_InfinityEdge",
+// "TFT_Item_LastWhisper", "TFT_Item_SpearOfShojin"], tier: 3 }. `tier` is
+// star level (1/2/3), matching Cell.level's real meaning — NOT player level
+// (that's participant.level, a sibling field, separately confirmed present).
+// No cell/position field exists in this API at all — final board only, same
+// limitation already documented for placement/augments (see file header).
+export interface RiotMatchUnit {
+  character_id: string;
+  itemNames: string[];
+  tier: number;
+}
+
 export interface RiotMatchParticipant {
   puuid: string;
   placement: number;
+  units: RiotMatchUnit[];
 }
 
 export interface RiotMatch {
@@ -123,4 +139,33 @@ export async function getMatchById(
 ): Promise<RiotMatch> {
   const url = `https://${continent}.api.riotgames.com/tft/match/v1/matches/${matchId}`;
   return riotFetch<RiotMatch>(url, apiKey);
+}
+
+// Converts Riot's final-board units into this app's BoardState shape so it
+// can be dropped straight into MatchSnapshot.finalBoard as a ground-truth
+// override — see runRiotEnrichment in src/background/main.ts. Cell keys are
+// synthetic (riot_0, riot_1, ...) since Riot's API has no position data;
+// every finalBoard consumer (AUGMENT_003/004's item counts, brief-builder's
+// final-comp display) only reads Object.values(), never real cell ids.
+export function riotUnitsToBoardState(units: RiotMatchUnit[]): BoardState {
+  const board: BoardState = {};
+  units.forEach((u, i) => {
+    board[`riot_${i}`] = {
+      name:   u.character_id,
+      level:  u.tier,
+      item_1: u.itemNames[0] ?? '0',
+      item_2: u.itemNames[1] ?? '0',
+      item_3: u.itemNames[2] ?? '0',
+    };
+  });
+  return board;
+}
+
+// Total equipped item slots across a board — shared comparison metric used
+// to decide whether Riot's board is meaningfully more complete than GEP's.
+export function countBoardItems(board: BoardState): number {
+  return Object.values(board).reduce(
+    (n, c) => n + [c.item_1, c.item_2, c.item_3].filter(i => i && i !== '0').length,
+    0
+  );
 }

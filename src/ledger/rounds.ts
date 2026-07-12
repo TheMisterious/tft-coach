@@ -3,9 +3,49 @@
 // KNOWN BUG: Stage 5-7 sometimes skips match_info events (Overwolf open issue).
 // Fallback: count round_start events since the last Realm of the Gods round to derive the label.
 
-import type { LedgerEntry, RoundSnapshot, MatchSnapshot, BoardState, PlayerState } from '../shared/types';
+import type { LedgerEntry, RoundSnapshot, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats } from '../shared/types';
 import { safeParseGep } from '../capture/safe-parse';
-import { normalizeBoardSnapshot } from './merge';
+import { normalizeBoardSnapshot, boardChampionIds } from './merge';
+
+// battle_stats groups units by an internal numeric "team" id, not by
+// "me"/"opponent" — and the opponent's id changes every round (a new
+// opponent) while PVE encounters use their own special ids (e.g. 38 for
+// Krugs). The only reliable way to tell which side is "me" is to match
+// champion names against the board we're already tracking live — the team
+// entry with more overlap against our own board is ours.
+function splitBattleStatsBySide(
+  raw: unknown,
+  ownBoard: BoardState
+): BattleStats | undefined {
+  const teams = safeParseGep(raw, []) as Array<{ team: number; units?: Array<Record<string, unknown>> }>;
+  if (!Array.isArray(teams) || teams.length < 2) return undefined;
+
+  const ownNames = new Set(boardChampionIds(ownBoard));
+  const toStats = (units: Array<Record<string, unknown>> | undefined): CombatUnitStats[] =>
+    (units ?? []).map(u => ({
+      name:         String(u.name ?? ''),
+      totalDamage:  Number(u.total_dmg ?? 0),
+      totalBlocked: Number(u.total_blocked ?? 0),
+      healed:       Number(u.healed ?? 0),
+      shielded:     Number(u.shielded ?? 0),
+    }));
+
+  const overlap = (units: Array<Record<string, unknown>> | undefined) =>
+    (units ?? []).filter(u => ownNames.has(String(u.name ?? ''))).length;
+
+  const [a, b] = teams;
+  const aIsOwn = overlap(a.units) >= overlap(b.units);
+  return {
+    own:      toStats(aIsOwn ? a.units : b.units),
+    opponent: toStats(aIsOwn ? b.units : a.units),
+  };
+}
+
+// Sortable key for a "3-2"-style round label — higher stage/round sorts higher.
+function roundSortKey(label: string): number {
+  const [stage, round] = label.split('-').map(Number);
+  return (stage || 0) * 100 + (round || 0);
+}
 
 // Walk backwards from position `upTo` to find the most recent round_type.stage.
 export function detectRoundLabel(entries: LedgerEntry[], upTo: number): string | null {
@@ -35,19 +75,28 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   let gold    = 0;
   let health  = 100;
   let level   = 1;
-  let liveRank: number | undefined;
 
   let prevGold  = 0;
   let prevShop: string[] = [];
   let rollsThisRound     = 0;
   let xpBoughtThisRound  = false;
   let lastRoundOutcome: 'win' | 'loss' | undefined;
+  let lastBattleStats: BattleStats | undefined;
+  let lastOpponentName: string | undefined;
 
   let streakCount = 0;
   let streakType: 'win' | 'loss' | 'none' = 'none';
   let localPlayerName: string | undefined;
 
+  // Last full snapshot of match_stats.board_players (stage -> per-player
+  // {board, bench} arrays, item_1/2/3 included) — a separate GEP source from
+  // board_pieces, used as a finalBoard fallback below (see block after the
+  // main loop).
+  let lastMatchStatsBoardPlayersRaw: unknown;
+
   let augments: string[]     = [];
+  const augmentSlots: Record<string, string> = {};
+  let benchItems: string[]   = [];
   let roundStartTs:  number  = 0;
   let roundType: 'PVP' | 'PVE' | 'realm_of_the_gods' | 'unknown' = 'unknown';
   // Realm of Gods state. Confirmed via a real ledger (tests/goldens/2026-07-03-rank-5.jsonl):
@@ -118,17 +167,21 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       xpBought:       xpBoughtThisRound,
       board:          { ...board },
       bench:          { ...bench },
+      benchItems:     [...benchItems],
       shop:           [...shop],
       augmentsPicked:     [...augments],
       opponentBoard:      { ...opponentBoard },
       interestEarned:     interest,
       streakCount,
       streakType,
-      liveRank,
       godChosen:          currentGodChosen,
       godOfferingHpCost:  currentGodHpCost,
+      battleStats:        lastBattleStats,
+      opponentName:       lastOpponentName,
     });
     lastRoundOutcome = undefined;
+    lastBattleStats  = undefined;
+    lastOpponentName = undefined;
   }
 
   for (let i = 0; i < entries.length; i++) {
@@ -203,6 +256,22 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
           }
         }
 
+        // Real per-unit damage/blocked/healed/shielded for the fight that just
+        // ended — fires right after battle_end, well within the same round
+        // window (confirmed via real ledger timestamps, unlike augment picks'
+        // multi-round lag). Captured continuously like gold/health and
+        // attached to whichever round closes next.
+        if (key === 'battle_stats') {
+          lastBattleStats = splitBattleStatsBySide(value, board);
+        }
+
+        // The real display name of this round's opponent — who board/
+        // opponentBoard actually belong to right now.
+        if (key === 'opponent') {
+          const opp = safeParseGep(value, {}) as { name?: string };
+          if (opp.name) lastOpponentName = opp.name;
+        }
+
         // Set 17 — Realm of Gods. Confirmed via a real recorded match (see
         // src/ledger/diagnostics.ts __debugRawSamples): GEP does NOT expose a
         // "realm_of_gods" feature or a "god_chosen" key. It sends the two
@@ -259,10 +328,6 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
           const xp = safeParseGep(value, {}) as { level?: number };
           if (xp.level) level = Number(xp.level);
         }
-        // Live standing among remaining players — distinct from me.placement,
-        // which only arrives once at match end (see extractFinalPlacement).
-        if (key === 'rank')   { liveRank = Number(value); }
-
         // Detect XP purchase: gold dropped by 4 with no shop/bench change.
         // me/xp.current_xp is broken (always 0) — gold delta is the only signal.
         if (key === 'gold' && prevGold - gold === 4) {
@@ -303,6 +368,27 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         bench = normalizeBoardSnapshot(safeParseGep(value, {}) as Record<string, any>);
       }
 
+      // item_bench is a SEPARATE feature from bench_pieces — an array keyed by
+      // player, one entry per lobby member, e.g. [{summoner: "Chibi Jinx",
+      // bench_items: [...]}, ...]. Confirmed via real ledger data: other
+      // players' entries use their equipped little-legend skin name (GEP
+      // anonymizes opponents), but the LOCAL player's own entry is the real
+      // Riot ID ("name#tag") — so it's found by prefix-matching localPlayerName
+      // (itself resolved from roster.player_status), not by exact key lookup.
+      // Filters out consumable tokens (ItemRemover/ItemReroller charges,
+      // TFT_Consumable_*) which aren't real components or completed items.
+      if (feature === 'bench' && key === 'item_bench') {
+        const players = safeParseGep(value, []) as Array<{ summoner?: string; bench_items?: string[] }>;
+        const mine = localPlayerName
+          ? players.find(p => p.summoner?.startsWith(localPlayerName!))
+          : undefined;
+        benchItems = (mine?.bench_items ?? []).filter(id => !id.includes('_Consumable_'));
+      }
+
+      if (feature === 'match_stats' && key === 'board_players') {
+        lastMatchStatsBoardPlayersRaw = value;
+      }
+
       if (feature === 'store' && key === 'shop_pieces') {
         // Confirmed via a real ledger: shop_pieces is an object keyed by slot
         // ("slot_1": {name}, "slot_2": {name}, ...), never a flat array. The
@@ -337,12 +423,25 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       // { slot_1: {name: "TFT_Augment_..."} , slot_4: {name: "TFT17_ChampionItem_Chosen_Kindred"} }),
       // NOT augments.me as an array. slot_4+ can hold a Set-specific "Chosen"
       // reward rather than a real augment — filter to ids containing "_Augment_".
+      //
+      // Confirmed across 22 real ledgers: this event fires only ONCE (rarely
+      // twice) for the entire match, and lands AFTER the final round_end —
+      // i.e. GEP delivers augment picks in the post-game settlement window,
+      // never live during play. Recording only the flat `augments` list here
+      // (used for match.augments) is fine for that, but round.augmentsPicked
+      // would end up empty for the ENTIRE match if built the same way — see
+      // the slot-based backfill after the main loop below, which is what
+      // actually populates it correctly.
       if (feature === 'me' && key === 'picked_augment') {
         const slots  = safeParseGep(value, {}) as Record<string, { name?: string } | undefined>;
         const picked = Object.values(slots)
           .map(s => s?.name)
           .filter((id): id is string => !!id && id.includes('_Augment_'));
         augments = [...new Set([...augments, ...picked])];
+
+        for (const [slot, cell] of Object.entries(slots)) {
+          if (cell?.name && cell.name.includes('_Augment_')) augmentSlots[slot] = cell.name;
+        }
       }
     }
 
@@ -399,6 +498,28 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     godPicks.push({ round: pendingGodRoundStage, god: currentGodChosen });
   }
 
+  // Back-fill round.augmentsPicked using TFT's fixed slot->round mapping
+  // (slot_1 is always picked at 2-1, slot_2 at 3-2, slot_3 at 4-2) instead of
+  // trusting when the picked_augment event happened to arrive in the event
+  // stream — see the picked_augment handler above for why that's unreliable.
+  // Every round from the pick round onward gets the augment added, exactly
+  // as if it had been captured live.
+  const AUGMENT_SLOT_ROUNDS: Array<[string, string]> = [
+    ['slot_1', '2-1'],
+    ['slot_2', '3-2'],
+    ['slot_3', '4-2'],
+  ];
+  for (const [slot, pickRoundLabel] of AUGMENT_SLOT_ROUNDS) {
+    const augId = augmentSlots[slot];
+    if (!augId) continue;
+    const pickKey = roundSortKey(pickRoundLabel);
+    for (const round of rounds) {
+      if (roundSortKey(round.label) >= pickKey && !round.augmentsPicked.includes(augId)) {
+        round.augmentsPicked.push(augId);
+      }
+    }
+  }
+
   console.log(`[rounds] events counted: round_start=${roundStartCount} round_end=${roundEndCount} synthesized=${synthesizedCount} → ${rounds.length} snapshots built`);
   console.log(`[rounds] setId=${setId} gameMode=${gameMode} pseudoMatchId=${pseudoMatchId || '(none)'}`);
   if (rounds.length > 0) {
@@ -410,13 +531,60 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   const finalPlacement = extractFinalPlacement(entries);
   console.log(`[rounds] finalPlacement=${finalPlacement} augments=${augments.length} godPicks=${godPicks.length}`);
 
+  // finalBoard fallback: board_pieces is a live diff stream, and its last
+  // update before the ledger ends can predate the player's final item slams
+  // if the match/game ended abruptly — confirmed real (MetaTFT's post-game
+  // recap showed 4 fully-itemised champions on a match where board_pieces
+  // alone produced a finalBoard with 0 completed items, causing AUGMENT_003/
+  // 004 to fire a false "augment's payoff went unused" note). match_stats.
+  // board_players is a separate, per-stage GEP snapshot (stage -> per-player
+  // {board, bench} arrays, item_1/2/3 included) that isn't subject to the
+  // same "last live diff before cutoff" risk — used here only when it shows
+  // strictly more equipped items than the board_pieces-derived board, so it
+  // can only improve accuracy, never regress a case that was already correct.
+  let finalBoard = board;
+  if (lastMatchStatsBoardPlayersRaw !== undefined && localPlayerName) {
+    type StageEntry = {
+      stage?: { stage_main?: number; stage_sub?: number };
+      board?: Array<{ summoner?: string; board?: Array<Record<string, any>> }>;
+    };
+    const stages = safeParseGep(lastMatchStatsBoardPlayersRaw, []) as StageEntry[];
+    const lastStage = stages.reduce<StageEntry | undefined>((best, s) => {
+      if (!best) return s;
+      const bestKey = (best.stage?.stage_main ?? 0) * 100 + (best.stage?.stage_sub ?? 0);
+      const key     = (s.stage?.stage_main ?? 0) * 100 + (s.stage?.stage_sub ?? 0);
+      return key > bestKey ? s : best;
+    }, undefined);
+
+    const mine = lastStage?.board?.find(p => p.summoner?.startsWith(localPlayerName!));
+    if (mine?.board) {
+      const fallbackBoard: BoardState = {};
+      for (const unit of mine.board) {
+        if (!unit?.cell || !unit?.name) continue;
+        fallbackBoard[unit.cell as string] = {
+          name:   unit.name,
+          level:  Number(unit.level ?? 1),
+          item_1: unit.item_1 || '0',
+          item_2: unit.item_2 || '0',
+          item_3: unit.item_3 || '0',
+        };
+      }
+      const itemCount = (b: BoardState) =>
+        Object.values(b).reduce((n, c) => n + [c.item_1, c.item_2, c.item_3].filter(i => i && i !== '0').length, 0);
+      if (itemCount(fallbackBoard) > itemCount(finalBoard)) {
+        console.warn(`[rounds] finalBoard from live board_pieces had fewer equipped items (${itemCount(finalBoard)}) than match_stats.board_players's last snapshot (${itemCount(fallbackBoard)}) — using the fallback as finalBoard`);
+        finalBoard = fallbackBoard;
+      }
+    }
+  }
+
   return {
     pseudoMatchId,
     setId,
     gameMode,
     rounds,
     finalPlacement,
-    finalBoard: board,
+    finalBoard,
     augments,
     godPicks,
   };

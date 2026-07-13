@@ -1,6 +1,6 @@
 {
   "name": "coachv",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Offline TFT post-match coaching app built on Overwolf",
   "license": "MIT",
   "scripts": {

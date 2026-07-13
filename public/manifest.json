@@ -4,7 +4,7 @@
   "meta": {
     "name": "coachv — coach for TFT",
     "author": "TheMisterious",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "minimum-overwolf-version": "0.224.0",
     "minimum-gep-version": "302.0",
     "description": "Round-by-round post-match TFT coaching with offline reports",

@@ -7,6 +7,9 @@ releases/
 .DS_Store
 Thumbs.db
 
+# Personal Riot API key notes — never commit, use .env instead.
+riot.txt
+
 # Unofficial MetaTFT data (scripts/fetch-metatft.js) — regenerate locally, don't commit.
 data/sets/*/meta-tiers.generated.json
 

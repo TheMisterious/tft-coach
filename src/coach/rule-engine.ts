@@ -18,6 +18,7 @@ import { checkCombat }           from './checkers/combat';
 import { getRuleTier, getRuleMeta, getMvpRules } from './rules-loader';
 import { buildMatchContext }     from './match-context';
 import { buildMatchPlan }        from './plan-builder';
+import { linkCompoundingPatterns } from './decision-links';
 
 const SEVERITY_ORDER: Record<Severity, number> = {
   critical: 0,
@@ -79,6 +80,7 @@ export function extractDecisionPoints(
 
   points = suppressHoldGoldAdviceDuringHpCrisis(points, context);
   points = mergeEconShortfallsAtSameRound(points);
+  points = linkCompoundingPatterns(points);
 
   console.log('[rule-engine] total decision points:', points.length);
 

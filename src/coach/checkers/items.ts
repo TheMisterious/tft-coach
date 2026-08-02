@@ -5,9 +5,10 @@
 // ITEM_005: A real, buildable completed item was left as unbuilt components
 //           for 3+ consecutive rounds — see data/core/item-data.json
 
-import type { MatchSnapshot, DecisionPoint, MetaData, MatchContext, Cell, ItemData } from '../../shared/types';
+import type { MatchSnapshot, DecisionPoint, MetaData, MatchContext, Cell, ItemData, RoundSnapshot } from '../../shared/types';
 import { getChampionName, getItemName } from '../../enrichment/meta-lookup';
-import { NEUTRAL_CONTEXT } from '../match-context';
+import { NEUTRAL_CONTEXT, computeActiveComp, computeCarryDamage } from '../match-context';
+import { pivotContextClause } from '../plan-builder';
 import { boardItemIds, identifyCarry } from '../../ledger/merge';
 
 function byHp(hp: number, t: { low: string; mid: string; high: string }): string {
@@ -52,7 +53,7 @@ export function checkItems(match: MatchSnapshot, meta: MetaData, context: MatchC
   return [
     ...checkSlamTiming(match, meta).filter(p => !conversionRounds.has(p.round)),
     ...checkCarryItemsOnTank(match, meta),
-    ...checkUnderItemisedCarry(match, meta),
+    ...checkUnderItemisedCarry(match, meta, context),
     ...checkItemSpread(match, meta),
     ...conversionPoints,
   ];
@@ -122,14 +123,14 @@ function checkCarryItemsOnTank(match: MatchSnapshot, meta: MetaData): DecisionPo
 }
 
 // ITEM_003 — carry has <2 completed items at round 4-1
-function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
+function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData, context: MatchContext): DecisionPoint[] {
   const r41 = match.rounds.find(r => r.label === '4-1');
   if (!r41) return [];
 
   const units = Object.values(r41.board).filter(c => c?.name && c.name !== '0');
   if (units.length === 0) return [];
 
-  const carry      = identifyCarry(units, meta);
+  const carry      = identifyCarry(units, meta, computeActiveComp(match), computeCarryDamage(match));
   const carryName  = getChampionName(carry.name, meta);
   const itemCount  = unitItems(carry).filter(id => !isComponent(id, meta)).length;
   if (itemCount >= 2) return [];
@@ -146,7 +147,7 @@ function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData): Decision
       low:  `${carryName} entered stage 4 with only ${itemCount} completed item(s) — and you're already at ${r41.health} HP. This is the worst combination: a weak board AND a low-HP position. Every fight from here where your carry underperforms accelerates elimination. Slam any available components immediately onto ${carryName}, even off-BiS items.`,
       mid:  `Your carry (${carryName}) entered stage 4 with only ${itemCount} item(s) at ${r41.health} HP. Two component rounds have already occurred — the carry should have at least 2 completed items by now. An under-itemised carry in stage 4 dramatically reduces your win rate and HP stability.`,
       high: `${carryName} entered stage 4 with only ${itemCount} completed item(s). You're at ${r41.health} HP so you have room to recover, but the itemisation gap is still costing you — a fully-itemised carry would close out fights faster and preserve that health lead into the late game.`,
-    }),
+    }) + pivotContextClause(context.plan, '4-1'),
   }];
 }
 
@@ -256,6 +257,108 @@ function findBuildablePairs(heldComponentIds: string[], meta: MetaData): Buildab
   return pairs;
 }
 
+interface FiringPair extends BuildablePair {
+  streak: number;
+}
+
+// 3+ held components produce C(n,2) buildable pairs that all pairwise share
+// a component — e.g. holding Negatron Cloak + Chain Vest + Giant's Belt
+// makes all 3 possible pairs (Negatron+Chain, Negatron+Belt, Chain+Belt)
+// buildable at once, and each hit its own 3-round streak in the same round.
+// FIXED (2026-08-02, real match report: 3 separate near-duplicate ITEM_005
+// notifications fired at 2-3, all for the same 3 held components): the old
+// per-pair loop fired one DecisionPoint per pair independently, but building
+// any one of those pairs consumes 2 of the 3 components and breaks the other
+// two — they were never 3 independent recommendations, just 3 views of one
+// hoarding situation. Groups same-round firings that share a component
+// (union-find over component ids, so it holds for 4+ overlapping components
+// too, not just the 3-component case) into a single DecisionPoint listing
+// every buildable option, instead of one point per pair.
+function clusterByComponent(pairs: FiringPair[]): FiringPair[][] {
+  const parent = new Map<string, string>();
+  const find = (x: string): string => {
+    let root = x;
+    while (parent.get(root) && parent.get(root) !== root) root = parent.get(root)!;
+    return root;
+  };
+  for (const pair of pairs) {
+    for (const c of pair.comps) if (!parent.has(c)) parent.set(c, c);
+    const [a, b] = pair.comps;
+    const ra = find(a), rb = find(b);
+    if (ra !== rb) parent.set(ra, rb);
+  }
+
+  const groups = new Map<string, FiringPair[]>();
+  for (const pair of pairs) {
+    const root = find(pair.comps[0]);
+    if (!groups.has(root)) groups.set(root, []);
+    groups.get(root)!.push(pair);
+  }
+  return [...groups.values()];
+}
+
+function buildConversionPoint(
+  cluster: FiringPair[],
+  round: RoundSnapshot,
+  meta: MetaData,
+  context: MatchContext
+): DecisionPoint | undefined {
+  const inCrisis = context.hpCrisisRounds.has(round.label);
+  const need: Need = inCrisis ? 'tank' : 'offense';
+
+  const options = cluster.flatMap(pair => {
+    const resultData = meta.itemData[pair.resultId];
+    if (!resultData) return [];
+    const fits = matchesNeed(resultData, need);
+    const resultName = getItemName(pair.resultId, meta);
+    // If the buildable item doesn't fit the round's need, still describe its
+    // real stats (whatever tag it actually has) rather than the need's stats.
+    const describeNeed = fits ? need : (resultData.tags[0] as Need | undefined) ?? need;
+    const statText = describeStatsForNeed(resultData, describeNeed);
+    return [{ resultName, statText, fits }];
+  });
+  if (options.length === 0) return undefined;
+
+  const compNames = [...new Set(cluster.flatMap(p => p.comps.map(id => getItemName(id, meta))))].join(' + ');
+  const fitsAny    = options.some(o => o.fits);
+  const consecutiveRounds = Math.max(...cluster.map(p => p.streak));
+  const crisisSuffix = inCrisis ? ` during an HP crisis (${round.health} HP)` : '';
+
+  // Single buildable option — identical wording to the pre-fix single-pair case.
+  if (options.length === 1) {
+    const { resultName, statText, fits } = options[0];
+    return {
+      ruleId:   'ITEM_005',
+      round:    round.label,
+      category: 'items',
+      severity: fits ? 'moderate' : 'minor',
+      observed: `Held ${compNames} unbuilt for 3+ consecutive rounds${crisisSuffix}`,
+      recommended: fits
+        ? `Combine into ${resultName} (${statText}) — matches what your board needed right then`
+        : `Combine into ${resultName} (${statText}) — real value, just not the kind this round's situation called for`,
+      reasonMetrics: { components: compNames, result: resultName, consecutiveRounds },
+      coaching_text: (fits
+        ? `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Combined, those build ${resultName} (${statText}) — exactly the kind of stats your board needed at that point. Sitting on the raw components instead of slamming them cost you that value for multiple fights.`
+        : `You held ${compNames} unbuilt for 3+ consecutive rounds. Combined, those build ${resultName} (${statText}) — real value left on the bench, though it isn't what this specific round's situation called for. Still better to slam it than let the components sit idle.`
+      ) + pivotContextClause(context.plan, round.label),
+    };
+  }
+
+  // Multiple overlapping options — building any one consumes 2 of the held
+  // components and breaks the rest, so only one is actually actionable.
+  const optionText = options.map(o => `${o.resultName} (${o.statText})`).join(' or ');
+  return {
+    ruleId:   'ITEM_005',
+    round:    round.label,
+    category: 'items',
+    severity: fitsAny ? 'moderate' : 'minor',
+    observed: `Held ${compNames} unbuilt for 3+ consecutive rounds${crisisSuffix}`,
+    recommended: `Combine any two into ${optionText} — you can only build one from these at a time`,
+    reasonMetrics: { components: compNames, results: options.map(o => o.resultName).join(', '), consecutiveRounds },
+    coaching_text: `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Any two of them combine into a real completed item — ${optionText} — but slamming one uses up two of the three, so pick whichever matches what your board needs. Sitting on all of them unbuilt instead of slamming any pair cost you that value for multiple fights.` + pivotContextClause(context.plan, round.label),
+  };
+}
+
 function checkComponentConversionOpportunity(match: MatchSnapshot, meta: MetaData, context: MatchContext): DecisionPoint[] {
   const points: DecisionPoint[] = [];
   const streaks    = new Map<string, number>();
@@ -280,38 +383,19 @@ function checkComponentConversionOpportunity(match: MatchSnapshot, meta: MetaDat
       }
     }
 
+    const firing: FiringPair[] = [];
     for (const pair of pairs) {
       const streak = (streaks.get(pair.pairKey) ?? 0) + 1;
       streaks.set(pair.pairKey, streak);
       if (streak !== 3 || firedPairs.has(pair.pairKey)) continue;
       firedPairs.add(pair.pairKey);
+      firing.push({ ...pair, streak });
+    }
+    if (firing.length === 0) continue;
 
-      const resultData = meta.itemData[pair.resultId];
-      if (!resultData) continue;
-      const inCrisis = context.hpCrisisRounds.has(round.label);
-      const need: Need = inCrisis ? 'tank' : 'offense';
-      const fits = matchesNeed(resultData, need);
-      const resultName = getItemName(pair.resultId, meta);
-      const compNames   = pair.comps.map(id => getItemName(id, meta)).join(' + ');
-      // If the buildable item doesn't fit the round's need, still describe its
-      // real stats (whatever tag it actually has) rather than the need's stats.
-      const describeNeed = fits ? need : (resultData.tags[0] as Need | undefined) ?? need;
-      const statText = describeStatsForNeed(resultData, describeNeed);
-
-      points.push({
-        ruleId:   'ITEM_005',
-        round:    round.label,
-        category: 'items',
-        severity: fits ? 'moderate' : 'minor',
-        observed: `Held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? ` during an HP crisis (${round.health} HP)` : ''}`,
-        recommended: fits
-          ? `Combine into ${resultName} (${statText}) — matches what your board needed right then`
-          : `Combine into ${resultName} (${statText}) — real value, just not the kind this round's situation called for`,
-        reasonMetrics: { components: compNames, result: resultName, consecutiveRounds: streak },
-        coaching_text: fits
-          ? `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Combined, those build ${resultName} (${statText}) — exactly the kind of stats your board needed at that point. Sitting on the raw components instead of slamming them cost you that value for multiple fights.`
-          : `You held ${compNames} unbuilt for 3+ consecutive rounds. Combined, those build ${resultName} (${statText}) — real value left on the bench, though it isn't what this specific round's situation called for. Still better to slam it than let the components sit idle.`,
-      });
+    for (const cluster of clusterByComponent(firing)) {
+      const point = buildConversionPoint(cluster, round, meta, context);
+      if (point) points.push(point);
     }
   }
   return points;

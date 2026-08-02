@@ -4,11 +4,12 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { CoachingReportView } from './CoachingReportView';
+import { PlayerTrendsView } from './PlayerTrendsView';
 import { StatusBar } from './StatusBar';
 import { AdBanner } from './AdBanner';
 import { useAppStore } from '../store';
-import { listRecentMatches, loadMatch } from '../../persistence/db';
-import type { CoachingReport, AppStatus } from '../../shared/types';
+import { listRecentMatches, loadMatch, loadPlayerProfile } from '../../persistence/db';
+import type { CoachingReport, AppStatus, PlayerProfile } from '../../shared/types';
 
 declare const overwolf: any;
 
@@ -19,11 +20,14 @@ function DesktopApp() {
     setCurrentReport, setAppStatus, setMatchHistory,
   } = useAppStore();
   const [activeMatchId, setActiveMatchId] = useState<string | undefined>();
+  const [view, setView] = useState<'match' | 'trends'>('match');
+  const [playerProfile, setPlayerProfile] = useState<PlayerProfile | null>(null);
 
   useEffect(() => {
     // Match history lives in localStorage (persistence/db.ts), shared across
     // windows in the same extension origin — load it directly, no IPC needed.
     setMatchHistory(listRecentMatches());
+    setPlayerProfile(loadPlayerProfile());
 
     // Primary channel: background calls getMainWindow().receiveStatusUpdate() directly.
     // start_window is "desktop" so getMainWindow() reliably returns this window's global.
@@ -38,6 +42,9 @@ function DesktopApp() {
       const history = listRecentMatches();
       setMatchHistory(history);
       setActiveMatchId(history[0]?.pseudo_match_id);
+      // Player Trends is retrained (background/main.ts) right after every
+      // match save, so the freshly-persisted profile is ready to reload here.
+      setPlayerProfile(loadPlayerProfile());
     };
 
     // Fallback channel: sendMessage (kept in case background calls it directly)
@@ -93,13 +100,39 @@ function DesktopApp() {
       background: '#11111b', fontFamily: 'Segoe UI, system-ui, sans-serif',
     }}>
       <StatusBar status={appStatus} />
+      <div style={{ display: 'flex', gap: 4, padding: '8px 12px 0', flexShrink: 0 }}>
+        <button
+          onClick={() => setView('match')}
+          style={{
+            background: view === 'match' ? '#313244' : 'transparent',
+            color: '#cdd6f4', border: '1px solid #313244', borderRadius: 6,
+            padding: '4px 12px', fontSize: 12, cursor: 'pointer',
+          }}
+        >
+          Match Report
+        </button>
+        <button
+          onClick={() => setView('trends')}
+          style={{
+            background: view === 'trends' ? '#313244' : 'transparent',
+            color: '#cdd6f4', border: '1px solid #313244', borderRadius: 6,
+            padding: '4px 12px', fontSize: 12, cursor: 'pointer',
+          }}
+        >
+          Player Trends
+        </button>
+      </div>
       <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
-        <CoachingReportView
-          report={currentReport ?? undefined}
-          history={matchHistory}
-          onSelectMatch={handleSelectMatch}
-          activeMatchId={activeMatchId}
-        />
+        {view === 'match' ? (
+          <CoachingReportView
+            report={currentReport ?? undefined}
+            history={matchHistory}
+            onSelectMatch={handleSelectMatch}
+            activeMatchId={activeMatchId}
+          />
+        ) : (
+          <PlayerTrendsView profile={playerProfile} />
+        )}
       </div>
       <AdBanner />
     </div>

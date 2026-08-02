@@ -15,7 +15,8 @@
 // ROLL_003.
 
 import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, MatchContext } from '../../shared/types';
-import { NEUTRAL_CONTEXT } from '../match-context';
+import { NEUTRAL_CONTEXT, computeActiveComp, computeCarryDamage } from '../match-context';
+import { pivotContextClause } from '../plan-builder';
 import { identifyCarry } from '../../ledger/merge';
 
 // Shop odds indexed by [carry_cost - 1][level - 1] (levels 1-10, costs 1-5).
@@ -36,10 +37,15 @@ function oddsAt(level: number, cost: number): number {
 
 // Infer most likely carry cost, using meta for both role-aware carry
 // identification (see ledger/merge.ts) and tier lookup.
-function inferCarryCost(round: RoundSnapshot, meta: MetaData): number {
+function inferCarryCost(
+  round: RoundSnapshot,
+  meta: MetaData,
+  activeComp: Set<string>,
+  carryDamage: Map<string, number>
+): number {
   const units = Object.values(round.board).filter(c => c?.name && c.name !== '0');
   if (units.length === 0) return 3;
-  const carry = identifyCarry(units, meta);
+  const carry = identifyCarry(units, meta, activeComp, carryDamage);
   return meta.champions[carry.name]?.tier ?? 3;
 }
 
@@ -61,13 +67,22 @@ export function checkRolling(
 // for a detected reroll archetype: a real reroll line intentionally sits at a
 // fixed low level rolling for its (cheap) target, and inferCarryCost's "most
 // itemised unit" heuristic is unreliable mid-reroll before items are slammed.
+// Also suppressed for context.plan's 'slow_roll' econStyle — isRerollComp
+// only fires for curated comps.json archetypes (currently just Anima/Jinx),
+// so any other reroll line (e.g. a 1-cost reroll) would otherwise fall
+// through to the full heuristic and get misjudged by inferCarryCost picking
+// the highest-cost incidental unit on board instead of the actual reroll
+// target. 'slow_roll' is plan-builder.ts's comp-agnostic behavioral signal
+// (4+ rounds rolling with no level movement) for exactly this shape of play.
 function checkOverRollBadOdds(match: MatchSnapshot, meta: MetaData, context: MatchContext): DecisionPoint[] {
-  if (context.isRerollComp) return [];
+  if (context.isRerollComp || context.plan?.econStyle === 'slow_roll') return [];
   const points: DecisionPoint[] = [];
+  const activeComp = computeActiveComp(match);
+  const carryDamage = computeCarryDamage(match);
   for (const round of match.rounds) {
     const goldRolled = round.rollsSpent * 2;
     if (goldRolled <= 15) continue;
-    const cost  = inferCarryCost(round, meta);
+    const cost  = inferCarryCost(round, meta, activeComp, carryDamage);
     const odds  = oddsAt(round.level, cost);
     if (odds > 10) continue;
 
@@ -85,7 +100,7 @@ function checkOverRollBadOdds(match: MatchSnapshot, meta: MetaData, context: Mat
       observed: `Spent ${goldRolled}g rolling at level ${round.level} for ${cost}-cost units (${odds}% odds per slot)`,
       recommended: `Level to ${targetLevel} first — odds jump to ${oddsAt(targetLevel, cost)}% per slot`,
       reasonMetrics: { goldRolled, level: round.level, cost, odds, targetLevel },
-      coaching_text: `You spent ${goldRolled}g rolling at level ${round.level}, but ${cost}-cost units only appear ${odds}% of the time per shop slot at that level. That is extremely inefficient — you expect to see roughly ${(5 * odds / 100 * (goldRolled / 2)).toFixed(1)} copies from ${goldRolled / 2} rolls. Leveling to ${targetLevel} first would give ${oddsAt(targetLevel, cost)}% odds per slot, making each roll dramatically more likely to hit.`,
+      coaching_text: `You spent ${goldRolled}g rolling at level ${round.level}, but ${cost}-cost units only appear ${odds}% of the time per shop slot at that level. That is extremely inefficient — you expect to see roughly ${(5 * odds / 100 * (goldRolled / 2)).toFixed(1)} copies from ${goldRolled / 2} rolls. Leveling to ${targetLevel} first would give ${oddsAt(targetLevel, cost)}% odds per slot, making each roll dramatically more likely to hit.` + pivotContextClause(context.plan, round.label),
     });
   }
   return points;
@@ -125,7 +140,7 @@ function checkUnderRollCrisis(match: MatchSnapshot): DecisionPoint[] {
 // penalising "no 3-star result this round" would flag correct reroll play as
 // a mistake on nearly every round of the game.
 function checkPostStabilizationRoll(match: MatchSnapshot, context: MatchContext): DecisionPoint[] {
-  if (context.isRerollComp) return [];
+  if (context.isRerollComp || context.plan?.econStyle === 'slow_roll') return [];
   const rounds = match.rounds;
 
   // Find stabilisation round: first round where ≥2 item-bearing units are 2-star.

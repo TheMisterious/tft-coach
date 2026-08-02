@@ -47,6 +47,21 @@ function checkBoardCostSum(match: MatchSnapshot, meta: MetaData): DecisionPoint[
     const deficit = benchmark - costSum;
     if (deficit <= 0) continue;
 
+    // Real HP delta across this stage (this round's health -> next stage's
+    // X-1 checkpoint), the same "stage-start to stage-start" window hp.ts's
+    // checkers already use — replaces the old unquantified "correlates with
+    // the HP you lost this stage" claim with the actual number for THIS
+    // match, or drops the HP framing entirely when the next checkpoint isn't
+    // in the match (e.g. the player was eliminated mid-stage) rather than
+    // asserting a number that isn't there.
+    const nextStageRound = match.rounds.find(r => r.label === `${stageStr + 1}-1`);
+    const hpLostThisStage = nextStageRound ? round.health - nextStageRound.health : undefined;
+    const hpClause = hpLostThisStage === undefined
+      ? ''
+      : hpLostThisStage > 0
+        ? ` You went on to lose ${hpLostThisStage} HP over the course of stage ${stageStr} (${round.health} → ${nextStageRound!.health}) — consistent with a board that was under-strength for the fights it had to play.`
+        : ` Your HP actually held steady this stage (${round.health} → ${nextStageRound!.health}) despite the deficit, so this is a power gap worth closing before it costs you a fight, not yet a confirmed loss.`;
+
     points.push({
       ruleId:   'BOARD_001',
       round:    round.label,
@@ -54,8 +69,8 @@ function checkBoardCostSum(match: MatchSnapshot, meta: MetaData): DecisionPoint[
       severity: deficit >= 15 ? 'critical' : 'moderate',
       observed: `Board cost sum at stage ${stageStr}: ~${costSum} (benchmark ≥${benchmark})`,
       recommended: `Aim for a weighted board value of ${benchmark}+ at stage ${stageStr} — buy higher-tier units or upgrade existing ones`,
-      reasonMetrics: { costSum, benchmark, deficit, stage: stageStr },
-      coaching_text: `Your board's weighted cost sum at stage ${stageStr} was approximately ${costSum} — ${deficit} below the expected benchmark of ${benchmark}. This is a proxy for board power and correlates with the HP you lost this stage. Focus on upgrading units to 2-star or adding higher-cost units to close this gap.`,
+      reasonMetrics: { costSum, benchmark, deficit, stage: stageStr, ...(hpLostThisStage !== undefined ? { hpLostThisStage } : {}) },
+      coaching_text: `Your board's weighted cost sum at stage ${stageStr} was approximately ${costSum} — ${deficit} below the expected benchmark of ${benchmark}. This is a proxy for board power.${hpClause} Focus on upgrading units to 2-star or adding higher-cost units to close this gap.`,
     });
   }
   return points;

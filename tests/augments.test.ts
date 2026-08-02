@@ -97,9 +97,40 @@ describe('AUGMENT_003 — carry augment payoff unrealised', () => {
     expect(points.find(p => p.ruleId === 'AUGMENT_003')).toBeUndefined();
   });
 
-  it('does not fire for augment ids that are not the "<Champion>Carry" shape', () => {
+  it('does not fire for augment ids that are not the "<Champion>Carry" shape and have no augmentUnitGrants entry', () => {
     const meta = makeMeta({ champions: { TFT17_Nasus: NASUS } });
     const match = makeMatch({ augments: ['TFT17_Augment_Arbiter_DivineAmendment'], finalBoard: {} });
+    const points = checkAugments(match, meta);
+    expect(points.find(p => p.ruleId === 'AUGMENT_003')).toBeUndefined();
+  });
+
+  // Real fix (2026-07-28): AUGMENT_003 used to only catch the narrow
+  // "_Augment_<Name>Carry" id shape — ~20 of the real ~63 champion-granting
+  // augments in augments.json's 'units' bucket. meta.augmentUnitGrants
+  // (auto-fetched, scripts/fetch-ddragon.js) covers the rest via real Data
+  // Dragon description text, e.g. "TFT17_Augment_Arbiter_DivineAmendment"
+  // ("Gain a Leona...") doesn't match the id-shape regex at all.
+  it('fires via augmentUnitGrants for a champion-granting augment that does not match the "Carry" id shape', () => {
+    const meta = makeMeta({
+      champions: { TFT17_Leona: { name: 'Leona', tier: 2, role: 'flex', traits: [] } },
+      augmentUnitGrants: { TFT17_Augment_Arbiter_DivineAmendment: 'TFT17_Leona' },
+    });
+    const match = makeMatch({ augments: ['TFT17_Augment_Arbiter_DivineAmendment'], finalBoard: {} });
+    const points = checkAugments(match, meta);
+    const hit = points.find(p => p.ruleId === 'AUGMENT_003');
+    expect(hit).toBeTruthy();
+    expect(hit!.observed).toContain('Leona');
+  });
+
+  it('does not fire when the augmentUnitGrants-resolved champion is on board and itemised', () => {
+    const meta = makeMeta({
+      champions: { TFT17_Leona: { name: 'Leona', tier: 2, role: 'flex', traits: [] } },
+      augmentUnitGrants: { TFT17_Augment_Arbiter_DivineAmendment: 'TFT17_Leona' },
+    });
+    const match = makeMatch({
+      augments: ['TFT17_Augment_Arbiter_DivineAmendment'],
+      finalBoard: { cell_1: cell('TFT17_Leona', ['TFT_Item_Bloodthirster', 'TFT_Item_WarmogsArmor']) },
+    });
     const points = checkAugments(match, meta);
     expect(points.find(p => p.ruleId === 'AUGMENT_003')).toBeUndefined();
   });

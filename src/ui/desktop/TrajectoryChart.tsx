@@ -8,6 +8,10 @@ interface Props {
   title: string;
   color: string;
   suffix?: string; // appended to axis value labels, e.g. "g" or " HP"
+  // Vertical dashed lines marking a round of interest (e.g. a comp pivot) —
+  // the only cross-round signal (src/coach/plan-builder.ts's MatchPlan)
+  // this chart otherwise has no way to show.
+  markers?: Array<{ round: string; label: string }>;
 }
 
 const WIDTH = 300;
@@ -16,7 +20,7 @@ const PAD_X = 4;
 const PAD_TOP = 8;
 const PAD_BOTTOM = 8;
 
-export function TrajectoryChart({ data, accessor, title, color, suffix = '' }: Props) {
+export function TrajectoryChart({ data, accessor, title, color, suffix = '', markers = [] }: Props) {
   const points = data
     .map(p => ({ round: p.round, value: accessor(p) }))
     .filter((p): p is { round: string; value: number } => p.value !== undefined);
@@ -40,6 +44,10 @@ export function TrajectoryChart({ data, accessor, title, color, suffix = '' }: P
   const floorY = HEIGHT - PAD_BOTTOM;
   const areaPath = `${linePath} L ${coords[coords.length - 1].x.toFixed(1)} ${floorY} L ${coords[0].x.toFixed(1)} ${floorY} Z`;
 
+  const markerCoords = markers
+    .map(m => ({ ...m, coord: coords.find(c => c.round === m.round) }))
+    .filter((m): m is typeof m & { coord: NonNullable<typeof m.coord> } => !!m.coord);
+
   return (
     <div className={styles.root}>
       <div className={styles.title}>{title}</div>
@@ -53,6 +61,19 @@ export function TrajectoryChart({ data, accessor, title, color, suffix = '' }: P
           <path d={linePath} fill="none" stroke={color} strokeWidth={2} vectorEffect="non-scaling-stroke" />
           {coords.map((c, i) => (
             <circle key={i} cx={c.x} cy={c.y} r={2} fill={color} />
+          ))}
+          {markerCoords.map((m, i) => (
+            <line
+              key={i}
+              x1={m.coord.x} x2={m.coord.x}
+              y1={PAD_TOP} y2={floorY}
+              stroke="#f38ba8"
+              strokeWidth={1}
+              strokeDasharray="3,2"
+              vectorEffect="non-scaling-stroke"
+            >
+              <title>{m.label}</title>
+            </line>
           ))}
         </svg>
       </div>

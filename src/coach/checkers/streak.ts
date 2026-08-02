@@ -47,6 +47,19 @@ function checkWinStreakBreak(match: MatchSnapshot): DecisionPoint[] {
   return points;
 }
 
+// STREAK_002 late-game cutoff: chasing streak-bonus gold efficiency assumes
+// econ optimization is still the priority, which flips by stage 5 — the
+// lobby has thinned out, fights matter more than +1-3g/round, and spending
+// to try to win (even a spend that doesn't pay off) is the correct play
+// regardless of the specific HP number. FIXED (2026-08-02, real match report:
+// this fired at 5-2 telling the player they should have "committed to the
+// loss streak and banked gold" instead of spending to try to survive/win —
+// backwards advice once you're in the late game). The existing HP<20 guard
+// below only catches literal emergencies; it didn't cover this case because
+// HP wasn't yet critical at 5-2, but the streak-econ tradeoff itself stops
+// being the right lens well before HP gets that low.
+const LATE_GAME_STAGE = 5;
+
 // STREAK_002
 function checkLossStreakWaste(match: MatchSnapshot): DecisionPoint[] {
   const points: DecisionPoint[] = [];
@@ -58,6 +71,9 @@ function checkLossStreakWaste(match: MatchSnapshot): DecisionPoint[] {
     if (curr.type !== 'PVP') continue;
     if (curr.streakType !== 'loss') continue;
     if (curr.streakCount < 2 || curr.streakCount > 4) continue;
+
+    const [stageStr] = curr.label.split('-');
+    if (Number(stageStr) >= LATE_GAME_STAGE) continue;
 
     // Flag if player spent significant gold this round but still lost the next fight.
     const spend = curr.rollsSpent * 2 + (curr.xpBought ? 4 : 0);

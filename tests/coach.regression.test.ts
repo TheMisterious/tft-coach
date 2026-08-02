@@ -14,6 +14,9 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import { replayLedger } from './replay-harness';
+import { buildMatchContext } from '../src/coach/match-context';
+import { buildMatchPlan } from '../src/coach/plan-builder';
+import { extractFeatureVector } from '../src/profile/feature-vector';
 
 const GOLDENS_DIR = path.resolve(__dirname, 'goldens');
 const CHAMPIONS   = loadKnownChampions();
@@ -66,6 +69,13 @@ describe('golden match smoke tests', () => {
         expect(brief).toBeDefined();
       });
 
+      it('produces a match plan with a non-empty headline', async () => {
+        const { brief } = await replayLedger(path.join(GOLDENS_DIR, file));
+        expect(brief.plan).toBeDefined();
+        expect(brief.plan.headline.length).toBeGreaterThan(0);
+        expect(brief.plan.econPhases.length).toBeGreaterThan(0);
+      });
+
       it('no hallucinated champion names in decision points', async () => {
         const { points } = await replayLedger(path.join(GOLDENS_DIR, file));
         // All decision point observed/recommended text should not contain
@@ -83,6 +93,22 @@ describe('golden match smoke tests', () => {
         const { brief } = await replayLedger(path.join(GOLDENS_DIR, file));
         expect(brief.placement).toBeGreaterThanOrEqual(1);
         expect(brief.placement).toBeLessThanOrEqual(8);
+      });
+
+      // Player Trends feature extraction runs cleanly on real captured
+      // ledger shapes — same "runs without throwing" philosophy as the
+      // pipeline smoke test above, not a check on specific values.
+      it('extracts a Player Trends feature vector with no NaN/undefined', async () => {
+        const { snapshot, points, meta } = await replayLedger(path.join(GOLDENS_DIR, file));
+        const context = { ...buildMatchContext(snapshot, meta), plan: buildMatchPlan(snapshot, meta) };
+        const fv = extractFeatureVector(snapshot, points, context, meta);
+
+        expect(fv.schemaVersion).toBe(1);
+        for (const [key, value] of Object.entries(fv)) {
+          if (value === null) continue; // several fields are legitimately nullable
+          expect(Number.isNaN(value as number)).toBe(false);
+          expect(value).not.toBeUndefined();
+        }
       });
     });
   }

@@ -3,6 +3,7 @@ import type { CoachingReport, CoachingNote, Severity, DecisionCategory, MatchSum
 import { ALL_CATEGORIES, CATEGORY_LABELS } from '../../coach/scoring';
 import { CoachingCard } from './CoachingCard';
 import { MatchTrajectoryCharts } from './MatchTrajectoryCharts';
+import { GamePlanSummary } from './GamePlanSummary';
 import { EmptyState } from './EmptyState';
 import styles from './CoachingReportView.module.css';
 
@@ -94,9 +95,21 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
               <p className={styles.tldr}>{report.tldr}</p>
               {report.priority_fix && (
                 <div className={styles.priorityFix}>
-                  <span className={styles.priorityFixLabel}>Priority fix — {CATEGORY_LABELS[report.priority_fix.category]}</span>
+                  <span className={styles.priorityFixLabel}>
+                    Priority fix — {CATEGORY_LABELS[report.priority_fix.category]}
+                    {report.priority_fix.occurrences > 1 && (
+                      <span className={styles.priorityFixCount}> · {report.priority_fix.occurrences}× this match</span>
+                    )}
+                  </span>
                   <p className={styles.priorityFixAction}>{report.priority_fix.action}</p>
                   <p className={styles.priorityFixWhy}>{report.priority_fix.why}</p>
+                  {report.priority_fix.patterns && report.priority_fix.patterns.length > 0 && (
+                    <ul className={styles.priorityFixPatterns}>
+                      {report.priority_fix.patterns.map((pattern, i) => (
+                        <li key={i}>{pattern}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
               <div className={styles.categoryGrid}>
@@ -110,8 +123,12 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
                   );
                 })}
               </div>
-              {report.round_trajectory && <MatchTrajectoryCharts data={report.round_trajectory} />}
+              {report.round_trajectory && (
+                <MatchTrajectoryCharts data={report.round_trajectory} pivots={report.plan.pivots} />
+              )}
             </header>
+
+            <GamePlanSummary plan={report.plan} />
 
             {/* Severity filter chips */}
             <div className={styles.filters}>

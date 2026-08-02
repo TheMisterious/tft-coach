@@ -33,7 +33,14 @@ import { detectSet, loadMeta }    from '../enrichment/meta-lookup';
 import { extractDecisionPoints }  from '../coach/rule-engine';
 import { buildBrief }             from '../coach/brief-builder';
 import { generateCoachingReport } from '../coach/report-generator';
-import { saveMatch, loadMatch, listRecentMatches } from '../persistence/db';
+import { buildMatchContext }      from '../coach/match-context';
+import { buildMatchPlan }         from '../coach/plan-builder';
+import { extractFeatureVector }   from '../profile/feature-vector';
+import { extractMatchLabels }     from '../profile/labels';
+import { buildPlayerProfile }     from '../profile/trend-model';
+import { saveMatch, loadMatch, listRecentMatches, loadAllFeatureRecords, savePlayerProfile } from '../persistence/db';
+import { runMetaCrawlTick } from '../enrichment/meta-crawler';
+import { loadMetaCrawlState, saveMetaCrawlState, saveAggregateMetaTable } from '../persistence/meta-cache';
 import { summarizeLedgerCoverage, formatLedgerCoverage, sampleRawValues, formatRawSamples } from '../ledger/diagnostics';
 import { ensureWindowOnScreen } from './window-position';
 import { readHotkeyBinding } from '../shared/hotkey';
@@ -50,6 +57,10 @@ import { getLeagueEntriesByPuuid, getMatchIdsByPuuid, getMatchById, formatRiotRa
   gameRunning:   false,
   matchActive:   false,
   appStatus:     'no_game' as import('../shared/types').AppStatus,
+  // True once a real report has been generated for the current game session
+  // (onGameLaunched..onGameClosed bracket). Blocks a second pipeline run —
+  // see runCoachingPipeline's entry guard for why this is needed.
+  pipelineRanThisSession: false,
 };
 
 function computeStatus(): import('../shared/types').AppStatus {
@@ -112,6 +123,7 @@ async function onGameLaunched(): Promise<void> {
   const state = (window as any).appState;
   state.gameRunning = true;
   state.matchActive = true;
+  state.pipelineRanThisSession = false;
   state.appStatus   = computeStatus();
   pushStatusToDesktop();
   // Pre-seed TFT mode immediately. The manifest targets only game 21570 (TFT),
@@ -233,6 +245,37 @@ function pollRunningGame(): void {
 }
 pollRunningGame();
 
+// ─── Player Trends (see src/profile/) ───────────────────────────────────────
+// Set-invariant behavioral feature extraction + incremental retrain, run
+// right after every saveMatch. context is recomputed here rather than
+// threaded out of extractDecisionPoints (which builds an equivalent context
+// internally but doesn't return it) — consistent with this codebase's
+// existing tolerance for cheap redundant recomputation of pure functions
+// (checkers/combat.ts and positioning.ts both already independently call
+// computeActiveComp rather than sharing one computed value).
+function computeTrendData(
+  snapshot: import('../shared/types').MatchSnapshot,
+  meta: import('../shared/types').MetaData,
+  points: import('../shared/types').DecisionPoint[]
+): { featureVector: import('../shared/types').FeatureVector; matchLabels: import('../shared/types').MatchLabels } {
+  const context = { ...buildMatchContext(snapshot, meta), plan: buildMatchPlan(snapshot, meta) };
+  return {
+    featureVector: extractFeatureVector(snapshot, points, context, meta),
+    matchLabels:   extractMatchLabels(snapshot, context),
+  };
+}
+
+// Rebuilds the whole-history PlayerProfile from every match's persisted
+// featureVector/matchLabels — the "retrain" step. Cheap at this project's
+// realistic scale (n<=200 matches, ~29 features), so it's just a function
+// call after every save rather than a separate training pipeline.
+function retrainPlayerProfile(): void {
+  const { records, skippedStaleSchemaCount } = loadAllFeatureRecords();
+  const profile = buildPlayerProfile(records, skippedStaleSchemaCount);
+  savePlayerProfile(profile);
+  console.log('[bg] player profile retrained — sampleSize:', profile.sampleSize, 'confidence:', profile.confidence);
+}
+
 // ─── Match end pipeline ───────────────────────────────────────────────────────
 
 // The listeners.ts module calls appendEvent() for every GEP update.
@@ -248,6 +291,20 @@ overwolf.games.events.onNewEvents.addListener(async (payload: any) => {
 async function runCoachingPipeline(): Promise<void> {
   const state = (window as any).appState;
   if (state.isProcessing) return;
+  if (state.pipelineRanThisSession) {
+    // A real report already went out for this game session. Any further
+    // trigger (typically onGameClosed's safety net firing on stray
+    // round_start/round_end/battle_end noise from post-elimination spectate,
+    // since the League client stays open watching remaining players finish)
+    // is noise, not a second match. Ledger switches matchId on pseudo_match_id
+    // changes, but spectate noise for the SAME match doesn't resend it, so the
+    // existing zero-round guard below can't tell it apart from a real short
+    // match — this flag is the actual fix. Drop the stray buffer so it can't
+    // bleed into whatever the next real match's ledger becomes.
+    console.log('[bg] pipeline already ran this session — ignoring duplicate trigger (likely post-elimination spectate noise)');
+    resetLedger();
+    return;
+  }
   state.isProcessing = true;
   state.matchActive  = false;
   state.appStatus    = computeStatus();
@@ -313,6 +370,10 @@ async function runCoachingPipeline(): Promise<void> {
       return;
     }
 
+    // Past this point we're committed to producing a real report for this
+    // session — block any later trigger (see the entry guard above).
+    state.pipelineRanThisSession = true;
+
     // 3. Load meta data for this set.
     const setId    = detectSet(ledger);
     console.log('[bg] pipeline step 3a: set detected —', setId);
@@ -335,22 +396,34 @@ async function runCoachingPipeline(): Promise<void> {
     // 7. Persist to localStorage (src/persistence/db.ts).
     const lastRound  = snapshot.rounds.at(-1)?.label ?? 'unknown';
     const datePlayed = Date.now();
-    saveMatch({
+    const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
+    const persisted = saveMatch({
       pseudoMatchId:  matchId,
       datePlayed,
       setId,
       placement:      snapshot.finalPlacement,
       lastRound,
-      ledger,
       brief,
       coachingReport: report,
+      featureVector,
+      matchLabels,
     });
-    console.log('[bg] pipeline step 7: match saved to DB');
+    if (persisted) {
+      console.log('[bg] pipeline step 7: match saved to DB');
+      retrainPlayerProfile();
+    } else {
+      // The report still displays below (it's already in memory) but this
+      // match won't appear in history — surface that now rather than let it
+      // go unnoticed, since saveMatch used to be void and this failure mode
+      // was previously silent.
+      console.error('[bg] pipeline step 7: saveMatch failed — report will display but will NOT appear in match history');
+    }
 
     // 8. Push to UI.
     state.latestReport = report;
     readHotkeyBinding((binding) => {
-      showInGameToast(`Coaching report ready — press ${binding ?? '(hotkey not set)'} to view`);
+      const historyWarning = persisted ? '' : ' (history save failed — storage may be full)';
+      showInGameToast(`Coaching report ready${historyWarning} — press ${binding ?? '(hotkey not set)'} to view`);
     });
     console.log('[bg] pipeline step 8: opening desktop window');
     openDesktopWindow(report);
@@ -517,43 +590,20 @@ async function runRiotEnrichment(matchId: string, finalPlacement: number, datePl
     });
     console.log('[bg] riot step 10: placement cross-check —', 'local:', finalPlacement, 'riot:', participant.placement);
 
-    // Step 11: GEP's board_pieces is a live diff stream and its last update
-    // before the ledger ends can predate the player's final item slams (see
-    // rounds.ts's own board_pieces-vs-match_stats.board_players fallback for
-    // the same class of bug) — occasionally producing a finalBoard with
-    // fewer completed items than the player actually ended with, which
-    // throws off AUGMENT_003/004's "no unit had 2+ completed items" checks.
-    // Riot's match-v1 units array is the true final board (no round-by-round
-    // data, but this one snapshot is authoritative) — if it shows more
-    // equipped items than what GEP captured, reprocess the report with Riot's
-    // board substituted in and silently push the corrected version to the
-    // desktop window if it's still open. Still never touches finalPlacement
-    // (stays GEP-sourced) or any per-round data — only the final-board-only
-    // checks that read match.finalBoard.
+    // Step 11 used to regenerate and re-send a second report when Riot's
+    // final board had more equipped items than GEP captured. That created a
+    // confusing "second report" after the match was already finished and the
+    // local report was visible. Keep the cross-check for diagnostics, but do
+    // not overwrite or redisplay the user's first report here.
     try {
       const riotBoard = riotUnitsToBoardState(participant.units ?? []);
-      const localSnapshot = reconstructSnapshots(record.ledger);
+      const localSnapshot = reconstructSnapshots(await readLedger(matchId));
       if (countBoardItems(riotBoard) <= countBoardItems(localSnapshot.finalBoard)) {
         console.log('[bg] riot step 11: GEP finalBoard already at least as complete as Riot\'s — no reprocess needed');
         return;
       }
 
-      console.log('[bg] riot step 11: Riot\'s final board has more equipped items than GEP captured — reprocessing with corrected finalBoard');
-      const correctedSnapshot = { ...localSnapshot, finalBoard: riotBoard };
-      const setId  = detectSet(record.ledger);
-      const meta   = await loadMeta(setId);
-      const points = extractDecisionPoints(correctedSnapshot, meta);
-      const brief  = buildBrief(correctedSnapshot, points, meta);
-      const report = await generateCoachingReport(brief);
-
-      saveMatch({ ...record, riotCrossCheck: { riotPlacement: participant.placement, matched: participant.placement === finalPlacement, checkedAt: Date.now() }, brief, coachingReport: report });
-      (window as any).appState.latestReport = report;
-
-      const mw = (overwolf.windows.getMainWindow() as any);
-      if (typeof mw?.receiveReport === 'function') {
-        mw.receiveReport(report);
-        console.log('[bg] riot step 11: corrected report delivered');
-      }
+      console.log('[bg] riot step 11: Riot\'s final board has more equipped items than GEP captured — keeping the original report and only recording the diagnostic cross-check');
     } catch (e) {
       console.warn('[bg] riot step 11: finalBoard reconciliation failed —', e);
     }
@@ -577,14 +627,17 @@ overwolf.hotkeys?.onHotkeyDown?.addListener((result: any) => {
   }
 });
 
-// Open the desktop window and push the initial status once it's ready.
+// Make sure the desktop window exists and is on-screen, but do NOT restore it
+// here. Restoring on background startup can steal focus and kick the user out
+// of gameplay when Overwolf reloads or re-attaches the controller. The desktop
+// window is restored explicitly only when we actually need to show a report or
+// when the user toggles it with the hotkey.
 overwolf.windows.obtainDeclaredWindow('desktop', (result: any) => {
   if (!result.success) return;
   ensureWindowOnScreen(result.window, () => {
-    overwolf.windows.restore(result.window.id, () => {
-      // Small delay to let the desktop React tree mount before the first message arrives.
-      setTimeout(pushStatusToDesktop, 500);
-    });
+    // Small delay to let the desktop React tree mount before the first status
+    // message arrives. No restore() call here on purpose.
+    setTimeout(pushStatusToDesktop, 500);
   });
 });
 
@@ -638,7 +691,7 @@ console.log('[bg] background controller started');
 //
 //   window.__debugLedgerCoverage()            — most recent saved match
 //   window.__debugLedgerCoverage('<matchId>') — a specific match
-(window as any).__debugLedgerCoverage = (matchId?: string) => {
+(window as any).__debugLedgerCoverage = async (matchId?: string) => {
   const id = matchId ?? listRecentMatches(1)[0]?.pseudo_match_id;
   if (!id) {
     console.warn('[debug] no saved matches found — play a match first');
@@ -649,8 +702,9 @@ console.log('[bg] background controller started');
     console.warn('[debug] no saved match found for id:', id);
     return undefined;
   }
-  const coverage = summarizeLedgerCoverage(record.ledger);
-  console.log(`[debug] ledger coverage for ${id} (placement ${record.placement}, ${record.ledger.length} ledger entries):\n${formatLedgerCoverage(coverage)}`);
+  const ledger = await readLedger(id);
+  const coverage = summarizeLedgerCoverage(ledger);
+  console.log(`[debug] ledger coverage for ${id} (placement ${record.placement}, ${ledger.length} ledger entries):\n${formatLedgerCoverage(coverage)}`);
   return coverage;
 };
 
@@ -661,7 +715,7 @@ console.log('[bg] background controller started');
 //   window.__debugRawSamples()                                — every key, 5 samples each, most recent match
 //   window.__debugRawSamples(['roster.player_status'])         — just this key, most recent match
 //   window.__debugRawSamples(['me.picked_augment'], '<matchId>') — a specific match
-(window as any).__debugRawSamples = (keyFilter?: string[], matchId?: string) => {
+(window as any).__debugRawSamples = async (keyFilter?: string[], matchId?: string) => {
   const id = matchId ?? listRecentMatches(1)[0]?.pseudo_match_id;
   if (!id) {
     console.warn('[debug] no saved matches found — play a match first');
@@ -672,7 +726,8 @@ console.log('[bg] background controller started');
     console.warn('[debug] no saved match found for id:', id);
     return undefined;
   }
-  const samples = sampleRawValues(record.ledger, 5, keyFilter);
+  const ledger = await readLedger(id);
+  const samples = sampleRawValues(ledger, 5, keyFilter);
   console.log(`[debug] raw value samples for ${id}:\n${formatRawSamples(samples)}`);
   return samples;
 };
@@ -699,8 +754,9 @@ console.log('[bg] background controller started');
     return undefined;
   }
 
-  const snapshot   = reconstructSnapshots(record.ledger);
-  const setId      = detectSet(record.ledger);
+  const ledger     = await readLedger(id);
+  const snapshot   = reconstructSnapshots(ledger);
+  const setId      = detectSet(ledger);
   const meta       = await loadMeta(setId);
   const points     = extractDecisionPoints(snapshot, meta);
   const brief      = buildBrief(snapshot, points, meta);
@@ -709,17 +765,134 @@ console.log('[bg] background controller started');
 
   console.log(`[debug] reprocessed ${id} — old placement:${record.placement} new placement:${snapshot.finalPlacement}, augments:${JSON.stringify(snapshot.augments)}, godPicks:${JSON.stringify(snapshot.godPicks)}`);
 
+  const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
   saveMatch({
     pseudoMatchId:  id,
     datePlayed:     record.datePlayed,
     setId,
     placement:      snapshot.finalPlacement,
     lastRound,
-    ledger:         record.ledger,
     brief,
     coachingReport: report,
+    featureVector,
+    matchLabels,
   });
+  retrainPlayerProfile();
   (window as any).appState.latestReport = report;
   openDesktopWindow(report);
   return report;
 };
+
+// Recovers a match whose ledger reached disk but never made it into DB —
+// e.g. saveMatch failing on a localStorage quota error (see the eviction
+// retry in src/persistence/db.ts). __debugReprocessMatch above requires
+// loadMatch(id) to already succeed, so it can't help here; this reads
+// straight from the ledger file instead of requiring an existing DB record.
+//
+//   window.__debugRecoverMatch('<matchId>') — matchId from the failed
+//   "[db] saveMatch failed" log line (e.g. "fallback-1785165189062")
+(window as any).__debugRecoverMatch = async (matchId: string) => {
+  const ledger = await readLedger(matchId);
+  if (ledger.length === 0) {
+    console.warn('[debug] no ledger found on disk for matchId:', matchId);
+    return undefined;
+  }
+
+  const snapshot  = reconstructSnapshots(ledger);
+  const setId     = detectSet(ledger);
+  const meta      = await loadMeta(setId);
+  const points    = extractDecisionPoints(snapshot, meta);
+  const brief     = buildBrief(snapshot, points, meta);
+  const report    = await generateCoachingReport(brief);
+  const lastRound = snapshot.rounds.at(-1)?.label ?? 'unknown';
+
+  const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
+  const persisted = saveMatch({
+    pseudoMatchId:  matchId,
+    datePlayed:     Date.now(),
+    setId,
+    placement:      snapshot.finalPlacement,
+    lastRound,
+    brief,
+    coachingReport: report,
+    featureVector,
+    matchLabels,
+  });
+  console.log(`[debug] recovered ${matchId} — placement:${snapshot.finalPlacement} persisted:${persisted}`);
+  if (persisted) {
+    retrainPlayerProfile();
+    (window as any).appState.latestReport = report;
+    openDesktopWindow(report);
+  }
+  return report;
+};
+
+// One-time backfill: attaches featureVector/matchLabels to every already-
+// indexed match that doesn't have them yet (older matches saved before the
+// Player Trends feature existed), then retrains the profile once at the end.
+//
+// Index-only, by design: this only reaches matches already present in
+// tft:index/tft:match:<id>. It does NOT enumerate raw .jsonl ledger files
+// that have no matching index entry (e.g. from a save that hit the
+// localStorage quota) — that would need Overwolf's directory-listing API
+// (overwolf.io.dir), which nothing in this codebase uses or has verified yet.
+// Treat "sweep up orphaned ledger files" as a separate follow-up, not done here.
+//
+//   window.__debugBackfillFeatureVectors()
+(window as any).__debugBackfillFeatureVectors = async () => {
+  const summaries = listRecentMatches(200);
+  let processed = 0;
+  let skipped   = 0;
+
+  for (const s of summaries) {
+    const record = loadMatch(s.pseudo_match_id);
+    if (!record) { skipped++; continue; }
+    if (record.featureVector && record.matchLabels) { skipped++; continue; } // already backfilled
+
+    const ledger = await readLedger(s.pseudo_match_id);
+    if (ledger.length === 0) { skipped++; continue; }
+
+    const snapshot = reconstructSnapshots(ledger);
+    if (snapshot.rounds.length === 0) { skipped++; continue; }
+
+    const setId = detectSet(ledger);
+    const meta  = await loadMeta(setId);
+    const points = extractDecisionPoints(snapshot, meta);
+    const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
+
+    saveMatch({ ...record, featureVector, matchLabels });
+    processed++;
+  }
+
+  retrainPlayerProfile();
+  console.log(`[debug] backfill complete — processed:${processed} skipped:${skipped}`);
+  return { processed, skipped };
+};
+
+// ─── Meta crawler (see src/enrichment/meta-crawler.ts) ──────────────────────
+// Periodic, resumable, entirely independent of runCoachingPipeline — never
+// blocks or delays match coaching. Ticks are small and bounded (see
+// runMetaCrawlTick), so a tick firing every few minutes naturally spreads a
+// full crawl cycle across many ticks rather than running it in one go.
+const META_CRAWL_TICK_MS = 5 * 60 * 1000; // 5 minutes
+
+async function runMetaCrawlTickSafely(): Promise<void> {
+  const settings = loadSettings();
+  if (!hasLinkedAccount(settings)) return; // reuses the existing Riot-linked gate
+
+  try {
+    const setId = 'set17'; // background crawl has no in-progress match to detectSet() from — same fallback loadMeta/detectSet already use
+    const meta = await loadMeta(setId);
+    const state = loadMetaCrawlState();
+    const result = await runMetaCrawlTick(state, settings, meta);
+    saveMetaCrawlState(result.state);
+    if (result.table) {
+      saveAggregateMetaTable(result.table);
+      console.log('[bg] meta crawl cycle complete — matchSampleCount:', result.table.matchSampleCount);
+    }
+  } catch (e) {
+    console.error('[bg] meta crawl tick failed:', e);
+  }
+}
+
+setInterval(runMetaCrawlTickSafely, META_CRAWL_TICK_MS);

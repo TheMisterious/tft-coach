@@ -8,6 +8,7 @@
 import type { MatchSnapshot, DecisionPoint, MatchBrief, CoachingNote, MetaData, RoundTrajectoryPoint } from '../shared/types';
 import { getChampionName, getItemName } from '../enrichment/meta-lookup';
 import { overallGrade, categoryGrades, capRepeats } from './scoring';
+import { buildMatchPlan } from './plan-builder';
 
 // Maximum decision points (resolved + pending combined) before truncating.
 const MAX_POINTS = 20;
@@ -23,7 +24,7 @@ export function buildBrief(
   // MAX_POINTS budget and crowds out rules that only fired once but matter
   // more (e.g. an off-BiS item note). Same cap scoring.ts uses for grading —
   // see capRepeats() there for why that matters too.
-  const diversified = capRepeats(points);
+  const diversified = diversifyRepeatedNotes(capRepeats(points));
 
   const topPoints = diversified.slice(0, MAX_POINTS); // already severity-sorted
   if (points.length > MAX_POINTS) {
@@ -50,6 +51,7 @@ export function buildBrief(
     finalComp:      buildFinalComp(match, meta),
     augments:       match.augments,
     godPicks:       match.godPicks,
+    plan:           buildMatchPlan(match, meta),
     resolvedNotes,
     decisionPoints: pendingPoints,
     // Graded from the FULL `points` list (pre-truncation) and normalized by
@@ -57,6 +59,47 @@ export function buildBrief(
     overallGrade:    overallGrade(match.finalPlacement, points, match.rounds.length),
     categoryGrades:  categoryGrades(points, match.rounds.length),
   };
+}
+
+// Each checker's coaching_text is picked from a small (2-3 entry) bucket
+// template keyed on HP/gold band (see e.g. checkers/econ.ts's byHp helper).
+// capRepeats() above allows the same ruleId to fire up to MAX_PER_RULE times
+// in one report, and a match's HP/gold band often stays put across nearby
+// rounds — so occurrence 2 and 3 would otherwise repeat the EXACT same
+// paragraph verbatim, just with the round-specific numbers swapped in ("mad
+// libs" repetition). Recurrences are rewritten into a short reference back to
+// the first occurrence instead of restating the full explanation — the
+// specific numbers already live in `observed`/`recommended`, which stay
+// per-round and are left untouched; only the repeated long-form "why" prose
+// is compressed.
+const RECURRENCE_INTROS: Array<(firstRound: string) => string> = [
+  firstRound => `Same pattern recurring since ${firstRound}`,
+  firstRound => `This kept happening — first flagged at ${firstRound}`,
+  firstRound => `Still unresolved from ${firstRound}`,
+];
+
+export function diversifyRepeatedNotes(points: DecisionPoint[]): DecisionPoint[] {
+  const firstRoundByRule = new Map<string, string>();
+  const occurrenceByRule = new Map<string, number>();
+
+  return points.map(p => {
+    if (!p.ruleId || !p.coaching_text) return p;
+    const occurrence = (occurrenceByRule.get(p.ruleId) ?? 0) + 1;
+    occurrenceByRule.set(p.ruleId, occurrence);
+
+    if (occurrence === 1) {
+      firstRoundByRule.set(p.ruleId, p.round);
+      return p;
+    }
+
+    const firstRound = firstRoundByRule.get(p.ruleId)!;
+    const intro = RECURRENCE_INTROS[(occurrence - 2) % RECURRENCE_INTROS.length](firstRound);
+    return { ...p, coaching_text: `${intro}: ${lowercaseFirst(p.observed)}. ${p.recommended}` };
+  });
+}
+
+function lowercaseFirst(text: string): string {
+  return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
 function toCoachingNote(dp: DecisionPoint): CoachingNote {

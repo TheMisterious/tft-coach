@@ -1,7 +1,7 @@
 // Rule engine — runs all checkers and returns a sorted list of decision points.
 // Every numeric claim originates here; the report generator only summarizes them.
 
-import type { MatchSnapshot, DecisionPoint, Severity, MetaData } from '../shared/types';
+import type { MatchSnapshot, DecisionPoint, Severity, MetaData, MatchContext } from '../shared/types';
 import { checkEcon }             from './checkers/econ';
 import { checkLeveling }         from './checkers/leveling';
 import { checkStreak }           from './checkers/streak';
@@ -14,8 +14,10 @@ import { checkSet17 }            from './checkers/set17';
 import { checkTraitBreakpoints } from './checkers/traits';
 import { checkAugments }         from './checkers/augments';
 import { checkPositioning }      from './checkers/positioning';
+import { checkCombat }           from './checkers/combat';
 import { getRuleTier, getRuleMeta, getMvpRules } from './rules-loader';
 import { buildMatchContext }     from './match-context';
+import { buildMatchPlan }        from './plan-builder';
 
 const SEVERITY_ORDER: Record<Severity, number> = {
   critical: 0,
@@ -43,9 +45,13 @@ export function extractDecisionPoints(
 ): DecisionPoint[] {
   console.log('[rule-engine] running checkers on', match.rounds.length, 'rounds');
 
-  const context = buildMatchContext(match, meta);
+  const plan = buildMatchPlan(match, meta);
+  const context: MatchContext = { ...buildMatchContext(match, meta), plan };
   if (context.isRerollComp) {
     console.log(`[rule-engine] detected reroll archetype: ${context.matchedComp?.name}`);
+  }
+  if (plan.pivots.length > 0) {
+    console.log(`[rule-engine] detected ${plan.pivots.length} comp pivot(s), last at ${plan.pivots.at(-1)!.round}`);
   }
 
   const checkerResults: Array<[string, DecisionPoint[]]> = [
@@ -56,11 +62,12 @@ export function extractDecisionPoints(
     ['streak',     checkStreak(match)],
     ['items',      checkItems(match, meta, context)],
     ['board',      checkBoard(match, meta)],
-    ['comp',       checkComp(match)],
+    ['comp',       checkComp(match, meta)],
     ['set17',      checkSet17(match)],
     ['traits',     checkTraitBreakpoints(match, meta)],
     ['augments',   checkAugments(match, meta, context)],
     ['positioning',checkPositioning(match, meta)],
+    ['combat',     checkCombat(match, meta)],
   ];
 
   const summary = checkerResults.map(([name, pts]) => `${name}:${pts.length}`).join(' ');

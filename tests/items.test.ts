@@ -150,6 +150,25 @@ describe('ITEM_005 — component conversion opportunity', () => {
     const points = checkItems(makeMatch(rounds), meta, context);
     expect(points.filter(p => p.ruleId === 'ITEM_005')).toHaveLength(1);
   });
+
+  it('regression: 3 held components that pairwise overlap (each pair buildable) fire ONE combined point, not one per pair', () => {
+    // Real match report: Negatron Cloak + Chain Vest + Giant's Belt held
+    // together produced 3 separate near-duplicate ITEM_005 notifications
+    // (Negatron+Chain, Negatron+Belt, Chain+Belt) in the same round — but
+    // building any one pair consumes 2 of the 3 components and breaks the
+    // other two, so only one recommendation is ever actually actionable.
+    const meta = makeMeta();
+    const context: MatchContext = { isRerollComp: false, hpCrisisRounds: new Set(), activeComp: new Set(), isFastTempo: false };
+    const rounds = ['2-1', '2-2', '2-3'].map(label =>
+      makeRound({ label, bench: benchWith(['TFT_Item_NegatronCloak', 'TFT_Item_ChainVest', 'TFT_Item_GiantsBelt']) })
+    );
+    const points = checkItems(makeMatch(rounds), meta, context);
+    const hits = points.filter(p => p.ruleId === 'ITEM_005');
+    expect(hits).toHaveLength(1);
+    expect(hits[0].recommended).toContain('Gargoyle Stoneplate');
+    expect(hits[0].recommended).toContain('Evenshroud');
+    expect(hits[0].recommended).toContain('Sunfire Cape');
+  });
 });
 
 describe('ITEM_001 — delayed item slam (real component data)', () => {

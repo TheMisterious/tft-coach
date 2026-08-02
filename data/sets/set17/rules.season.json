@@ -15,12 +15,7 @@
       "source_tier": "community_inferred",
       "severity": "high",
       "confidence": "high",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You were still level {{actual_level}} at round 3-2! Most players aim to hit level 6 by this point. Level 6 gives you better shop odds and a 6th board slot.",
-        "mid_rank": "Level {{actual_level}} at 3-2 — behind the standard level 6 checkpoint. Late level 6 delays your stabilization window.",
-        "high_rank": "Level {{actual_level}} at 3-2 (target: 6). Gold available: {{gold_available}}g. Assess whether a streak or augment decision consumed those resources."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "LEVEL_002",
@@ -31,12 +26,7 @@
       "source_tier": "community_inferred",
       "severity": "high",
       "confidence": "high",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You were level {{actual_level}} at round 4-1, but most players aim for level 7 here. Level 7 gives much better units in the shop.",
-        "mid_rank": "Level {{actual_level}} at 4-1 (target: 7). You missed the standard level-7 stabilization window. Gold at 4-1: {{gold_at_4_1}}g.",
-        "high_rank": "Level {{actual_level}} at 4-1 (benchmark: 7). Confirm reroll vs. standard intent was clear before stage 3-1."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "LEVEL_003",
@@ -47,12 +37,7 @@
       "source_tier": "community_inferred",
       "severity": "high",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You had {{gold_at_4_1}}g at round 4-1 but were only level {{actual_level}} at 4-2. Aim to hit level 8 around this time — press E to buy XP.",
-        "mid_rank": "Level {{actual_level}} at 4-2 with {{gold_at_4_1}}g available. Fast 8 window missed — buying XP at 4-1 should have gotten you to 8.",
-        "high_rank": "Level {{actual_level}} at 4-2 despite {{gold_at_4_1}}g at 4-1. Was the roll-down yield enough to justify delaying level 8?"
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "LEVEL_005",
@@ -63,12 +48,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You were level {{actual_level}} at round 5-2 with {{gold_at_5_1}}g and {{hp_at_5_1}} HP. Pushing to level 9 unlocks 5-cost units!",
-        "mid_rank": "Still level {{actual_level}} at 5-2 with {{gold_at_5_1}}g and {{hp_at_5_1}} HP — the resources were there to push 9. Level 9 adds 15% 5-cost odds.",
-        "high_rank": "Level {{actual_level}} at 5-2 with {{gold_at_5_1}}g / {{hp_at_5_1}} HP. The 5-cost access from level 9 was the logical next investment."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "LEVEL_006",
@@ -79,12 +59,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You were on a {{streak_count}}-streak but still level {{actual_level}} at {{round}}! A real streak means you should push levels a round earlier than usual.",
-        "mid_rank": "{{streak_count}}-streak at {{round}}, level {{actual_level}} (streak-adjusted target: {{target}}). The extra HP/gold cushion from the streak was there to push a round early.",
-        "high_rank": "Level {{actual_level}} at {{round}} on a {{streak_count}}-streak (target: {{target}}). Streak-adjusted timing is one round ahead of the generic curve."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "ROLL_001",
@@ -95,12 +70,7 @@
       "source_tier": "mixed",
       "severity": "high",
       "confidence": "high",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You spent {{gold_spent_rolling}}g rolling at level {{player_level}}, but your main units only have a {{odds}}% chance to appear at that level!",
-        "mid_rank": "{{gold_spent_rolling}}g at level {{player_level}} for {{carry_cost}}-cost units ({{odds}}% odds). That gold would have been better spent leveling to {{target_level}}.",
-        "high_rank": "Roll inefficiency: {{gold_spent_rolling}}g at level {{player_level}} for {{carry_cost}}-cost target ({{odds}}% per slot). Level {{target_level}} gives {{target_odds}}%."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "HP_001",
@@ -111,12 +81,7 @@
       "source_tier": "mixed",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You lost {{hp_lost}} HP during Stage 2 — that's a lot! Try to get 2-star units early or find a trait synergy to stabilize before Stage 3.",
-        "mid_rank": "{{hp_lost}} HP lost in Stage 2 (benchmark: <15). This typically indicates a weak opener or missing key synergy units.",
-        "high_rank": "Stage 2 HP loss: {{hp_lost}} (expected < 12 for a functional opener). Was this an opener issue, augment miss, or contested pool problem?"
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "HP_002",
@@ -127,12 +92,7 @@
       "source_tier": "mixed",
       "severity": "high",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You only had {{hp}} HP entering Stage 4! That's dangerously low. Roll to upgrade your team and start winning fights.",
-        "mid_rank": "{{hp}} HP entering Stage 4 (safe zone: 60+). You lost {{hp_lost}} HP in Stage 3. Priority at 4-1: roll down to stabilize.",
-        "high_rank": "Stage 4 entry HP: {{hp}} (critical: <60). Stage 3 bleed: {{hp_lost}} HP. Damage formula: 6 base + surviving units."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "HP_003",
@@ -143,12 +103,7 @@
       "source_tier": "mixed",
       "severity": "high",
       "confidence": "high",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You entered Stage 5 with only {{hp}} HP — one bad fight and you're out! Roll harder in Stage 4 to win fights and preserve HP.",
-        "mid_rank": "{{hp}} HP at Stage 5 entry — lethal range. Stage 5 losses deal 10+ damage; one full loss eliminates you. This traces back to Stage 4 stabilization.",
-        "high_rank": "Stage 5 entry HP: {{hp}} (lethal zone: <=25). Stage 4 bleed: {{hp_lost}}. The stabilization window at 4-1/4-2 was the last chance."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "ITEM_002",
@@ -159,12 +114,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "Your tank unit {{tank}} had damage items equipped! Put those items on your main carry unit instead.",
-        "mid_rank": "{{tank}} holding damage items: {{items}}. Tanks benefit from defensive items — those damage items would boost your carry significantly.",
-        "high_rank": "Carry item misallocation: {{items}} on {{tank}} (role: tank). Was there a carry available to hold these at that point?"
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "BOARD_001",
@@ -176,11 +126,11 @@
       "severity": "medium",
       "confidence": "medium",
       "patch_sensitivity": "medium",
-      "benchmarks": { "2": 12, "3": 20, "4": 30, "5": 45 },
-      "coaching_message_templates": {
-        "low_rank": "Your board was worth about {{cost_sum}}g at Stage {{stage}}, but most players aim for around {{benchmark}}g at this point.",
-        "mid_rank": "Board cost sum: {{cost_sum}} vs. Stage {{stage}} benchmark (~{{benchmark}}). Your board was {{deficit}}g below average power level — this correlates with HP lost this stage.",
-        "high_rank": "Board cost proxy: {{cost_sum}} (Stage {{stage}} expected: ~{{benchmark}}). Deficit: {{deficit}}. Supplement with trait activation count for fuller picture."
+      "benchmarks": {
+        "2": 12,
+        "3": 20,
+        "4": 30,
+        "5": 45
       }
     },
     {
@@ -192,12 +142,7 @@
       "source_tier": "mixed",
       "severity": "high",
       "confidence": "high",
-      "patch_sensitivity": "high",
-      "coaching_message_templates": {
-        "low_rank": "You picked a different God each round — you missed your special God Blessing at round 4-7! Pick the same God at least twice to unlock their powerful bonus.",
-        "mid_rank": "No God alignment achieved. Picks: {{picks}}. Missing the 4-7 Blessing is a significant mid-game power spike loss. Even if one offering was better short-term, alignment value outweighs it.",
-        "high_rank": "God alignment failure: {{picks}}. Max picks of any one god: {{max_count}}. Evaluate: was the alternative god's immediate offering worth more than the lost Blessing?"
-      }
+      "patch_sensitivity": "high"
     },
     {
       "unique_id": "SET17_002",
@@ -208,12 +153,7 @@
       "source_tier": "community_inferred",
       "severity": "high",
       "confidence": "high",
-      "patch_sensitivity": "high",
-      "coaching_message_templates": {
-        "low_rank": "You chose an Evelynn offering that cost HP when you only had {{hp}} HP left! At low HP, consider a safer God option.",
-        "mid_rank": "Evelynn HP offering accepted at {{hp}} HP (-{{cost}} HP). Below 40 HP, HP expenditure on God offerings is extremely risky — a single bad Stage 4 fight could eliminate you.",
-        "high_rank": "Evelynn HP offering: -{{cost}} HP at {{hp}} HP. Stage 4 average damage per loss: ~12-18. Was the offering value above the survivability delta?"
-      }
+      "patch_sensitivity": "high"
     },
     {
       "unique_id": "SET17_003",
@@ -224,12 +164,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "high",
-      "patch_sensitivity": "high",
-      "coaching_message_templates": {
-        "low_rank": "After Round 3-4, you still hadn't picked the same God twice! Round 4-4 is your last chance — pick the same God you chose earlier to unlock their blessing at 4-7!",
-        "mid_rank": "Unaligned after Stage 3-4: picks were {{picks}}. Round 4-4 is your last chance. Pick {{best_god}} again to secure the blessing.",
-        "high_rank": "Alignment gap post-3-4: {{picks}}. 4-4 is the correction window. Best alignment candidate: {{best_god}} ({{best_count}} pick(s))."
-      }
+      "patch_sensitivity": "high"
     },
     {
       "unique_id": "AUGMENT_001",
@@ -240,12 +175,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You picked {{augment}}, an economy augment, at only {{hp}} HP! Below 45 HP a combat or item augment usually helps more right away.",
-        "mid_rank": "{{augment}} (econ) picked at {{hp}} HP, below the 45 HP safe threshold. Econ augments pay off over time you may not have at this HP.",
-        "high_rank": "Econ augment {{augment}} taken at {{hp}} HP. Compare immediate board-power alternatives against the multi-round econ payoff given elimination risk."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "AUGMENT_002",
@@ -256,12 +186,7 @@
       "source_tier": "official",
       "severity": "minor",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "We couldn't see your augment picks this game, so we skipped augment coaching.",
-        "mid_rank": "Augment picks weren't captured for this match. This usually happens on very short games or a GEP registration delay.",
-        "high_rank": "Augment telemetry gap: 0 picks recorded, placement {{placement}}. Check GEP registration timing for early-elimination games."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "AUGMENT_003",
@@ -272,12 +197,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You picked {{augment}}, built around {{champion}}, but {{champion}} didn't end up itemised on your final board. That augment's value went unused.",
-        "mid_rank": "{{augment}} boosts {{champion}} specifically — but {{champion}} wasn't a built, itemised part of your final board. Commit to the carry once you take an augment like this.",
-        "high_rank": "Carry-designating augment {{augment}} taken; {{champion}} finished under-realised on the final board. Either commit items to {{champion}} or skip these augments when the carry isn't reachable."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "AUGMENT_004",
@@ -288,12 +208,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You picked {{augment}}, an item-focused augment, but never fully itemised any single unit. Commit items to one carry to get value from picks like this.",
-        "mid_rank": "{{augment}} rewards a built carry — your best-itemised unit only had {{maxItems}} completed item(s). Concentrate items earlier when you take this kind of augment.",
-        "high_rank": "Item-shaping augment {{augment}} picked without a corresponding itemisation commitment (max {{maxItems}} completed items on any unit). Evaluate whether the augment matched your itemisation plan."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "POSITION_002",
@@ -304,12 +219,7 @@
       "source_tier": "community_inferred",
       "severity": "moderate",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "Your board had no tank for {{rounds}} fights in a row at Stage 4+! Add a frontline unit so your carry survives long enough to deal damage.",
-        "mid_rank": "No tank-role unit for {{rounds}} consecutive Stage 4+ fights (since {{since}}). {{hint}}",
-        "high_rank": "Frontline gap: {{rounds}} rounds without a tank-role unit since {{since}}. {{hint}} Even a cheap tank buys several seconds of combat time for carries to fire."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "ECON_004",
@@ -320,12 +230,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "At {{round}} you had {{gold}}g, but {{benchmark}}g is the target for this point in the game. {{notes}}",
-        "mid_rank": "{{round}} checkpoint: {{gold}}g vs {{benchmark}}g benchmark ({{deficit}}g short). {{notes}}",
-        "high_rank": "Econ curve deficit at {{round}}: {{deficit}}g below benchmark. {{notes}}"
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "LEVEL_004",
@@ -336,12 +241,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You bought XP at {{round}} and had only {{gold_after}}g left with just {{two_stars}} two-star unit(s)! That's risky if you lose the next fight.",
-        "mid_rank": "XP purchase at {{round}} left {{gold_after}}g and {{two_stars}} two-star unit(s) — not enough cushion to absorb a loss.",
-        "high_rank": "Naked level at {{round}}: {{gold_after}}g remaining, {{two_stars}} two-star units. Evaluate whether the level spike was worth the exposed gold/board position."
-      }
+      "patch_sensitivity": "medium"
     },
     {
       "unique_id": "ITEM_005",
@@ -352,12 +252,7 @@
       "source_tier": "official",
       "severity": "medium",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You held {{components}} unbuilt for 3+ rounds! Combine them into {{result_item}} for {{stats}}.",
-        "mid_rank": "{{components}} sat unbuilt for 3+ consecutive rounds. Combined they make {{result_item}} ({{stats}}) — real stats left on the bench.",
-        "high_rank": "Unbuilt recipe held 3+ rounds: {{components}} -> {{result_item}} ({{stats}}). Compare against the round's actual need before deciding what to slam next time."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "TRAIT_001",
@@ -368,12 +263,7 @@
       "source_tier": "community_inferred",
       "severity": "minor",
       "confidence": "medium",
-      "patch_sensitivity": "medium",
-      "coaching_message_templates": {
-        "low_rank": "You were one unit away from {{trait}} {{next_tier}} for {{rounds}} fights in a row! Grab one more {{trait}} unit to unlock it.",
-        "mid_rank": "{{trait}} sat at one unit short of tier {{next_tier}} for {{rounds}} consecutive fights. One more unit activates it for every remaining fight.",
-        "high_rank": "{{trait}} breakpoint gap: one unit short of {{next_tier}} for {{rounds}} rounds. Free efficiency left on the table — scout for the cheapest available holder."
-      }
+      "patch_sensitivity": "medium"
     }
   ]
 }

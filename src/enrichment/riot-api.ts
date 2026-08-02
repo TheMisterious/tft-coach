@@ -5,10 +5,12 @@
 // only works in the Node context that runs that script, not inside a bundled
 // background/desktop window.
 //
-// Scope: account-v1 (Riot ID -> puuid), tft-league-v1 (rank), tft-match-v1
-// (final-result cross-check only — no round-by-round data exists in this API,
-// see report-generator.ts / the ledger pipeline for that). spectator-tft-v5
-// and tft-status-v1 are deliberately not wired up — no concrete use yet.
+// Scope: account-v1 (Riot ID -> puuid), tft-league-v1 (own rank + Challenger/
+// GM/Master top-player lists, added 2026-07-28 to seed src/enrichment/meta-
+// crawler.ts), tft-match-v1 (final-result only — no round-by-round data
+// exists in this API, see report-generator.ts / the ledger pipeline for
+// that). spectator-tft-v5 and tft-status-v1 are deliberately not wired up —
+// no concrete use yet.
 
 import type { RiotAccount, RiotLeagueEntry, BoardState } from '../shared/types';
 import type { RiotContinent, RiotPlatform } from '../persistence/settings';
@@ -20,28 +22,42 @@ export class RiotApiError extends Error {
   }
 }
 
-// ─── Simple request queue ──────────────────────────────────────────────────
-// The given personal-key rate limits (20 req/1s, 100 req/2min app-wide) are
-// generous for this app's call volume (a handful of calls per finished match
-// plus the occasional settings-panel verify) — a sequential queue with a
-// fixed minimum gap between requests is enough, no token-bucket needed.
+// ─── Request queues ─────────────────────────────────────────────────────────
+// Two SEPARATE queues, not one. The reactive queue (60ms gap) serves the
+// low-volume, latency-sensitive per-match calls (rank refresh, placement
+// cross-check) — the original given personal-key limits (20 req/1s, 100
+// req/2min) are generous at that volume, no token-bucket needed. The crawl
+// queue (1300ms gap) serves src/enrichment/meta-crawler.ts's bulk pull across
+// many top players — a crawl can run hundreds of calls per cycle, so it
+// needs its own conservative, SUSTAINED pace: 1300ms/request keeps sustained
+// throughput to ~92 req/2min, comfortably under the 100/2min cap with margin
+// (the 60ms reactive gap only guards the 20/1s burst limit, not the sustained
+// window — fine at reactive volume, not fine for a bulk crawl). Fully
+// independent tails so a long crawl can never delay/starve a reactive call
+// mid-match, and vice versa.
 
-const MIN_GAP_MS = 60; // well under 1000ms / 20 = 50ms/request ceiling
-let queueTail: Promise<unknown> = Promise.resolve();
-
-function enqueue<T>(fn: () => Promise<T>): Promise<T> {
-  const run = queueTail.then(async () => {
-    const result = await fn();
-    await new Promise(r => setTimeout(r, MIN_GAP_MS));
-    return result;
-  });
-  // Swallow rejection on the shared tail so one failed call doesn't wedge
-  // every call queued after it.
-  queueTail = run.catch(() => undefined);
-  return run;
+function makeQueue(minGapMs: number) {
+  let tail: Promise<unknown> = Promise.resolve();
+  return function enqueue<T>(fn: () => Promise<T>): Promise<T> {
+    const run = tail.then(async () => {
+      const result = await fn();
+      await new Promise(r => setTimeout(r, minGapMs));
+      return result;
+    });
+    // Swallow rejection on the shared tail so one failed call doesn't wedge
+    // every call queued after it.
+    tail = run.catch(() => undefined);
+    return run;
+  };
 }
 
-async function riotFetch<T>(url: string, apiKey: string): Promise<T> {
+const enqueueReactive = makeQueue(60);
+const enqueueCrawl = makeQueue(1300);
+
+export type RiotQueue = 'reactive' | 'crawl';
+
+async function riotFetch<T>(url: string, apiKey: string, queue: RiotQueue = 'reactive'): Promise<T> {
+  const enqueue = queue === 'crawl' ? enqueueCrawl : enqueueReactive;
   return enqueue(async () => {
     const res = await fetch(url, { headers: { 'X-Riot-Token': apiKey } });
     if (res.status === 429) {
@@ -95,15 +111,52 @@ export function formatRiotRank(entries: RiotLeagueEntry[]): string {
   return `${ranked.tier} ${ranked.rank} · ${ranked.leaguePoints} LP`;
 }
 
+// ─── tft-league-v1 top-player lists (for src/enrichment/meta-crawler.ts) ────
+// New — no equivalent existed before this. Seeds the meta crawl with real
+// high-elo puuids so match-v1 pulls sample from the current patch's actual
+// top-of-ladder play, not a guess.
+//
+// UNVERIFIED, flagged per this file's own established discipline (every
+// prior addition here was live-checked before being trusted): assumes the
+// response's `entries[]` carry `puuid` directly, matching Riot's current
+// documented LeagueItemDTO shape. If a live call ever shows only
+// `summonerId` instead, an extra tft-summoner-v1 `by-summoner/{id}` resolve
+// per entry would be needed — not implemented here since it hasn't been
+// confirmed necessary.
+export interface RiotLeagueTopEntry {
+  puuid: string;
+  leaguePoints: number;
+}
+
+async function getTopLeague(
+  tier: 'challenger' | 'grandmaster' | 'master', apiKey: string, platform: RiotPlatform
+): Promise<RiotLeagueTopEntry[]> {
+  const url = `https://${platform}.api.riotgames.com/tft/league/v1/${tier}`;
+  const data = await riotFetch<{ entries: Array<{ puuid: string; leaguePoints: number }> }>(url, apiKey, 'crawl');
+  return (data.entries ?? []).map(e => ({ puuid: e.puuid, leaguePoints: e.leaguePoints }));
+}
+
+export function getChallengerLeague(apiKey: string, platform: RiotPlatform): Promise<RiotLeagueTopEntry[]> {
+  return getTopLeague('challenger', apiKey, platform);
+}
+
+export function getGrandmasterLeague(apiKey: string, platform: RiotPlatform): Promise<RiotLeagueTopEntry[]> {
+  return getTopLeague('grandmaster', apiKey, platform);
+}
+
+export function getMasterLeague(apiKey: string, platform: RiotPlatform): Promise<RiotLeagueTopEntry[]> {
+  return getTopLeague('master', apiKey, platform);
+}
+
 // ─── tft-match-v1 ────────────────────────────────────────────────────────────
 // Final-result only — placement, augments, final board. No round-by-round
 // timeline. Used solely as a ground-truth cross-check on GEP's finalPlacement.
 
 export async function getMatchIdsByPuuid(
-  puuid: string, apiKey: string, continent: RiotContinent, count = 1
+  puuid: string, apiKey: string, continent: RiotContinent, count = 1, queue: RiotQueue = 'reactive'
 ): Promise<string[]> {
   const url = `https://${continent}.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids?count=${count}`;
-  return riotFetch<string[]>(url, apiKey);
+  return riotFetch<string[]>(url, apiKey, queue);
 }
 
 // Confirmed live (2026-07-12) against 4 real VN2 matches: character_id uses
@@ -125,6 +178,12 @@ export interface RiotMatchParticipant {
   puuid: string;
   placement: number;
   units: RiotMatchUnit[];
+  // UNVERIFIED field name — added for meta-crawler.ts's augment aggregation.
+  // Riot's documented tft-match-v1 participant shape includes a per-match
+  // `augments: string[]` array of picked augment ids; confirm live against a
+  // real match response before trusting this, same discipline as every other
+  // field in this interface (each carries its own live-verification note).
+  augments: string[];
 }
 
 export interface RiotMatch {
@@ -135,10 +194,10 @@ export interface RiotMatch {
 }
 
 export async function getMatchById(
-  matchId: string, apiKey: string, continent: RiotContinent
+  matchId: string, apiKey: string, continent: RiotContinent, queue: RiotQueue = 'reactive'
 ): Promise<RiotMatch> {
   const url = `https://${continent}.api.riotgames.com/tft/match/v1/matches/${matchId}`;
-  return riotFetch<RiotMatch>(url, apiKey);
+  return riotFetch<RiotMatch>(url, apiKey, queue);
 }
 
 // Converts Riot's final-board units into this app's BoardState shape so it

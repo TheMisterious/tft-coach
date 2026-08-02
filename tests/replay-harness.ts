@@ -39,7 +39,7 @@ export async function replayLedger(filePath: string) {
   const points = extractDecisionPoints(snapshot, meta);
   const brief  = buildBrief(snapshot, points, meta);
 
-  return { ledger, snapshot, points, brief };
+  return { ledger, snapshot, points, brief, meta };
 }
 
 // ─── CLI runner ───────────────────────────────────────────────────────────────

@@ -1,0 +1,114 @@
+.root {
+  background: #181825;
+  border: 1px solid #313244;
+  border-left: 3px solid #89b4fa;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin: 0 0 16px;
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #89b4fa;
+  margin-bottom: 6px;
+}
+
+.headline {
+  font-size: 14px;
+  color: #cdd6f4;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.groupLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c7086;
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.traitPill {
+  background: #313244;
+  color: #cdd6f4;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 12px;
+}
+
+.econPill {
+  background: #313244;
+  color: #f9e2af;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 12px;
+  align-self: flex-start;
+}
+
+.timingPill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 12px;
+}
+.timingAhead   { background: #313244; color: #a6e3a1; }
+.timingOnCurve { background: #313244; color: #89b4fa; }
+.timingBehind  { background: #313244; color: #f38ba8; }
+
+.pivots {
+  border-top: 1px solid #313244;
+  padding-top: 10px;
+}
+
+.pivotList {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #9399b2;
+}
+.pivotList li { padding: 2px 0; }
+
+.pivotRound {
+  font-weight: 700;
+  color: #cdd6f4;
+}
+
+/* Reference-only, deliberately muted — never a severity color or directive
+   tone, since this is crowd meta context, not a coaching verdict. */
+.metaContext {
+  border-top: 1px solid #313244;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.metaLine {
+  font-size: 12px;
+  color: #9399b2;
+  line-height: 1.5;
+  margin: 4px 0 0;
+}

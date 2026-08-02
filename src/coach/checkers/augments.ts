@@ -25,6 +25,7 @@
 import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, MatchContext, ChampionMeta } from '../../shared/types';
 import { getAugmentName } from '../../enrichment/meta-lookup';
 import { NEUTRAL_CONTEXT } from '../match-context';
+import { metaAugmentClause } from '../meta-blend';
 import { isComponent, unitItems } from './items';
 
 const HP_CRISIS_THRESHOLD = 45;
@@ -78,7 +79,7 @@ function checkEconAugmentOnCrisis(match: MatchSnapshot, meta: MetaData, context:
         coaching_text: byHp(round, {
           low: `At only ${round.health} HP you chose ${shortName}, an economy augment. Economy augments compound over many rounds — but at ${round.health} HP you are likely to be eliminated before that income materialises. A combat augment here would have added immediate board strength when you needed it most.${tempoNote}`,
           mid: `You picked ${shortName} (econ augment) at ${round.health} HP — below the safe threshold. Econ augments are correct when you're healthy and econ'ing; at ${round.health} HP the priority shifts toward stabilising your board with a combat or item augment.${tempoNote}`,
-        }),
+        }) + metaAugmentClause(meta, aug),
       });
     }
   }
@@ -118,7 +119,21 @@ function normaliseName(name: string): string {
   return name.toLowerCase().replace(/[^a-z]/g, '');
 }
 
-function findChampByCarryAugment(augId: string, meta: MetaData): { id: string; champ: ChampionMeta } | undefined {
+// Which champion an augment "designates" as its build-around target — checked
+// two ways: `meta.augmentUnitGrants` (real, id-precise, auto-fetched from Data
+// Dragon description text — see scripts/fetch-ddragon.js; covers augments.json's
+// whole 'units' bucket, minus ones that genuinely grant 2+ champions and were
+// left unresolved rather than guessed at) first, falling back to the narrow
+// "_Augment_<Name>Carry" id-suffix pattern for anything the grants map missed
+// (e.g. an older cached MetaData without it, or a name-shape match the
+// description-text extraction didn't catch).
+function findChampGrantedByAugment(augId: string, meta: MetaData): { id: string; champ: ChampionMeta } | undefined {
+  const grantedId = meta.augmentUnitGrants?.[augId];
+  if (grantedId) {
+    const champ = meta.champions?.[grantedId];
+    if (champ) return { id: grantedId, champ };
+  }
+
   const m = CARRY_AUGMENT_RE.exec(augId);
   if (!m) return undefined;
   const wanted = normaliseName(m[1]);
@@ -126,14 +141,15 @@ function findChampByCarryAugment(augId: string, meta: MetaData): { id: string; c
   return entry ? { id: entry[0], champ: entry[1] } : undefined;
 }
 
-// AUGMENT_003 — picked a "<Champion>Carry" augment but that champion either
-// never reached the final board (benched/sold/never hit) or made it with
-// fewer than 2 completed items, i.e. the augment's entire payoff went unused.
+// AUGMENT_003 — picked a champion-designating augment but that champion
+// either never reached the final board (benched/sold/never hit) or made it
+// with fewer than 2 completed items, i.e. the augment's entire payoff went
+// unused.
 function checkCarryAugmentUnrealised(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
   const points: DecisionPoint[] = [];
 
   for (const augId of match.augments) {
-    const found = findChampByCarryAugment(augId, meta);
+    const found = findChampGrantedByAugment(augId, meta);
     if (!found) continue;
     const { id: champId, champ } = found;
     const augName = getAugmentName(augId, meta);
@@ -148,7 +164,7 @@ function checkCarryAugmentUnrealised(match: MatchSnapshot, meta: MetaData): Deci
         observed: `Picked ${augName} but ${champ.name} was not on the final board`,
         recommended: `Build toward ${champ.name} after picking a carry-designating augment, or don't take it if ${champ.name} isn't reachable this game`,
         reasonMetrics: { augment: augName, champion: champ.name },
-        coaching_text: `You picked ${augName}, which specifically boosts ${champ.name} — but ${champ.name} never made your final board. That augment's entire value was left on the table; a generic augment would have helped regardless of your final comp.`,
+        coaching_text: `You picked ${augName}, which specifically boosts ${champ.name} — but ${champ.name} never made your final board. That augment's entire value was left on the table; a generic augment would have helped regardless of your final comp.` + metaAugmentClause(meta, augId),
       });
       continue;
     }
@@ -164,7 +180,7 @@ function checkCarryAugmentUnrealised(match: MatchSnapshot, meta: MetaData): Deci
       observed: `Picked ${augName} but ${champ.name} finished with only ${completedItems} completed item(s)`,
       recommended: `Prioritise items on ${champ.name} once you've committed to a carry-designating augment`,
       reasonMetrics: { augment: augName, champion: champ.name, completedItems },
-      coaching_text: `You picked ${augName}, built around ${champ.name}, but ${champ.name} finished the game with only ${completedItems} completed item(s). The augment's power spike needs ${champ.name} itemised to pay off — without items, you're only getting a fraction of what you drafted for.`,
+      coaching_text: `You picked ${augName}, built around ${champ.name}, but ${champ.name} finished the game with only ${completedItems} completed item(s). The augment's power spike needs ${champ.name} itemised to pay off — without items, you're only getting a fraction of what you drafted for.` + metaAugmentClause(meta, augId),
     });
   }
 
@@ -192,6 +208,6 @@ function checkItemAugmentWithoutBuiltCarry(match: MatchSnapshot, meta: MetaData)
     observed: `Picked item-shaping augment ${augName} but no unit on the final board had 2+ completed items`,
     recommended: `Item-shaping augments like ${augName} need a built carry to pay off — commit items to one unit early`,
     reasonMetrics: { augment: augName, maxItems },
-    coaching_text: `You picked ${augName}, an item-shaping augment — those only pay off once a unit is actually itemised around them. Your best-built unit finished with just ${maxItems} completed item(s), so the augment's bonus went mostly unused.`,
+    coaching_text: `You picked ${augName}, an item-shaping augment — those only pay off once a unit is actually itemised around them. Your best-built unit finished with just ${maxItems} completed item(s), so the augment's bonus went mostly unused.` + metaAugmentClause(meta, picked),
   }];
 }

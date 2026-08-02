@@ -6,7 +6,8 @@
 // player was running a reroll comp" (which several checkers used to write in
 // their coaching text without ever checking) with an actual detection pass.
 
-import type { MatchSnapshot, MetaData, MatchContext, CompArchetype } from '../shared/types';
+import type { MatchSnapshot, MetaData, MatchContext, CompArchetype, BoardState } from '../shared/types';
+import { isNonChampionToken } from '../ledger/merge';
 
 export const NEUTRAL_CONTEXT: MatchContext = {
   isRerollComp: false,
@@ -29,25 +30,97 @@ export function buildMatchContext(match: MatchSnapshot, meta: MetaData): MatchCo
   };
 }
 
-// Plurality-vote active comp — unit names on board in >50% of PvP rounds.
-// (Mirrors the logic checkers/comp.ts uses for bench-clutter detection;
-// hoisted here so archetype detection can reuse the same notion of "comp".)
-function computeActiveComp(match: MatchSnapshot): Set<string> {
-  const nameFreq: Record<string, number> = {};
-  for (const round of match.rounds) {
-    if (round.type !== 'PVP') continue;
+// Plurality-vote active comp — unit names on board in >50% of PvP rounds
+// *since that unit's first appearance*, not the whole match. Exported so
+// checkers/comp.ts's bench-clutter check shares this exact definition of
+// "comp" instead of recomputing its own copy.
+//
+// FIXED (2026-08-02, real match report: a comp pivot at 4-1 brought in Nami
+// as the real carry, but she was on board nearly every round from 4-1
+// onward and still never counted as "committed" — she was present in 10 of
+// the match's 21 total PvP rounds, just under the 50% bar): the original
+// version measured every unit's presence against the *whole* match's PvP
+// round count, a denominator that includes rounds before a pivoted-in
+// champion was even recruited. No genuinely-committed late-pivot carry can
+// ever clear a 50%-of-everything bar. Measuring against the rounds since
+// each unit's own first appearance instead (Nami: 10/10 = 100% of her
+// window) correctly recognizes "played every round since you got her" as
+// commitment, regardless of when in the match that was. Units present since
+// round one are unaffected — their window already was the whole match.
+export function computeActiveComp(match: MatchSnapshot): Set<string> {
+  const pvpRounds = match.rounds.filter(r => r.type === 'PVP');
+  if (pvpRounds.length === 0) return new Set();
+
+  const firstSeenIdx = new Map<string, number>();
+  const presenceCount: Record<string, number> = {};
+  pvpRounds.forEach((round, i) => {
     for (const cell of Object.values(round.board)) {
       if (!cell?.name || cell.name === '0') continue;
-      nameFreq[cell.name] = (nameFreq[cell.name] ?? 0) + 1;
+      if (!firstSeenIdx.has(cell.name)) firstSeenIdx.set(cell.name, i);
+      presenceCount[cell.name] = (presenceCount[cell.name] ?? 0) + 1;
+    }
+  });
+
+  const committed = new Set<string>();
+  for (const [name, count] of Object.entries(presenceCount)) {
+    const windowLen = pvpRounds.length - firstSeenIdx.get(name)!;
+    if (count > windowLen * 0.5) committed.add(name);
+  }
+  return committed;
+}
+
+// Cumulative real damage per champion across every PVP round's battle_stats
+// (match_info.battle_stats — same real per-fight telemetry positioning.ts's
+// checkRepeatedOpponentCarry and feature-vector.ts's opponentCarryKey already
+// trust as ground truth for "who is the carry" on the OPPONENT's board).
+// merge.ts's identifyCarry uses this as its own-board equivalent — see the
+// 2026-08-02 fix note there for why static role tags and cost weren't enough.
+export function computeCarryDamage(match: MatchSnapshot): Map<string, number> {
+  const damage = new Map<string, number>();
+  for (const round of match.rounds) {
+    if (round.type !== 'PVP' || !round.battleStats?.own?.length) continue;
+    for (const stats of round.battleStats.own) {
+      // Spell-effect/pet tokens (Shen's clone, summons) can deal real
+      // recorded damage under their own token name — excluded so a clone
+      // can never outrank the real champion it's cloning as "the carry".
+      if (isNonChampionToken(stats.name)) continue;
+      damage.set(stats.name, (damage.get(stats.name) ?? 0) + stats.totalDamage);
     }
   }
-  const pvpCount = match.rounds.filter(r => r.type === 'PVP').length;
-  if (pvpCount === 0) return new Set();
-  return new Set(
-    Object.entries(nameFreq)
-      .filter(([, count]) => count > pvpCount * 0.5)
-      .map(([name]) => name)
-  );
+  return damage;
+}
+
+// A trait becomes "active" once the board meets its lowest breakpoint tier.
+// Exported so plan-builder.ts's per-round comp trajectory AND
+// meta-crawler.ts's per-harvested-final-board trait-key derivation share one
+// definition of "what traits are active on this board" instead of a third
+// reimplementation — plan-builder.ts previously had its own private copy of
+// exactly this logic (activeTraitsForRound), moved here unchanged.
+export function computeActiveTraitSet(board: BoardState, meta: MetaData): Set<string> {
+  const counts: Record<string, number> = {};
+  for (const cell of Object.values(board)) {
+    if (!cell?.name || cell.name === '0') continue;
+    const traits = meta.champions[cell.name]?.traits ?? [];
+    for (const trait of traits) counts[trait] = (counts[trait] ?? 0) + 1;
+  }
+
+  const active = new Set<string>();
+  for (const bp of meta.traitBreakpoints) {
+    const lowestTier = bp.tiers[0];
+    if (lowestTier !== undefined && (counts[bp.trait] ?? 0) >= lowestTier) {
+      active.add(bp.trait);
+    }
+  }
+  return active;
+}
+
+// Canonical sort-order key for a trait set, so "TraitA + TraitB" and
+// "TraitB + TraitA" (a Set's insertion order isn't meaningful) resolve to the
+// same lookup key — used by meta-crawler.ts (building AggregateMetaTable's
+// traitCombos bucket) and meta-blend.ts (looking a match's own final trait
+// set up in that same table) so the two never drift out of sync.
+export function traitSetKey(traits: Set<string> | string[]): string {
+  return [...traits].sort().join(',');
 }
 
 // A "reroll" archetype match requires the active comp to overlap a curated

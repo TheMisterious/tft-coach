@@ -5,6 +5,7 @@
 
 import type { MatchSnapshot, DecisionPoint, MetaData, BoardSnapshot, BoardState, RoundSnapshot, HexPosition } from '../../shared/types';
 import { boardChampionIds, isNonChampionToken, identifyCarry } from '../../ledger/merge';
+import { computeActiveComp, computeCarryDamage } from '../match-context';
 import { getChampionName, getFrontlineExemption } from '../../enrichment/meta-lookup';
 import { resolveHexCell, describeHexPosition, HEX_ROWS, HEX_COLS } from '../../shared/hex-grid';
 
@@ -34,7 +35,9 @@ function buildBoardSnapshot(board: BoardState, opponentBoard: BoardState, meta: 
 function suggestCounterPosition(
   round: RoundSnapshot,
   meta: MetaData,
-  oppCol: number
+  oppCol: number,
+  activeComp: Set<string>,
+  carryDamage: Map<string, number>
 ): {
   frontlineName: string | null;
   carryName: string | null;
@@ -47,7 +50,7 @@ function suggestCounterPosition(
     ([, c]) => c?.name && c.name !== '0' && !isNonChampionToken(c.name)
   );
   const tankEntry  = ownEntries.find(([, c]) => meta.champions?.[c.name]?.role === 'tank');
-  const carryCell  = ownEntries.length > 0 ? identifyCarry(ownEntries.map(([, c]) => c), meta) : null;
+  const carryCell  = ownEntries.length > 0 ? identifyCarry(ownEntries.map(([, c]) => c), meta, activeComp, carryDamage) : null;
   const carryEntry = ownEntries.find(([, c]) => c === carryCell);
 
   const safeCol = HEX_COLS - 1 - oppCol;
@@ -73,6 +76,8 @@ export function checkPositioning(match: MatchSnapshot, meta: MetaData = {} as Me
 // POSITION_001 — same opponent carry in same hex across multiple fights
 function checkRepeatedOpponentCarry(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
   const points: DecisionPoint[] = [];
+  const activeComp = computeActiveComp(match);
+  const carryDamage = computeCarryDamage(match);
 
   type CarryRecord = { champName: string; hex: string; count: number };
   const seenCarries: Record<string, CarryRecord> = {};
@@ -122,7 +127,7 @@ function checkRepeatedOpponentCarry(match: MatchSnapshot, meta: MetaData): Decis
       if (seenCarries[key].count >= REPEAT_THRESHOLD) {
         const pos      = resolveHexCell(hex);
         const spotName = pos ? `the ${describeHexPosition(pos)} of the board` : `hex ${hex}`;
-        const suggestion = pos ? suggestCounterPosition(round, meta, pos.col) : null;
+        const suggestion = pos ? suggestCounterPosition(round, meta, pos.col, activeComp, carryDamage) : null;
 
         const moveClause = suggestion?.frontlineName
           ? `Move ${suggestion.frontlineName} to your ${suggestion.blockSpot} to intercept it`
@@ -157,7 +162,18 @@ function checkRepeatedOpponentCarry(match: MatchSnapshot, meta: MetaData): Decis
   return points;
 }
 
-// POSITION_002 — board has no tank-role unit at stage 4+ PvP rounds
+// POSITION_002 — no unit holding the front two rows at stage 4+ PvP rounds
+//
+// Deliberately position-based, not role-based: meta.champions' role field is
+// curated for only a handful of champions (tank role covers 4 of 66 in
+// set17's data — even Cho'Gath is untagged 'flex'), so gating on role=='tank'
+// produced false positives on any comp fronting an uncurated unit. It also
+// missed the inverse case: a curated tank-role unit sitting in the backline
+// isn't actually protecting anyone, but a presence-only check would've
+// counted it as "has frontline" anyway. Whether someone is standing in the
+// front two rows (row 0/1, matching hex-grid.ts's calibrated own-side
+// orientation) is the thing that actually matters here, and it's true ground
+// truth from the board snapshot instead of a guess about a champion's role.
 function checkNoFrontline(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
   if (!meta.champions || Object.keys(meta.champions).length === 0) return [];
 
@@ -171,7 +187,13 @@ function checkNoFrontline(match: MatchSnapshot, meta: MetaData): DecisionPoint[]
     if (round.type !== 'PVP') continue;
 
     const champIds = boardChampionIds(round.board);
-    const hasTank  = champIds.some(id => meta.champions[id]?.role === 'tank');
+    const ownEntries = Object.entries(round.board).filter(
+      ([, c]) => c?.name && c.name !== '0' && !isNonChampionToken(c.name)
+    );
+    const hasTank = ownEntries.some(([hex]) => {
+      const pos = resolveHexCell(hex);
+      return !!pos && pos.side === 'own' && pos.row < HEX_ROWS / 2;
+    });
     // A defensive augment (shields, damage reduction) can substitute for an
     // actual tank-role unit — don't flag a "no frontline" mistake that isn't one.
     const exemption = !hasTank ? getFrontlineExemption(round.augmentsPicked, meta) : null;
@@ -196,10 +218,10 @@ function checkNoFrontline(match: MatchSnapshot, meta: MetaData): DecisionPoint[]
           round:    round.label,
           category: 'positioning',
           severity: 'moderate',
-          observed: `No tank-role unit on board for ${consecutiveNoTank} consecutive stage-4 PvP rounds (since ${firstRound})`,
-          recommended: `Add at least one tank unit to absorb damage and give your carry time to deal damage.${hint}`,
+          observed: `No unit holding the front line for ${consecutiveNoTank} consecutive stage-4 PvP rounds (since ${firstRound})`,
+          recommended: `Move a unit to the front row to absorb damage and give your carry time to deal damage.${hint}`,
           reasonMetrics: { consecutiveRounds: consecutiveNoTank, firstRound },
-          coaching_text: `Your board has had no tank-role unit for ${consecutiveNoTank} stage-4 fights in a row. Without a frontline, enemy carries reach your backline on the first step — your carry deals zero damage before dying. Even a 1-cost tank holding zero items buys 3–5 seconds of combat time, which is often enough for a carry ability to fire.${hint}`,
+          coaching_text: `Your board has had nobody standing in the front row for ${consecutiveNoTank} stage-4 fights in a row. Without a frontline, enemy carries reach your backline on the first step — your carry deals zero damage before dying. Even a 1-cost tank holding zero items buys 3–5 seconds of combat time, which is often enough for a carry ability to fire.${hint}`,
           boardSnapshot: buildBoardSnapshot(round.board, round.opponentBoard, meta),
         });
         // Reset so a player who never fixes this gets flagged again every 2

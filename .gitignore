@@ -1,6 +1,8 @@
 node_modules/
 dist/
 releases/
+design/
+CLAUDE.md
 .env
 *.opk
 *.log

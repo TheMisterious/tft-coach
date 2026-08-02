@@ -10,12 +10,7 @@
       "source_tier": "official",
       "severity": "medium",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You ended {{missed_count}} round(s) just {{gap}}g short of a savings bonus! Holding a tiny bit more gold earns you free gold every round. You missed about {{cumulative_interest_missed}}g total.",
-        "mid_rank": "{{cumulative_interest_missed}}g forfeited across {{missed_count}} rounds from sub-threshold endings. Avoid 1g rolls or XP purchases that drop you below a bracket — that single gold costs you 1 interest.",
-        "high_rank": "{{cumulative_interest_missed}}g interest lost ({{missed_count}} rounds). Audit for impulse 1g rolls or XP buys that crossed a bracket."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "ECON_002",
@@ -26,12 +21,7 @@
       "source_tier": "mixed",
       "severity": "minor",
       "confidence": "medium",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You sat above 50g for {{consecutive_overcap_rounds}} rounds in a row without spending. Once you hit 50g you stop earning extra gold!",
-        "mid_rank": "{{consecutive_overcap_rounds}} idle rounds above 50g. Plan a spend — level up or roll down — when you are above cap and HP is stable.",
-        "high_rank": "{{consecutive_overcap_rounds}} rounds overcap without deploy. Match your gold stockpile to your stage-based level plan."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "ECON_003",
@@ -42,12 +32,7 @@
       "source_tier": "community_inferred",
       "severity": "high",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You rolled {{total_gold_rolled_before_stage3}}g worth of shops before Stage 3! In most games, save your gold until Stage 4.",
-        "mid_rank": "{{total_gold_rolled_before_stage3}}g burned on pre-Stage-3 rolls. Unless playing a reroll comp, this gold was better held for interest and a Stage 4 rolldown.",
-        "high_rank": "{{total_gold_rolled_before_stage3}}g early roll spend (pre-3-1). Unless maintaining streak or executing an intentional reroll line, this damages your econ floor."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "ROLL_002",
@@ -58,12 +43,7 @@
       "source_tier": "community_inferred",
       "severity": "high",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You had only {{hp_at_4_1}} HP entering Stage 4 and barely rolled at all! Roll to upgrade your units and stop taking damage.",
-        "mid_rank": "{{hp_at_4_1}} HP at 4-1 but only {{roll_spend}}g spent on stabilization. With {{gold_available_4_1}}g available, rolling down was the correct play.",
-        "high_rank": "{{hp_at_4_1}} HP, {{roll_spend}}g stabilization spend at 4-1/4-2. Carry 2-stars at 4-2: {{carry_2star_count}}. HP bleed in stage 4 was preventable."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "ROLL_003",
@@ -74,12 +54,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "After your main units were upgraded, you kept rolling a lot ({{post_roll_waste}}g more). Save that gold to level up instead!",
-        "mid_rank": "{{post_roll_waste}}g spent rolling after board stabilization without completing a 3-star. That gold could fund a level 9 push.",
-        "high_rank": "Post-stabilization roll waste: {{post_roll_waste}}g across {{over_roll_rounds}} rounds, no 3-stars gained. Opportunity cost: partial level 9 funding."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "ROLL_004",
@@ -90,12 +65,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You rolled {{gold_rolled}}g at level 6 while {{streak_count}} rounds into a loss streak! Save that gold — the streak is setting up your level 8 push.",
-        "mid_rank": "{{gold_rolled}}g rolled at level 6 on a {{streak_count}}-loss streak. That gold was better banked for the level-8 spike the streak is funding.",
-        "high_rank": "Roll spend at level 6: {{gold_rolled}}g, {{streak_count}}-loss streak in progress. Fast-8 discipline calls for holding rolls until the level-8 push."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "ROLL_005",
@@ -106,12 +76,7 @@
       "source_tier": "community_inferred",
       "severity": "low",
       "confidence": "medium",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You dropped below 50g for {{streak}} rounds in a row! Slow rolling means staying above 50g and only spending the extra each round.",
-        "mid_rank": "Below the 50g cap for {{streak}} consecutive rounds ({{streak_start_round}} onward) while reroll-comp'ing. That loses interest without a real rolldown to show for it.",
-        "high_rank": "Interest-floor violation: sub-50g for {{streak}} rounds from {{streak_start_round}}. Slow-roll discipline requires holding the cap between spends."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "STREAK_001",
@@ -122,12 +87,7 @@
       "source_tier": "official",
       "severity": "medium",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You were on a {{streak_length}}-game win streak at round {{round}} and lost! Each win in a row earns bonus gold.",
-        "mid_rank": "Win streak of {{streak_length}} broken at {{round}}. You were earning +{{streak_bonus}}g/round. Losing drops your income for future rounds.",
-        "high_rank": "Streak {{streak_length}} broken at {{round}}. Check item placement, frontline positioning, or trait activation at that round."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "STREAK_002",
@@ -138,12 +98,7 @@
       "source_tier": "mixed",
       "severity": "medium",
       "confidence": "medium",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You spent {{spend}}g trying to stop your losing streak but still lost! Save that gold and collect bonus gold from the streak instead.",
-        "mid_rank": "You spent {{spend}}g to break your loss streak at {{round}} but still lost. Commit or convert — half-measures waste both econ and streak value.",
-        "high_rank": "Failed streak break at {{round}}: {{spend}}g spent, result still loss. Estimated forfeited streak gold vs. spend."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "STREAK_003",
@@ -154,12 +109,7 @@
       "source_tier": "official",
       "severity": "minor",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You never built a streak of 5 in this game! A 5-game streak (win or loss) earns you +2 gold per round.",
-        "mid_rank": "Max streak this game: {{max_streak}} ({{streak_type}}). Never reached the +2g threshold (5 streak). Without streak income you're leaving gold on the table.",
-        "high_rank": "No 5+ streak achieved (best: {{max_streak}}). Missed +2g tier entirely. Assess board decisions at streak break points."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "ITEM_001",
@@ -170,12 +120,7 @@
       "source_tier": "community_inferred",
       "severity": "medium",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You had components sitting on your bench for {{stages_held}} stages without combining them! Combine them as soon as you can.",
-        "mid_rank": "{{component_count}} component(s) held for {{stages_held}} stages. Slam items on any reasonable holder if you don't have a target yet.",
-        "high_rank": "Item hold detected: {{component_names}} uncombined for {{stages_held}} stages. Power delta from holding vs. slamming on flex holder."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "ITEM_003",
@@ -186,12 +131,7 @@
       "source_tier": "community_inferred",
       "severity": "high",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "Your main carry only had {{count}} item(s) at Stage 4! Carries need at least 2 items to win fights. Combine your components ASAP.",
-        "mid_rank": "Carry had only {{count}} completed item(s) at Stage 4 entry. Fully itemized carries deal dramatically more damage. Check: did you hold components too long?",
-        "high_rank": "Carry item deficit at 4-1: {{count}} items on carry. Two God rounds have occurred by this point — audit component choices."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "ITEM_004",
@@ -202,12 +142,7 @@
       "source_tier": "community_inferred",
       "severity": "minor",
       "confidence": "medium",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "Your items were spread across {{unit_count}} different units with none having 2+. Put all your best items on 1-2 main carry units.",
-        "mid_rank": "Items spread across {{unit_count}} units (max on any single unit: {{max_items}}). Multiplicative item interactions are lost when items are spread thin.",
-        "high_rank": "Item spread: {{unit_count}} units with items, max concentration {{max_items}}. Unless multi-carry archetype, consolidate to 1 primary (3 items) + 1 secondary (2 items)."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "BOARD_003",
@@ -218,12 +153,7 @@
       "source_tier": "official",
       "severity": "medium",
       "confidence": "high",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You had {{empty}} empty board spot(s) at Stage {{stage}}! Put bench units on the board — even a 1-cost is better than nothing.",
-        "mid_rank": "{{empty}} board slot(s) unused at level {{level}} in Stage {{stage}}. Every deployed unit adds combat power and trait activations.",
-        "high_rank": "Empty board slots: {{empty}} (level {{level}}, stage {{stage}}). If persistent >2 rounds, this is a unit-acquisition failure. Were units on bench during these fights?"
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "COMP_002",
@@ -234,12 +164,7 @@
       "source_tier": "community_inferred",
       "severity": "minor",
       "confidence": "medium",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "You had {{count}} units on your bench that weren't part of your team! That's about {{gold}}g locked up. Sell them!",
-        "mid_rank": "Bench clutter: {{count}} off-comp units ({{gold}}g locked) for {{rounds}} rounds. That gold could have funded XP purchases or extra rolls.",
-        "high_rank": "Bench clutter: {{count}} off-comp units, {{gold}}g locked for {{rounds}} rounds. Opportunity cost at interest rate: {{interest_delta}}g."
-      }
+      "patch_sensitivity": "low"
     },
     {
       "unique_id": "POSITION_001",
@@ -250,12 +175,18 @@
       "source_tier": "community_inferred",
       "severity": "minor",
       "confidence": "medium",
-      "patch_sensitivity": "low",
-      "coaching_message_templates": {
-        "low_rank": "The same opponent kept their strong unit in the same spot for {{fights}} fights and you didn't adjust! Move a frontline unit to block that spot next time.",
-        "mid_rank": "Opponent's {{carry}} stayed in {{hex}} for {{fights}} fights with no counter-positioning. Blocking that hex or repositioning your own carry is free win-rate.",
-        "high_rank": "Static opponent carry position: {{carry}} in {{hex}} for {{fights}} fights. Lobby scouting between rounds should catch this pattern immediately."
-      }
+      "patch_sensitivity": "low"
+    },
+    {
+      "unique_id": "COMBAT_001",
+      "human_readable_name": "Itemized Carry Not Leading Team Damage — Real Combat Data",
+      "category": "combat",
+      "subcategory": "damage_share",
+      "short_summary": "A fully-itemized (2+ completed items) carry was outdamaged by a teammate in 2+ consecutive stage-4+ fights, measured from GEP's real per-unit battle_stats rather than an item/board proxy.",
+      "source_tier": "official",
+      "severity": "medium",
+      "confidence": "high",
+      "patch_sensitivity": "low"
     }
   ]
 }

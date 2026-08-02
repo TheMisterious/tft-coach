@@ -5,6 +5,7 @@
 
 import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, MatchContext } from '../../shared/types';
 import { NEUTRAL_CONTEXT } from '../match-context';
+import { pivotContextClause } from '../plan-builder';
 import { boardChampionIds } from '../../ledger/merge';
 
 function byHp(round: RoundSnapshot, t: { low: string; mid: string; high: string }): string {
@@ -109,7 +110,7 @@ function checkMissedInterest(
             low:  `At ${round.label} you were ${gap}g short of the ${tier}g bracket — and already at ${round.health} HP. You cannot afford to lose fights AND give up interest income simultaneously. Immediately cross the ${tier}g line before spending anything else; that +1g per round is the cheapest form of comeback available to you.${rerollNote}`,
             mid:  `At ${round.label} you ended on ${gold}g — just ${gap}g short of the ${tier}g interest bracket. That single gold costs you +1 interest every round from here. At ${round.health} HP sub-bracket endings like this compound: you lose both income and the HP cushion to play for econ.${rerollNote}`,
             high: `At ${round.label} you ended on ${gold}g — ${gap}g below the ${tier}g bracket. At ${round.health} HP you have the luxury of playing the interest game properly; ending ${gap}g short is a pure inefficiency. Hold ${gap}g more before spending and this never costs you.${rerollNote}`,
-          }),
+          }) + pivotContextClause(context.plan, round.label),
         });
         break;
       }
@@ -161,7 +162,7 @@ function checkInterestOvercap(match: MatchSnapshot, context: MatchContext): Deci
           ? 'You are playing a reroll comp — spend this gold rolling for your carry, not holding it above the interest cap'
           : 'Plan a spend — level up or roll down — when you are above the 50g interest cap and HP is stable',
         reasonMetrics: { goldEnd: r.goldEnd, streak, streakStartRound: streakStart },
-        coaching_text: `You sat above ${INTEREST_CAP}g for ${streak} rounds in a row (starting ${streakStart}) without rolling or buying XP. Interest caps at 50g — every gold above that earns nothing extra. Plan a level-up or rolldown spike when you are overcap and your HP is not critical.${rerollNote}`,
+        coaching_text: `You sat above ${INTEREST_CAP}g for ${streak} rounds in a row (starting ${streakStart}) without rolling or buying XP. Interest caps at 50g — every gold above that earns nothing extra. Plan a level-up or rolldown spike when you are overcap and your HP is not critical.${rerollNote}` + pivotContextClause(context.plan, r.label),
       });
       streak = 0;
     }

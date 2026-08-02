@@ -135,6 +135,25 @@
   line-height: 1.5;
 }
 
+.priorityFixCount {
+  color: #9399b2;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.priorityFixPatterns {
+  margin: 8px 0 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #9399b2;
+  line-height: 1.6;
+}
+
+.priorityFixPatterns li {
+  margin-bottom: 2px;
+}
+
 /* Per-category grade grid */
 .categoryGrid {
   display: flex;

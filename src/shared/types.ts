@@ -114,6 +114,7 @@ export type DecisionCategory =
   | 'hp'
   | 'board'
   | 'comp'
+  | 'combat'
   | 'set_mechanic';
 
 export type Severity = 'minor' | 'moderate' | 'critical';
@@ -195,6 +196,71 @@ export interface RoundTrajectoryPoint {
   rollGold: number;   // gold spent rolling this round (rollsSpent * 2)
 }
 
+// ─── Match plan ──────────────────────────────────────────────────────────────
+// A whole-match synthesis layer, distinct from the per-round DecisionPoints
+// above. Every checker judges a single round in isolation; MatchPlan instead
+// describes what the player was actually building across the whole game
+// (comp trajectory, econ arc, leveling curve) so the report can open with an
+// overview instead of a flat pile of disconnected notes. See
+// src/coach/plan-builder.ts for the derivation — deliberately deterministic
+// (no LLM), built entirely from data already captured in RoundSnapshot.
+
+export interface CompPivot {
+  round: string;
+  from: string[]; // trait names active immediately before the pivot
+  to: string[];   // trait names active immediately after the pivot
+}
+
+export interface EconPhase {
+  startRound: string;
+  endRound: string;
+  mode: 'banking' | 'spending';
+}
+
+export interface LevelMilestone {
+  level: number;
+  round: string; // first round this level was reached
+}
+
+export type EconStyle = 'standard' | 'slow_roll' | 'reroll' | 'fast_tempo';
+
+export interface MatchPlan {
+  headline: string;
+  finalTraits: string[];  // active trait set in the final stretch of the match
+  pivots: CompPivot[];
+  econStyle: EconStyle;
+  econPhases: EconPhase[];
+  levelMilestones: LevelMilestone[];
+  // Timing vs. the same level-8-by-4-2 / level-9-by-5-2 benchmarks
+  // checkers/leveling.ts's LEVEL_003/LEVEL_005 already use. Undefined when
+  // the match ended before the benchmark round existed to compare against.
+  level8Timing?: 'ahead' | 'on_curve' | 'behind';
+  level9Timing?: 'ahead' | 'on_curve' | 'behind';
+  // Current-patch reference info, blended in from AggregateMetaTable (see
+  // src/coach/meta-blend.ts) — always informational, never a directive. See
+  // MetaContext's own doc comment for why.
+  metaContext?: MetaContext;
+}
+
+// Current-patch reference context for the match's comp/champion choices,
+// sourced from AggregateMetaTable (crowd data across many high-elo players
+// via Riot's official API — see src/enrichment/meta-crawler.ts). Deliberately
+// NOT a tier-list judgment: `compStanding` is pure reference info ("this trait
+// combo has averaged Xth place recently"), never phrased as a mistake.
+// `missedChampion` is the ONLY place an implied "you had a better option"
+// claim is made, and only when there's real per-round evidence for it —
+// RoundSnapshot.shop is genuinely captured "what was offered" data, so a
+// champion offered repeatedly and never bought, whose boards place
+// meaningfully better in the aggregate table, is a grounded claim. Augment
+// offers are NOT capturable by GEP at all (see checkers/augments.ts's header
+// comment), so no augment equivalent of `missedChampion` exists anywhere —
+// augment meta context stays purely informational (see meta-blend.ts's
+// metaAugmentClause).
+export interface MetaContext {
+  compStanding?: { avgPlacement: number; samples: number };
+  missedChampion?: { name: string; avgPlacement: number; offeredCount: number };
+}
+
 export type Grade = 'S' | 'A' | 'B' | 'C' | 'D';
 
 // The single highest-leverage fix for the match — the worst-graded category
@@ -206,6 +272,13 @@ export interface PriorityFix {
   occurrences: number;
   action: string; // what_should_have_happened from the category's most severe note
   why: string;    // that note's why text
+  // Distinct what_happened lines across every note in this category (not just
+  // the one most-severe note `action`/`why` are drawn from), deduplicated and
+  // capped — so a category with several different underlying issues (e.g.
+  // two separate missed-interest gaps and a rolldown-timing miss, all under
+  // "economy") shows its real scope instead of reading as one repeated note.
+  // Omitted when there's only the one note `action`/`why` already covers.
+  patterns?: string[];
 }
 
 export interface CoachingReport {
@@ -220,6 +293,7 @@ export interface CoachingReport {
   notes: CoachingNote[];
   strengths: string[];
   round_trajectory?: RoundTrajectoryPoint[];
+  plan: MatchPlan;
 }
 
 // ─── Match brief (compact report input) ─────────────────────────────────────
@@ -231,6 +305,7 @@ export interface MatchBrief {
   finalComp: Array<{ name: string; stars: number; items: string[] }>;
   augments: string[];
   godPicks: Array<{ round: string; god: string }>;
+  plan: MatchPlan;
   // Notes already narrated by the rule engine.
   resolvedNotes: CoachingNote[];
   // Decision points that still need report prose.
@@ -248,21 +323,148 @@ export type AppStatus =
   | 'no_game'   // not in a TFT match
   | 'in_match'; // TFT match in progress
 
+// ─── Player Trends (cross-match, set-invariant behavioral profile) ──────────
+// A Challenger player transfers skill to a new set in days because econ
+// rules, interest breakpoints, streak management, roll-down timing,
+// HP-as-a-resource, item slamming, and tempo never change — only the
+// vocabulary (units/traits/augments) does. FeatureVector is exactly that
+// invariant layer, numeric-only, derivable entirely from RoundSnapshot[] plus
+// the already-computed DecisionPoint[]/MatchPlan/MatchContext for one match.
+// MatchLabels is the vocabulary layer, kept structurally separate: it's used
+// for narrative grouping only ("this pattern shows up in your reroll games")
+// and is NEVER fed into ridge regression or k-means as a feature, so a new
+// set changeover invalidates only the labels, never the trained model's
+// input schema. See src/profile/ for extraction + the model itself.
+
+export interface FeatureVector {
+  schemaVersion: 1; // bump on any field add/remove/rename — src/profile/trend-model.ts skips mismatched records rather than misaligning columns
+
+  // Econ curve shape
+  econBankingPhaseRatio: number;       // 0-1, fraction of rounds classified 'banking' (see plan-builder.ts's roundMode)
+  econPhaseSwitchCount: number;        // banking<->spending transitions across the match
+  interestMissedRoundCount: number;    // rounds ending 1-3g short of a 10g interest tier (ECON_001's condition, counted not just fired)
+  overcapRoundCount: number;           // rounds sitting >=54g with no roll/XP spend (ECON_002's per-round condition)
+  preStage3RollGold: number;           // total gold spent rolling before stage 3 (ECON_003's metric)
+
+  // Roll timing
+  rolldownLatencyRounds: number | null;    // rounds between first HP-crisis round and the first roll response after it; null = no crisis this match
+  postStabilizationOverrollGold: number;   // ROLL_003's totalWaste when it fired, else 0
+  level6RollDuringLossStreakGold: number;  // sum of ROLL_004's goldRolled across all firings, else 0
+
+  // Streak
+  maxWinStreak: number;
+  maxLossStreak: number;
+  streakBreakCount: number;            // count of STREAK_001 firings (win streak of 3+ broken)
+  streakConversionRate: number;        // 0-1: (win-streak episodes reaching 3+) / (episodes reaching 2+); 0 when no episode reached 2+
+
+  // Leveling curve vs. the existing level-8-by-4-2 / level-9-by-5-2 benchmarks
+  level8DeltaRounds: number | null;    // signed roundToNumber delta, negative = ahead of 4-2; null if level 8 never reached
+  level9DeltaRounds: number | null;    // same, vs 5-2; null if level 9 never reached
+
+  // Item-slam timing
+  componentHoldRoundRatio: number;         // 0-1: stage>=2 rounds holding 2+ unbuilt components (ITEM_001's condition)
+  componentConversionsMissedCount: number; // count of ITEM_005 firings
+  carryItemCountAt41: number;              // completed items on the identified carry at round 4-1; 0 if that round doesn't exist
+
+  // Positioning-adjustment
+  positioningNoAdjustStreakAvg: number;    // avg consecutive-fight run length of "same opponent carry, same hex" (POSITION_001's ground truth)
+  noFrontlineRoundRatio: number;           // 0-1: stage>=4 PVP rounds with nobody in the front two rows
+
+  // Combat damage-share consistency (real battle_stats, not a proxy)
+  carryDamageLeadRate: number | null;      // 0-1: qualifying stage>=4 rounds (carry has 2+ completed items) where the carry led own-team damage; null if no qualifying rounds
+  avgCarryDamageShareOfTeam: number | null; // avg carryDamage / teamDamage over the same qualifying rounds; null if none
+
+  // HP trajectory shape
+  hpCrisisRoundRatio: number;          // 0-1: match.rounds in context.hpCrisisRounds
+  hpAtStage3Entry: number | null;      // health at round 3-1; null if absent
+  hpAtStage4Entry: number | null;      // health at round 4-1; null if absent
+  hpAtStage5Entry: number | null;      // health at round 5-1; null if absent
+  hpRecoverySlope: number | null;      // avg HP delta/round from the first crisis round to recovery (health>=40) or match end; null if no crisis
+
+  // Set-invariant situational signals — mechanics/tempo classifications, not vocabulary
+  isRerollComp: 0 | 1;
+  isFastTempo: 0 | 1;
+  isSlowRoll: 0 | 1;
+
+  totalRounds: number;
+}
+
+// Set-specific vocabulary — narrative annotation only, never a model input.
+export interface MatchLabels {
+  setId: string;
+  matchedCompId?: string;
+  finalTraits: string[];
+  augmentsPicked: string[];
+  econStyle: EconStyle;
+}
+
+export interface FeatureCorrelation {
+  feature: keyof FeatureVector;
+  r: number;               // Pearson correlation vs. placement (lower placement = better, so a positive r means higher feature value correlates with WORSE placement)
+  meaningfulAtN: boolean;   // |r| > 2/sqrt(n) — an honest "not indistinguishable from noise at this n" flag, not a real significance test
+}
+
+export interface RegressionResult {
+  coefficients: Partial<Record<keyof FeatureVector, number>>; // standardized-units (z-scored inputs), so magnitudes are comparable across features
+  rSquared: number;
+  sampleSize: number;
+  sufficientData: boolean; // n >= 3x feature count; when false the UI must present this as exploratory only
+}
+
+export interface PlayStyleCluster {
+  clusterId: number;
+  matchIds: string[];
+  size: number;
+  avgPlacement: number;
+  centroid: Partial<Record<keyof FeatureVector, number>>; // in original units, for a readable summary
+  dominantLabels: string[]; // most common MatchLabels values (finalTraits/econStyle) across member matches — narrative only, never fed back into the model
+}
+
+export interface PlayerProfile {
+  computedAt: number;
+  sampleSize: number;
+  // Deliberately never claims more than 'moderate' at this project's realistic
+  // scale (single user, n in the tens to low hundreds) — see trend-model.ts.
+  confidence: 'insufficient_data' | 'exploratory' | 'moderate';
+  correlations: FeatureCorrelation[];
+  regression?: RegressionResult;  // absent entirely below the sufficiency bar, not shown-with-caveat
+  clusters: PlayStyleCluster[];   // clusters below the minimum size are dropped, not padded
+  // Records skipped because their featureVector.schemaVersion didn't match
+  // the current schema — surfaced so the UI can say "N older matches need
+  // reprocessing" instead of silently training on a shrinking, unexplained set.
+  skippedStaleSchemaCount: number;
+}
+
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
+// Deliberately does NOT include the raw ledger (LedgerEntry[]) — it used to,
+// and a full match's ledger can be 1-3MB+ of JSON. Duplicating that into every
+// localStorage-persisted record (on top of the .jsonl file already on disk,
+// keyed by pseudoMatchId — see src/ledger/ledger.ts) was enough to exhaust
+// localStorage's ~5-10MB quota after only a handful of matches, silently
+// failing saveMatch. The ledger file on disk is the single source of truth
+// (architectural invariant #1 in design/01-architecture-overview.md); anything
+// needing raw ledger data (Riot cross-check reconciliation, the
+// __debugReprocessMatch/__debugRecoverMatch dev helpers) reads it fresh via
+// readLedger(pseudoMatchId) instead of expecting it here.
 export interface MatchRecord {
   pseudoMatchId: string;
   datePlayed: number;
   setId: string;
   placement: number;
   lastRound: string;
-  ledger: LedgerEntry[];
   brief?: MatchBrief;
   coachingReport?: CoachingReport;
   // Best-effort ground-truth check against Riot's match-v1, when a Riot
   // account is linked in settings. Diagnostic only — never overwrites
   // `placement`, which stays sourced from GEP. See src/enrichment/riot-api.ts.
   riotCrossCheck?: RiotCrossCheck;
+  // Set-invariant behavioral stats + set-specific vocabulary for this match —
+  // see the "Player Trends" section above. Additive/optional so this stays
+  // the single source of truth for match history (no second store): older
+  // records simply lack these fields until reprocessed.
+  featureVector?: FeatureVector;
+  matchLabels?: MatchLabels;
 }
 
 // ─── Riot API (bring-your-own-key, see src/enrichment/riot-api.ts) ───────────
@@ -286,6 +488,54 @@ export interface RiotCrossCheck {
   riotPlacement: number;
   matched: boolean;
   checkedAt: number;
+}
+
+// ─── Meta crawler (src/enrichment/meta-crawler.ts) ──────────────────────────
+// Aggregate crowd stats harvested across many high-elo players via Riot's
+// official league-v1 (top-player lists) + match-v1 (per-match results) APIs
+// — the official, sanctioned replacement for the unofficial-proxy
+// scripts/fetch-metatft.js (never wired into the app). Runtime-only: cached
+// in localStorage (src/persistence/meta-cache.ts), not a data/ file, since
+// it's sourced live under the user's own key rather than shipped/committed.
+
+export interface AggregateStatBucket {
+  samples: number;
+  avgPlacement: number;
+  top4Rate: number;
+}
+
+export interface AggregateMetaTable {
+  champions: Record<string, AggregateStatBucket>;    // champion id -> stats across harvested final boards
+  traitCombos: Record<string, AggregateStatBucket>;  // sorted-trait-key (see match-context.ts's computeActiveTraitSet) -> stats
+  augments: Record<string, AggregateStatBucket>;      // augment id -> stats
+  computedAt: number;
+  matchSampleCount: number; // unique matches harvested (participants counted separately per bucket)
+}
+
+// One harvested match participant, reduced to only what the aggregation
+// needs — NOT the raw Riot payload (keeps localStorage small; a crawl can
+// touch thousands of participants across many matches over time).
+export interface HarvestedParticipant {
+  matchId: string; // lets computeAggregateTable count unique matches, not just participants
+  placement: number;
+  championIds: string[];
+  traitKey: string;
+  augmentIds: string[];
+}
+
+// Resumable crawl progress — a single crawl tick (runMetaCrawlTick) advances
+// this by a small bounded amount and persists it, so a multi-hundred-player
+// crawl survives app restarts instead of needing to run start-to-finish in
+// one sitting. seedPuuids/cursor implement the "which top players have we
+// pulled a recent match for already this cycle" progress; seenMatchIds
+// dedupes match bodies (many top players share lobbies, so the same match id
+// would otherwise be fetched/harvested once per participant in it).
+export interface MetaCrawlState {
+  seedPuuids: string[];
+  cursor: number;
+  seedFetchedAt: number;
+  seenMatchIds: string[];
+  accumulator: HarvestedParticipant[];
 }
 
 export interface MatchSummary {
@@ -404,6 +654,21 @@ export interface MetaData {
   augmentModifiers: AugmentModifiers;
   // Curated comp archetypes for this set (data/sets/set{N}/comps.json).
   comps: CompArchetype[];
+  // augment id -> local champion id, for augments.json's 'units' bucket
+  // entries where the granted champion could be resolved from real Data
+  // Dragon augment description text (data/sets/set{N}/augment-unit-grants.json,
+  // auto-fetched — see scripts/fetch-ddragon.js). Optional: absent on any
+  // MetaData built without it (older data, or a test literal) should be
+  // treated as "no grants known," not a crash.
+  augmentUnitGrants?: Record<string, string>;
+  // Crowd meta data aggregated across many high-elo players via Riot's
+  // official API (src/enrichment/meta-crawler.ts), cached at runtime in
+  // localStorage (src/persistence/meta-cache.ts) — NOT a static data/ file,
+  // since it's sourced live under the user's own Riot key, not shipped.
+  // Optional: absent until a Riot account is linked and a first crawl cycle
+  // completes; every consumer must treat that as "no meta data known yet,"
+  // not a crash. See MetaContext's doc comment for how this is used.
+  metaTierTable?: AggregateMetaTable;
 }
 
 // ─── Match context ───────────────────────────────────────────────────────────
@@ -431,4 +696,12 @@ export interface MatchContext {
   // verifiable game mechanic; "this is a Fast 9 comp" is not, without real
   // per-archetype curation this project doesn't have yet.
   isFastTempo: boolean;
+  // The whole-match synthesis (see plan-builder.ts) — optional and NOT set by
+  // buildMatchContext() itself (match-context.ts can't import plan-builder.ts,
+  // which already imports match-context.ts). rule-engine.ts computes it once
+  // and attaches it before passing context to checkers, so any checker that
+  // already accepts MatchContext can read context.plan without a new
+  // parameter. Undefined in NEUTRAL_CONTEXT and in any test that builds a
+  // MatchContext literal without it — callers must treat it as optional.
+  plan?: MatchPlan;
 }

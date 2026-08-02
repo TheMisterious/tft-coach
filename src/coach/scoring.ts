@@ -84,7 +84,7 @@ function categoryGrade(penalty: number): Grade {
 
 export const ALL_CATEGORIES: DecisionCategory[] = [
   'econ', 'streak', 'leveling', 'items', 'rolling', 'traits',
-  'augments', 'positioning', 'hp', 'board', 'comp', 'set_mechanic',
+  'augments', 'positioning', 'hp', 'board', 'comp', 'combat', 'set_mechanic',
 ];
 
 export const CATEGORY_LABELS: Record<DecisionCategory, string> = {
@@ -99,6 +99,7 @@ export const CATEGORY_LABELS: Record<DecisionCategory, string> = {
   hp: 'HP management',
   board: 'board strength',
   comp: 'comp direction',
+  combat: 'combat performance',
   set_mechanic: 'set mechanics',
 };
 

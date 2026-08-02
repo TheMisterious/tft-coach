@@ -1,5 +1,5 @@
 import React from 'react';
-import type { RoundTrajectoryPoint } from '../../shared/types';
+import type { RoundTrajectoryPoint, CompPivot } from '../../shared/types';
 import { TrajectoryChart } from './TrajectoryChart';
 import styles from './MatchTrajectoryCharts.module.css';
 
@@ -10,14 +10,24 @@ import styles from './MatchTrajectoryCharts.module.css';
 // before match end. Same one-shot nature as me.placement, not a trajectory —
 // charting it produced a flat line at 0 for the entire match. Removed rather
 // than fixed: there's no per-round data to fix it with.
-export function MatchTrajectoryCharts({ data }: { data: RoundTrajectoryPoint[] }) {
+interface Props {
+  data: RoundTrajectoryPoint[];
+  pivots?: CompPivot[];
+}
+
+export function MatchTrajectoryCharts({ data, pivots = [] }: Props) {
   if (data.length < 2) return null;
+
+  const pivotMarkers = pivots.map(p => ({
+    round: p.round,
+    label: `Pivot: ${p.from.join('/') || 'no traits'} -> ${p.to.join('/') || 'no traits'}`,
+  }));
 
   return (
     <div className={styles.grid}>
       <TrajectoryChart data={data} accessor={p => p.hp} title="HP" color="#a6e3a1" />
       <TrajectoryChart data={data} accessor={p => p.gold} title="Gold" color="#f9e2af" suffix="g" />
-      <TrajectoryChart data={data} accessor={p => p.level} title="Level" color="#89b4fa" />
+      <TrajectoryChart data={data} accessor={p => p.level} title="Level" color="#89b4fa" markers={pivotMarkers} />
       <TrajectoryChart data={data} accessor={p => p.rollGold} title="Roll spend" color="#cba6f7" suffix="g" />
     </div>
   );

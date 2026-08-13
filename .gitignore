@@ -21,3 +21,8 @@ data/sets/*/meta-tiers.generated.json
 # is tracked.
 tests/goldens/*.jsonl
 !tests/goldens/.gitkeep
+
+# Working output at the repo root: rule-audit reports (results/rule-audit) and
+# the Riot match cache (results/riot-meta-cache). Regenerable, never shipped.
+/results/*
+!/results/.gitkeep

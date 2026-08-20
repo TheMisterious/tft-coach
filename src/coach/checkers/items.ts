@@ -1,12 +1,12 @@
-// ITEM_001: Delayed item slam — 2+ components on bench for 3+ consecutive rounds
+﻿// ITEM_001: Delayed item slam â€” 2+ components on bench for 3+ consecutive rounds
 // ITEM_002: Carry items on tank units (requires champion role data)
 // ITEM_003: Under-itemised carry at stage 4 (<2 completed items)
 // ITEM_004: Items spread across 4+ units with no unit holding 2+
 // ITEM_005: A real, buildable completed item was left as unbuilt components
-//           for 3+ consecutive rounds — see data/core/item-data.json
+//           for 3+ consecutive rounds â€” see data/core/item-data.json
 
 import type { MatchSnapshot, DecisionPoint, MetaData, MatchContext, Cell, ItemData, RoundSnapshot } from '../../shared/types';
-import { getChampionName, getItemName } from '../../enrichment/meta-lookup';
+import { getChampionName, getItemName, getItemData, resolveItemId, isNonItemId } from '../../enrichment/meta-lookup';
 import { NEUTRAL_CONTEXT, computeActiveComp, computeCarryDamage } from '../match-context';
 import { pivotContextClause } from '../plan-builder';
 import { boardItemIds, identifyCarry } from '../../ledger/merge';
@@ -18,12 +18,36 @@ function byHp(hp: number, t: { low: string; mid: string; high: string }): string
 }
 
 export function isComponent(id: string, meta: MetaData): boolean {
-  return !!meta.itemData[id]?.isComponent;
+  return !!getItemData(id, meta)?.isComponent;
+}
+
+/**
+ * Does this id resolve to a real catalogue entry at all?
+ *
+ * Counting rules must not treat "we have never heard of this id" as "this is a
+ * finished item". That is what happened before 2026-08-07: `isComponent()`
+ * returns false for an unknown id, so every unresolved artifact, emblem and
+ * set-mechanic item silently counted as a completed item â€” right answer by
+ * accident for artifacts, wrong answer for an unresolved COMPONENT, and either
+ * way a number the report could not justify.
+ */
+export function isKnownItem(id: string, meta: MetaData): boolean {
+  return !!getItemData(id, meta);
+}
+
+/** Completed items a unit is actually holding, ignoring ids nothing can identify. */
+export function completedItems(cell: Cell, meta: MetaData): string[] {
+  return realItems(cell, meta).filter(id => isKnownItem(id, meta) && !isComponent(id, meta));
+}
+
+/** Equipped ids that resolve to nothing â€” a real coverage gap, reported not guessed. */
+export function unresolvedItems(cell: Cell, meta: MetaData): string[] {
+  return realItems(cell, meta).filter(id => !isKnownItem(id, meta));
 }
 
 // Thief's Gloves is real-data-tagged 'offense' (Community Dragon gives it a
 // baseline 20% crit chance + 150 health, so it lands in both 'offense' and
-// 'tank') but that baseline isn't what the item actually is — its entire
+// 'tank') but that baseline isn't what the item actually is â€” its entire
 // value is the 2 random items it rolls each combat, which land on offense,
 // defense, or utility with equal likelihood. It's commonly built ON tanks
 // specifically because you don't want to gamble your carry's itemization,
@@ -34,18 +58,23 @@ export function isComponent(id: string, meta: MetaData): boolean {
 const RANDOM_ITEM_IDS = new Set(['TFT_Item_ThiefsGloves']);
 
 function isOffenseItem(id: string, meta: MetaData): boolean {
-  if (RANDOM_ITEM_IDS.has(id)) return false;
-  return !!meta.itemData[id]?.tags.includes('offense');
+  if (RANDOM_ITEM_IDS.has(resolveItemId(id, meta))) return false;
+  return !!getItemData(id, meta)?.tags.includes('offense');
 }
 
 export function unitItems(cell: Cell): string[] {
   return [cell.item_1, cell.item_2, cell.item_3].filter(i => i && i !== '0');
 }
 
+/** Equipped slots that hold a real item â€” placeholders like EmptyBag are not one. */
+function realItems(cell: Cell, meta: MetaData): string[] {
+  return unitItems(cell).filter(id => !isNonItemId(id, meta));
+}
+
 export function checkItems(match: MatchSnapshot, meta: MetaData, context: MatchContext = NEUTRAL_CONTEXT): DecisionPoint[] {
   const conversionPoints = checkComponentConversionOpportunity(match, meta, context);
   // ITEM_005 already says "held these unbuilt for 3+ rounds, here's the exact
-  // item you should've slammed" for a round — ITEM_001's generic "you held
+  // item you should've slammed" for a round â€” ITEM_001's generic "you held
   // components unbuilt" for that same round is strictly less useful and just
   // repeats the same observation, so skip it wherever ITEM_005 already fired.
   const conversionRounds = new Set(conversionPoints.map(p => p.round));
@@ -59,7 +88,7 @@ export function checkItems(match: MatchSnapshot, meta: MetaData, context: MatchC
   ];
 }
 
-// ITEM_001 — components held for 3+ consecutive rounds (was 2-stage threshold)
+// ITEM_001 â€” components held for 3+ consecutive rounds (was 2-stage threshold)
 function checkSlamTiming(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
   const points: DecisionPoint[] = [];
   let consecutiveHolding = 0;
@@ -69,7 +98,7 @@ function checkSlamTiming(match: MatchSnapshot, meta: MetaData): DecisionPoint[] 
     if (Number(stageStr) < 2) continue;
 
     // Components live in two places: equipped on a benched (not yet fielded)
-    // champion, or loose in the item tray (round.benchItems — the far more
+    // champion, or loose in the item tray (round.benchItems â€” the far more
     // common real case; see rounds.ts's item_bench handling).
     const benchComps = [...boardItemIds(round.bench), ...round.benchItems].filter(id => isComponent(id, meta));
     if (benchComps.length >= 2) {
@@ -81,9 +110,9 @@ function checkSlamTiming(match: MatchSnapshot, meta: MetaData): DecisionPoint[] 
           category: 'items',
           severity: 'moderate',
           observed: `${benchComps.length} unbuilt component(s) held for 3+ consecutive rounds`,
-          recommended: 'Slam components into serviceable items — any completed item outperforms raw components on the bench',
+          recommended: 'Slam components into serviceable items â€” any completed item outperforms raw components on the bench',
           reasonMetrics: { components: benchComps.length, consecutiveRounds: consecutiveHolding },
-          coaching_text: `You kept ${benchComps.length} unbuilt components on your bench for at least 3 rounds in a row. Every fight you played with those components unslammed was a fight where your board was weaker than it needed to be. Slam items on any reasonable holder — even an imperfect completed item provides more combat power than components waiting for the "perfect" recipient.`,
+          coaching_text: `You kept ${benchComps.length} unbuilt components on your bench for at least 3 rounds in a row. Every fight you played with those components unslammed was a fight where your board was weaker than it needed to be. Slam items on any reasonable holder â€” even an imperfect completed item provides more combat power than components waiting for the "perfect" recipient.`,
         });
       }
     } else {
@@ -93,7 +122,7 @@ function checkSlamTiming(match: MatchSnapshot, meta: MetaData): DecisionPoint[] 
   return points;
 }
 
-// ITEM_002 — offense-tagged items on tank-role units
+// ITEM_002 â€” offense-tagged items on tank-role units
 function checkCarryItemsOnTank(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
   const points: DecisionPoint[] = [];
   const lastRound = match.rounds.at(-1);
@@ -114,15 +143,15 @@ function checkCarryItemsOnTank(match: MatchSnapshot, meta: MetaData): DecisionPo
       category: 'items',
       severity: 'moderate',
       observed: `Tank unit ${champMeta.name} is holding ${damageItems.length} damage item(s): ${damageItemNames.join(', ')}`,
-      recommended: `Move damage items to a carry unit — ${champMeta.name} benefits from defensive items instead`,
+      recommended: `Move damage items to a carry unit â€” ${champMeta.name} benefits from defensive items instead`,
       reasonMetrics: { unit: champMeta.name, damageItemCount: damageItems.length },
-      coaching_text: `${champMeta.name} is a tank-role unit but finished the game holding ${damageItems.length} damage items. Damage items on tanks provide almost no value — the unit does not have the attack speed, ability power, or crit interactions to leverage them. Those items on a carry unit would multiply damage output significantly.`,
+      coaching_text: `${champMeta.name} is a tank-role unit but finished the game holding ${damageItems.length} damage items. Damage items on tanks provide almost no value â€” the unit does not have the attack speed, ability power, or crit interactions to leverage them. Those items on a carry unit would multiply damage output significantly.`,
     });
   }
   return points;
 }
 
-// ITEM_003 — carry has <2 completed items at round 4-1
+// ITEM_003 â€” carry has <2 completed items at round 4-1
 function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData, context: MatchContext): DecisionPoint[] {
   const r41 = match.rounds.find(r => r.label === '4-1');
   if (!r41) return [];
@@ -132,8 +161,13 @@ function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData, context: 
 
   const carry      = identifyCarry(units, meta, computeActiveComp(match), computeCarryDamage(match));
   const carryName  = getChampionName(carry.name, meta);
-  const itemCount  = unitItems(carry).filter(id => !isComponent(id, meta)).length;
-  if (itemCount >= 2) return [];
+  const itemCount  = completedItems(carry, meta).length;
+  // Items nothing in the catalogue can identify â€” artifacts, trait emblems and
+  // set-mechanic items all landed here before the id resolver existed. They are
+  // real items the player really equipped, so a "your carry has too few items"
+  // note must not be written as if the slot were empty.
+  const unknown    = unresolvedItems(carry, meta).length;
+  if (itemCount + unknown >= 2) return [];
 
   return [{
     ruleId:   'ITEM_003',
@@ -141,23 +175,26 @@ function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData, context: 
     category: 'items',
     severity: 'critical',
     observed: `Main carry ${carryName} had only ${itemCount} completed item(s) at stage 4 entry`,
-    recommended: 'Two God rounds have occurred by 4-1 — your carry should have at least 2 completed items',
+    recommended: 'Two God rounds have occurred by 4-1 â€” your carry should have at least 2 completed items',
     reasonMetrics: { carry: carryName, itemCount },
     coaching_text: byHp(r41.health, {
-      low:  `${carryName} entered stage 4 with only ${itemCount} completed item(s) — and you're already at ${r41.health} HP. This is the worst combination: a weak board AND a low-HP position. Every fight from here where your carry underperforms accelerates elimination. Slam any available components immediately onto ${carryName}, even off-BiS items.`,
-      mid:  `Your carry (${carryName}) entered stage 4 with only ${itemCount} item(s) at ${r41.health} HP. Two component rounds have already occurred — the carry should have at least 2 completed items by now. An under-itemised carry in stage 4 dramatically reduces your win rate and HP stability.`,
-      high: `${carryName} entered stage 4 with only ${itemCount} completed item(s). You're at ${r41.health} HP so you have room to recover, but the itemisation gap is still costing you — a fully-itemised carry would close out fights faster and preserve that health lead into the late game.`,
+      low:  `${carryName} entered stage 4 with only ${itemCount} completed item(s) â€” and you're already at ${r41.health} HP. This is the worst combination: a weak board AND a low-HP position. Every fight from here where your carry underperforms accelerates elimination. Slam any available components immediately onto ${carryName}, even off-BiS items.`,
+      mid:  `Your carry (${carryName}) entered stage 4 with only ${itemCount} item(s) at ${r41.health} HP. Two component rounds have already occurred â€” the carry should have at least 2 completed items by now. An under-itemised carry in stage 4 dramatically reduces your win rate and HP stability.`,
+      high: `${carryName} entered stage 4 with only ${itemCount} completed item(s). You're at ${r41.health} HP so you have room to recover, but the itemisation gap is still costing you â€” a fully-itemised carry would close out fights faster and preserve that health lead into the late game.`,
     }) + pivotContextClause(context.plan, '4-1'),
   }];
 }
 
-// ITEM_004 — items spread across 4+ units at stage 4 with no unit holding 2+
+// ITEM_004 â€” items spread across 4+ units at stage 4 with no unit holding 2+
 function checkItemSpread(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
   const r42 = match.rounds.find(r => r.label === '4-2');
   if (!r42) return [];
 
   const units = Object.values(r42.board).filter(c => c?.name && c.name !== '0');
-  const itemCounts = units.map(u => unitItems(u).filter(id => !isComponent(id, meta)).length);
+  // Unresolved ids count toward "this unit is carrying something" â€” the player
+  // did equip them, and calling a 3-item carry "spread thin" because two of the
+  // three are artifacts would be exactly backwards.
+  const itemCounts = units.map(u => completedItems(u, meta).length + unresolvedItems(u, meta).length);
   const unitsWithItems = itemCounts.filter(n => n >= 1).length;
   const maxItems       = Math.max(0, ...itemCounts);
 
@@ -168,16 +205,16 @@ function checkItemSpread(match: MatchSnapshot, meta: MetaData): DecisionPoint[] 
     round:    '4-2',
     category: 'items',
     severity: 'minor',
-    observed: `Items spread across ${unitsWithItems} units at 4-2 — no unit holds 2+ items`,
-    recommended: 'Concentrate 2–3 items on your primary carry for multiplicative stat interactions',
+    observed: `Items spread across ${unitsWithItems} units at 4-2 â€” no unit holds 2+ items`,
+    recommended: 'Concentrate 2â€“3 items on your primary carry for multiplicative stat interactions',
     reasonMetrics: { unitsWithItems, maxItems },
     coaching_text: `At round 4-2 you had items spread across ${unitsWithItems} different units with none holding more than ${maxItems}. Item multiplicative interactions (crit + IE + JG, AP + Rabadons + JG) require concentration on one unit. One fully-itemised carry almost always outperforms four units with one item each.`,
   }];
 }
 
-// ── ITEM_005 — component conversion opportunity ────────────────────────────
+// â”€â”€ ITEM_005 â€” component conversion opportunity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Real recipe/stat data only (data/core/item-data.json, fetched from Community
-// Dragon — see scripts/fetch-ddragon.js). No BiS list, no per-champion curation:
+// Dragon â€” see scripts/fetch-ddragon.js). No BiS list, no per-champion curation:
 // this looks at exactly what components the player held and what real
 // completed item they could build from them, judged against the round's
 // actual situation (HP crisis -> defense/sustain need, otherwise -> offense).
@@ -198,7 +235,7 @@ const STAT_LABELS: Record<string, string> = {
 };
 
 // Community Dragon stores some stats as a flat number (Health: 500) and others
-// as a fraction of a percentage (AD: 0.15 -> +15% bonus AD) — cross-checked
+// as a fraction of a percentage (AD: 0.15 -> +15% bonus AD) â€” cross-checked
 // against known real item values (B.F. Sword AD:10 flat, Bloodthirster
 // AD:0.15 = the real known +15% bonus AD), not guessed.
 function formatStat(key: string, value: number): string {
@@ -262,14 +299,14 @@ interface FiringPair extends BuildablePair {
 }
 
 // 3+ held components produce C(n,2) buildable pairs that all pairwise share
-// a component — e.g. holding Negatron Cloak + Chain Vest + Giant's Belt
+// a component â€” e.g. holding Negatron Cloak + Chain Vest + Giant's Belt
 // makes all 3 possible pairs (Negatron+Chain, Negatron+Belt, Chain+Belt)
 // buildable at once, and each hit its own 3-round streak in the same round.
 // FIXED (2026-08-02, real match report: 3 separate near-duplicate ITEM_005
 // notifications fired at 2-3, all for the same 3 held components): the old
 // per-pair loop fired one DecisionPoint per pair independently, but building
 // any one of those pairs consumes 2 of the 3 components and breaks the other
-// two — they were never 3 independent recommendations, just 3 views of one
+// two â€” they were never 3 independent recommendations, just 3 views of one
 // hoarding situation. Groups same-round firings that share a component
 // (union-find over component ids, so it holds for 4+ overlapping components
 // too, not just the 3-component case) into a single DecisionPoint listing
@@ -324,7 +361,7 @@ function buildConversionPoint(
   const consecutiveRounds = Math.max(...cluster.map(p => p.streak));
   const crisisSuffix = inCrisis ? ` during an HP crisis (${round.health} HP)` : '';
 
-  // Single buildable option — identical wording to the pre-fix single-pair case.
+  // Single buildable option â€” identical wording to the pre-fix single-pair case.
   if (options.length === 1) {
     const { resultName, statText, fits } = options[0];
     return {
@@ -334,17 +371,17 @@ function buildConversionPoint(
       severity: fits ? 'moderate' : 'minor',
       observed: `Held ${compNames} unbuilt for 3+ consecutive rounds${crisisSuffix}`,
       recommended: fits
-        ? `Combine into ${resultName} (${statText}) — matches what your board needed right then`
-        : `Combine into ${resultName} (${statText}) — real value, just not the kind this round's situation called for`,
+        ? `Combine into ${resultName} (${statText}) â€” matches what your board needed right then`
+        : `Combine into ${resultName} (${statText}) â€” real value, just not the kind this round's situation called for`,
       reasonMetrics: { components: compNames, result: resultName, consecutiveRounds },
       coaching_text: (fits
-        ? `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Combined, those build ${resultName} (${statText}) — exactly the kind of stats your board needed at that point. Sitting on the raw components instead of slamming them cost you that value for multiple fights.`
-        : `You held ${compNames} unbuilt for 3+ consecutive rounds. Combined, those build ${resultName} (${statText}) — real value left on the bench, though it isn't what this specific round's situation called for. Still better to slam it than let the components sit idle.`
+        ? `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Combined, those build ${resultName} (${statText}) â€” exactly the kind of stats your board needed at that point. Sitting on the raw components instead of slamming them cost you that value for multiple fights.`
+        : `You held ${compNames} unbuilt for 3+ consecutive rounds. Combined, those build ${resultName} (${statText}) â€” real value left on the bench, though it isn't what this specific round's situation called for. Still better to slam it than let the components sit idle.`
       ) + pivotContextClause(context.plan, round.label),
     };
   }
 
-  // Multiple overlapping options — building any one consumes 2 of the held
+  // Multiple overlapping options â€” building any one consumes 2 of the held
   // components and breaks the rest, so only one is actually actionable.
   const optionText = options.map(o => `${o.resultName} (${o.statText})`).join(' or ');
   return {
@@ -353,9 +390,9 @@ function buildConversionPoint(
     category: 'items',
     severity: fitsAny ? 'moderate' : 'minor',
     observed: `Held ${compNames} unbuilt for 3+ consecutive rounds${crisisSuffix}`,
-    recommended: `Combine any two into ${optionText} — you can only build one from these at a time`,
+    recommended: `Combine any two into ${optionText} â€” you can only build one from these at a time`,
     reasonMetrics: { components: compNames, results: options.map(o => o.resultName).join(', '), consecutiveRounds },
-    coaching_text: `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Any two of them combine into a real completed item — ${optionText} — but slamming one uses up two of the three, so pick whichever matches what your board needs. Sitting on all of them unbuilt instead of slamming any pair cost you that value for multiple fights.` + pivotContextClause(context.plan, round.label),
+    coaching_text: `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Any two of them combine into a real completed item â€” ${optionText} â€” but slamming one uses up two of the three, so pick whichever matches what your board needs. Sitting on all of them unbuilt instead of slamming any pair cost you that value for multiple fights.` + pivotContextClause(context.plan, round.label),
   };
 }
 
@@ -376,7 +413,7 @@ function checkComponentConversionOpportunity(match: MatchSnapshot, meta: MetaDat
       if (!currentKeys.has(key)) {
         streaks.delete(key);
         // Once the pair stops being buildable (built, sold, or broken up),
-        // clear the fired-flag too — a genuine later recurrence of holding
+        // clear the fired-flag too â€” a genuine later recurrence of holding
         // the same two components unbuilt for 3+ rounds should be able to
         // fire again, not be silently eaten for the rest of the match.
         firedPairs.delete(key);

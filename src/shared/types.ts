@@ -29,6 +29,15 @@ export interface CombatUnitStats {
   totalBlocked: number;
   healed: number;
   shielded: number;
+  /**
+   * `totalDamage` split by type, straight off GEP's `phy_dmg` / `mag_dmg` /
+   * `true_dmg`. Present on both sides whenever the case came from a real
+   * `battle_stats` payload; absent when the case was rebuilt from damage
+   * curves, which carry no type at all.
+   */
+  physicalDamage?: number;
+  magicDamage?: number;
+  trueDamage?: number;
 }
 
 export interface BattleStats {
@@ -646,6 +655,13 @@ export interface MetaData {
   items: Record<string, string>;
   // Core, set-agnostic item id -> real composition/stat data (data/core/item-data.json).
   itemData: Record<string, ItemData>;
+  // GEP's id for an item Riot has since renamed -> the real catalogue id
+  // (data/core/item-aliases.json). GEP names some items after their CURRENT
+  // display name while Community Dragon keeps the original apiName, so those
+  // ids exist in no catalogue at all and can only be joined through the name.
+  // Optional: a stale data/ folder without the file still loads, it just
+  // resolves fewer ids. See meta-lookup.ts's resolveItemId.
+  itemAliases?: Record<string, string>;
   // Augment ids grouped by category (data/sets/set{N}/augments.json).
   augments: Record<string, string[]>;
   // Core, auto-fetched augment id -> friendly display name (data/core/augment-names.json).

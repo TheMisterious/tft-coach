@@ -62,6 +62,12 @@ function formatFeatureValue(key: keyof FeatureVector, value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
+function correlationPhrase(value: number): string {
+  const abs = Math.abs(value);
+  const strength = abs >= 0.5 ? 'Strongly' : abs >= 0.3 ? 'Moderately' : abs >= 0.15 ? 'Slightly' : 'Barely';
+  return `${strength} linked to ${value > 0 ? 'worse' : 'better'} finishes`;
+}
+
 const CONFIDENCE_COPY: Record<PlayerProfile['confidence'], string> = {
   insufficient_data: 'Not enough matches yet — patterns need at least 15 Player-Trends-eligible matches before anything reliable can show up here.',
   exploratory: 'Exploratory — patterns below are directional, not statistically reliable yet. More matches will sharpen this.',
@@ -90,9 +96,6 @@ function CorrelationsList({ profile }: { profile: PlayerProfile }) {
   return (
     <section className={styles.section}>
       <h3 className={styles.sectionTitle}>What correlates with your placement</h3>
-      <p className={styles.sectionNote}>
-        Positive means higher values here tend to show up in your worse finishes; negative means your better ones.
-      </p>
       {shown.length === 0 ? (
         <p className={styles.sectionNote}>No signal clears the noise floor yet at this sample size.</p>
       ) : (
@@ -100,8 +103,11 @@ function CorrelationsList({ profile }: { profile: PlayerProfile }) {
           {shown.slice(0, 8).map(c => (
             <li key={c.feature} className={styles.correlationRow}>
               <span className={styles.correlationLabel}>{featureLabel(c.feature)}</span>
-              <span className={c.r > 0 ? styles.correlationNeg : styles.correlationPos}>
-                {c.r > 0 ? '+' : ''}{c.r.toFixed(2)}
+              <span
+                className={c.r > 0 ? styles.correlationNeg : styles.correlationPos}
+                title={`r = ${c.r.toFixed(2)}`}
+              >
+                {correlationPhrase(c.r)}
               </span>
             </li>
           ))}
@@ -128,8 +134,11 @@ function RegressionSection({ profile }: { profile: PlayerProfile }) {
         {top.map(([feature, coef]) => (
           <li key={feature} className={styles.correlationRow}>
             <span className={styles.correlationLabel}>{featureLabel(feature)}</span>
-            <span className={coef > 0 ? styles.correlationNeg : styles.correlationPos}>
-              {coef > 0 ? '+' : ''}{coef.toFixed(2)}
+            <span
+              className={coef > 0 ? styles.correlationNeg : styles.correlationPos}
+              title={`coefficient = ${coef.toFixed(2)}`}
+            >
+              {correlationPhrase(coef)}
             </span>
           </li>
         ))}

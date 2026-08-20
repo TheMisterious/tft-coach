@@ -30,13 +30,14 @@ export function detectSet(entries: LedgerEntry[]): string {
 export async function loadMeta(setId: string): Promise<MetaData> {
   const base = `/data/sets/${setId}`;
   console.log('[meta] loading set data from:', base);
-  const [carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, augments, augmentNames, augmentModifiersRaw, comps, augmentUnitGrants] = await Promise.all([
+  const [carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiersRaw, comps, augmentUnitGrants] = await Promise.all([
     fetchJson<Record<string, CarryBisEntry>>(`${base}/carry-bis.json`, {}),
     fetchJson<TraitBreakpoint[]>(`${base}/trait-breakpoints.json`, []),
     fetchJson<EconBenchmark[]>(`${base}/econ-benchmarks.json`, []),
     fetchJson<Record<string, ChampionMeta>>(`${base}/champions.json`, {}),
     fetchJson<Record<string, string>>(`/data/core/items.json`, {}),
     fetchJson<Record<string, ItemData>>(`/data/core/item-data.json`, {}),
+    fetchJson<Record<string, string>>(`/data/core/item-aliases.json`, {}),
     fetchJson<Record<string, string[]>>(`${base}/augments.json`, {}),
     fetchJson<Record<string, string>>(`/data/core/augment-names.json`, {}),
     fetchJson<Partial<AugmentModifiers>>(`${base}/augment-modifiers.json`, {}),
@@ -54,7 +55,7 @@ export async function loadMeta(setId: string): Promise<MetaData> {
   // missing localStorage global, same as every other persistence accessor).
   const metaTierTable = loadAggregateMetaTable();
   console.log(`[meta] loaded — champions:${Object.keys(champions ?? {}).length} carryBis:${Object.keys(carryBis ?? {}).length} traits:${(traitBreakpoints as unknown[])?.length ?? 0} econBenchmarks:${(econBenchmarks as unknown[])?.length ?? 0} items:${Object.keys(items ?? {}).length} itemData:${Object.keys(itemData ?? {}).length} augments:${Object.keys(augments ?? {}).length} augmentNames:${Object.keys(augmentNames ?? {}).length} augmentModifiers:${Object.keys(augmentModifiers.itemBisOverrides).length} comps:${comps?.length ?? 0} augmentUnitGrants:${Object.keys(augmentUnitGrants ?? {}).length} metaTierTable:${metaTierTable ? metaTierTable.matchSampleCount : 'none'}`);
-  return { carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, augments, augmentNames, augmentModifiers, comps, augmentUnitGrants, metaTierTable };
+  return { carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiers, comps, augmentUnitGrants, metaTierTable };
 }
 
 // Friendly display name for a champion id (e.g. "TFT17_AurelionSol" -> "Aurelion Sol").
@@ -64,11 +65,102 @@ export function getChampionName(championId: string, meta: MetaData): string {
   return known ?? humanize(championId, /^TFT\d+_/);
 }
 
+/**
+ * Turns the id GEP reports into the id this project's data files are keyed by.
+ *
+ * Three real, separately-confirmed mismatches (2026-08-07, measured against
+ * every ledger on disk — 18.1% of all equipped item instances resolved to
+ * nothing before this existed):
+ *
+ *  1. Set-mechanic items arrive as an ICON PATH, not an id:
+ *     `ASSETS/Maps/TFT/Icons/Items/Hexcore/TFT17_AnimaSquadItem_Annihilator_T2`
+ *     for catalogue key `TFT17_AnimaSquadItem_Tier2_Annihilator`. Same rewrite
+ *     the local combat-sim sandbox already proved out (964 recovered
+ *     instances there): take the basename, drop the optional
+ *     `.TFT_SetNN` suffix, move the `_T<N>` tier marker into Riot's `Tier<N>_`
+ *     position. GEP genuinely writes `AnimSquadItem` without the "a" sometimes,
+ *     and case drifts between sources, so both are handled rather than smoothed.
+ *  2. Renamed items keep their old apiName upstream while GEP names them after
+ *     the CURRENT display name — see data/core/item-aliases.json.
+ *  3. Everything else already matches.
+ *
+ * Returns the input unchanged when nothing applies, so an unknown id stays
+ * visible as itself rather than being silently rewritten into a wrong one.
+ */
+export function resolveItemId(itemId: string, meta: MetaData): string {
+  if (!itemId) return itemId;
+  if (meta.itemData?.[itemId] || meta.items?.[itemId]) return itemId;
+
+  let candidate = itemId;
+  if (candidate.includes('/')) {
+    candidate = candidate.slice(candidate.lastIndexOf('/') + 1);
+  }
+  candidate = candidate.replace(/\.TFT_Set\d+$/i, '');
+  // `TFT17_AnimaSquadItem_Annihilator_T2` -> `TFT17_AnimaSquadItem_Tier2_Annihilator`
+  // Greedy on the family prefix: the tier marker goes after the item FAMILY,
+  // not after the set number.
+  const tiered = /^(.*)_([^_]+)_T(\d+)$/.exec(candidate);
+  if (tiered) candidate = `${tiered[1]}_Tier${tiered[3]}_${tiered[2]}`;
+  candidate = candidate.replace(/AnimSquadItem/i, 'AnimaSquadItem');
+  // PsyOps mods use a different shape again: GEP writes
+  // `TFT17_PsyOps_Mod_DroneMod`, the catalogue keys it `TFT17_Item_PsyOps_DroneMod`.
+  // Same family, same trailing name — only the segment layout differs.
+  candidate = candidate.replace(/^(TFT\d*)_PsyOps_Mod_/i, '$1_Item_PsyOps_');
+
+  if (meta.itemData?.[candidate] || meta.items?.[candidate]) return candidate;
+
+  // Case drifts between GEP and the catalogue (UwUBlaster/UwuBlaster,
+  // TargetLockMod/TargetlockMod), so fall back to a case-insensitive match.
+  const lower = candidate.toLowerCase();
+  for (const key of Object.keys(meta.itemData ?? {})) {
+    if (key.toLowerCase() === lower) return key;
+  }
+
+  const alias = meta.itemAliases?.[itemId] ?? meta.itemAliases?.[candidate];
+  if (alias) return alias;
+
+  // Artifacts: upstream keys them `..._Artifact_<Champion>Artifact` while GEP
+  // names them after the display name, which Riot sometimes changes out from
+  // under it (`..._Artifact_EvelynnFang` is upstream's "Evelynn's Instinct").
+  // The champion segment is the stable part and there is exactly one artifact
+  // per champion, so the prefix map generated at fetch time resolves it.
+  const artifact = /^(TFT\d*_Item_Artifact_)([A-Z][a-z]+)/.exec(candidate);
+  if (artifact) {
+    const byPrefix = meta.itemAliases?._artifactPrefixes as unknown as Record<string, string> | undefined;
+    const hit = byPrefix?.[artifact[1] + artifact[2]];
+    if (hit) return hit;
+  }
+
+  return candidate;
+}
+
+/**
+ * Ids that are real in the feed but are not equippable items at all, so they
+ * must count as neither "held" nor "unresolved". `TFT_Item_EmptyBag` is a real
+ * Set 17 catalogue entry whose upstream NAME is the empty string — the same
+ * class of placeholder as `TFT_Item_Blank`, which the fetch already drops.
+ */
+const NON_ITEM_IDS = new Set(['TFT_Item_EmptyBag', 'TFT_Item_Blank']);
+
+export function isNonItemId(itemId: string, meta: MetaData): boolean {
+  return NON_ITEM_IDS.has(resolveItemId(itemId, meta));
+}
+
+/** The item's real catalogue entry, or undefined when nothing resolves it. */
+export function getItemData(itemId: string, meta: MetaData): ItemData | undefined {
+  return meta.itemData?.[resolveItemId(itemId, meta)];
+}
+
 // Friendly display name for an item id (e.g. "TFT_Item_RabadonsDeathcap" -> "Rabadons Deathcap").
 // Falls back to a humanized id when the item isn't in data/core/items.json yet.
 export function getItemName(itemId: string, meta: MetaData): string {
-  const known = meta.items?.[itemId];
-  return known ?? humanize(itemId, /^TFT_Item_/);
+  const resolved = resolveItemId(itemId, meta);
+  const known = meta.items?.[resolved] ?? meta.itemData?.[resolved]?.name;
+  // An unresolved id must never reach coaching text as a prettified asset path
+  // ("ASSETS/Maps/TFT/Icons/... Rocket Swarm T1" was really being shown). Say
+  // it is unknown instead — that is honest and it is also a visible bug report.
+  if (known) return known;
+  return resolved.includes('/') ? 'an unknown item' : humanize(resolved, /^TFT\d*_(Item|Emblem)_/);
 }
 
 // Friendly display name for an augment id (e.g. "TFT_Augment_GoldReserve" -> "Gold Reserve").

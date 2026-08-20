@@ -13,6 +13,2055 @@
       "AP": 55
     }
   },
+  "TFT17_MarketOffering_LoversPlus": {
+    "name": "Lovers +",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Health": {
+    "name": "@Health@ Tactician Health",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_DelayedRandomArtifact": {
+    "name": "Artifact Item",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_BloodPactPlusPlus": {
+    "name": "Blood Pact ++",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_BlueOrb": {
+    "name": "Blue Loot Orb",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_ComponentAnvil": {
+    "name": "Component Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AurelionSol_GoldQuest_Stage2": {
+    "name": "Wealth Quest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RollTheBones": {
+    "name": "Roll the Bones",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_GrayOrb": {
+    "name": "Gray Loot Orb",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_EmpoweredHex_Wind": {
+    "name": "Acceleration Hex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_HardPivot": {
+    "name": "Hard Pivot",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_2star4cost_Eve": {
+    "name": "2-star 4-cost",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_FiveCostChampion": {
+    "name": "5-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_SorakasEmbrace": {
+    "name": "Soraka's Embrace",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_LesserDupe_Varus": {
+    "name": "Lesser Champion Duplicator",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AurelionSol_StarQuest_Stage3": {
+    "name": "Starry Quest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_XP_16_Stage1": {
+    "name": "16 XP",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Rerolls_16": {
+    "name": "16 free rerolls",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_DelayedCompletedAnvil": {
+    "name": "Completed Item Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_CategoryHack_Combat": {
+    "name": "Combat Hack",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Craftsmanship": {
+    "name": "Craftsmanship",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Chosen_5Cost": {
+    "name": "2 Salvagers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_Stage3_Eve": {
+    "name": "@Gold@ gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Delayed5Cost": {
+    "name": "@NumUnits_TOOLTIPONLY@ @Cost_TOOLTIPONLY@-cost champions.",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Chosen_1Cost": {
+    "name": "2 Salvagers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Chosen_2Cost": {
+    "name": "2 Salvagers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_2star3cost_Eve": {
+    "name": "2-star 3-cost",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Lovers": {
+    "name": "The Lovers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AugmentWheel": {
+    "name": "Augment Wheel",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_StarlightPlusPlus": {
+    "name": "Starcrossed Upgrade ++",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_SilverAugment": {
+    "name": "Silver Augment",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Chosen_3Cost": {
+    "name": "2 Salvagers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_EmpoweredHex_Socialite": {
+    "name": "Starlight Hex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Delayed5CostShop": {
+    "name": "5-cost shop",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_StarlightPlus": {
+    "name": "Starcrossed Upgrade",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_XP_14": {
+    "name": "14 XP",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_GoldOrb": {
+    "name": "Gold Loot Orb",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_PandorasSeat": {
+    "name": "Pandora's Seat",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_XP_Large": {
+    "name": "@XP@ XP.",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Starlight": {
+    "name": "Starcrossed Upgrade",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_TomeOfTraits": {
+    "name": "Tome of Traits",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_FinalistGambit": {
+    "name": "Finalist Gambit",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Anomaly": {
+    "name": "Anomaly",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_ArtifactAnvil": {
+    "name": "God Artifact Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_DelayedComponentAnvil": {
+    "name": "Component Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_BloodPact": {
+    "name": "Blood Pact",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_LesserDupe_Varus_Stage4": {
+    "name": "Lesser Champion Duplicator",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AurelionSol_LowHPQuest_Stage4": {
+    "name": "Low Health Quest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_OneCostChampion_ThreeStar": {
+    "name": "Two 3-star 1-cost Champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_GoldPerTurn_Stage3": {
+    "name": "Gold Every Turn",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_Stage4_Eve": {
+    "name": "@Gold@ gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Augment_StarterKit": {
+    "name": "Starter Kit",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Sacrifice": {
+    "name": "Sacrifice",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_ExtraAugmentRollsPlus": {
+    "name": "Augment Rerolls",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Steamroll": {
+    "name": "Steamroll",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AurelionSol_RerollQuest_Stage4": {
+    "name": "Reroll Quest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_3_Reforger": {
+    "name": "3 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_2TinyDupes": {
+    "name": "2 Tiny Duplicators",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RainbowShops": {
+    "name": "Rainbow Shops",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Rerolls_Large_Stage4": {
+    "name": "@Rerolls@ free rerolls",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_GroupHugPlus": {
+    "name": "Better Together +",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_ThreeCostChampion_Owned": {
+    "name": "Owned @Tier@ cost",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_EmpoweredHex_Electric": {
+    "name": "Storm Hex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_MaxInterest_Stage2": {
+    "name": "Divine Investment",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_1star4cost_Eve": {
+    "name": "4-cost",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_MaxInterest_Stage3": {
+    "name": "Divine Investment",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_2Salvagers": {
+    "name": "2 Salvagers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Rerolls_Small_Stage2": {
+    "name": "@Rerolls@ free rerolls",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_GroupHug": {
+    "name": "Better Together",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AnvilTransformation": {
+    "name": "Anvil Transformation",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AurelionSol_LevelQuest_Stage4": {
+    "name": "Level Quest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_PenguPairs": {
+    "name": "Super Parting Gift",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_DivineEmpathy": {
+    "name": "Divine Empathy",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_IncreasedInterest": {
+    "name": "Increased Interest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_SteamrollPlus": {
+    "name": "Steamroll+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_EmpoweredHex_Wood": {
+    "name": "Cosmic Hex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Humility": {
+    "name": "Humility",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Dummy_Evelynn": {
+    "name": "Frontline Dummy",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_OneCostChampion_2": {
+    "name": "2 1-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_ThreeCostChampion": {
+    "name": "3-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RandomBoon_Stage3": {
+    "name": "Random Boon",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RandomBoon_Stage2": {
+    "name": "Random Boon",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_FourCostChampion": {
+    "name": "4-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RandomBoon_Stage4": {
+    "name": "Random Boon",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_EmpoweredHex_Sun": {
+    "name": "TFT17_MarketOffering_EmpoweredHex_SunHex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_ExtraAugmentRolls": {
+    "name": "Augment Rerolls",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Cashflow": {
+    "name": "Cashflow",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_25": {
+    "name": "25 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_Stage4": {
+    "name": "@Gold@ gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_Stage2": {
+    "name": "@Gold@ gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RandomComponent": {
+    "name": "Random Component",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_XP_Medium_Stage3": {
+    "name": "@XP@ XP.",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_Stage3": {
+    "name": "@Gold@ gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_2": {
+    "name": "2 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_3": {
+    "name": "3 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Recombobulator_Stage2": {
+    "name": "Mini Recombobulate",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_SplitGold_Stage2": {
+    "name": "Chest of Greed",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_4": {
+    "name": "4 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_SplitGold_Stage3": {
+    "name": "Chest of Greed",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RandomCompleted_Eve": {
+    "name": "Completed Item",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_5TinyDupes": {
+    "name": "Duplicator Bundle",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_SplitGold_Stage4": {
+    "name": "Chest of Greed",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_BlueOrb_2Gold": {
+    "name": "Blue Loot Orb and 2 Gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_NextPVEScuttle": {
+    "name": "Scuttle Party",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Rerolls_Small": {
+    "name": "@Rerolls@ free rerolls",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_5_Reforger": {
+    "name": "5 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_EmpoweredHex_Ice": {
+    "name": "Cryogenic Hex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Chosen_4Cost": {
+    "name": "2 Salvagers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Dummy_Kayle": {
+    "name": "Armored Dummy",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_DelayedRandomArtifact_Stage4": {
+    "name": "Artifact Item",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_PrismaticAugment": {
+    "name": "Prismatic Augment",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_EphemeralRerolls": {
+    "name": "Ephemeral Rerolls",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_XP_Small": {
+    "name": "@XP@ XP.",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Spatula": {
+    "name": "Spatula",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AurelionSol_TraitQuest_Stage2": {
+    "name": "Trait Quest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RandomEmblem": {
+    "name": "Random Emblem",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_CompletedAnvil": {
+    "name": "Completed Item Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_TwoCostChampion": {
+    "name": "2-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RandomLoot_Stage4": {
+    "name": "Mystery Loot",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Sampler": {
+    "name": "Mystery Loot",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_EmpoweredHex_Golden": {
+    "name": "Golden Hex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_4_Reforger": {
+    "name": "4 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RandomLoot_Stage3": {
+    "name": "Mystery Loot",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_TreasureArmory": {
+    "name": "Treasure Armory",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_RandomLoot_Stage2": {
+    "name": "Mystery Loot",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_LoversPlusPlus": {
+    "name": "Lovers ++",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_GoldAugment": {
+    "name": "Gold Augment",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Delayed4Cost": {
+    "name": "@Cost_TOOLTIPONLY@-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Augment_PreciseSmithing": {
+    "name": "Precise Smithing",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_TwoCostChampion_ThreeStar": {
+    "name": "Two 3-star 2-cost Champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_IncreasedFiveCostOdds_Large": {
+    "name": "@PercentIncrease@% Increased 5-Cost Odds",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_EmpoweredHex_Fire": {
+    "name": "Solar Hex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_DivineRefund": {
+    "name": "Divine Refund",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_2_Reforger": {
+    "name": "2 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Stimmy": {
+    "name": "Divine Intervention",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_SharedWealth_Stage4": {
+    "name": "Shared Wealth +",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_BloodPactPlus": {
+    "name": "Blood Pact +",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_TwoCostChampion_TwoStar": {
+    "name": "2-star 2-cost",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Rerolls_Large": {
+    "name": "@Rerolls@ free rerolls",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_SharedWealth_Stage2": {
+    "name": "Shared Wealth",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_3star1cost_Eve": {
+    "name": "3-star 1-cost",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_SharedWealth_Stage3": {
+    "name": "Shared Wealth +",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_1star5cost_Eve": {
+    "name": "2  5-costs",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_IncreasedFiveCostOdds": {
+    "name": "@PercentIncrease@% Increased 5-Cost Odds",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AllTierFourShop": {
+    "name": "@Tier@-Cost Shop",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_AllTierThreeShop": {
+    "name": "@Tier@-Cost Shop",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_FourCostChampion_Owned": {
+    "name": "Owned @Tier@ cost",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_Gold_4_Remover": {
+    "name": "4 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_MarketOffering_FourCostChampion_PlusGold": {
+    "name": "4-cost",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_Item_PsyOps_ChemicalCapacitorMod_Radiant": {
+    "name": "Malware Matrix",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "sustain"
+    ],
+    "keyStats": {
+      "AS": 15,
+      "StatOmnivamp": 0.10000000149011612
+    }
+  },
+  "TFT17_Item_PsyOps_DroneMod_Radiant": {
+    "name": "Drone Uplink",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_Item_PsyOps_ChemicalCapacitorMod": {
+    "name": "Malware Matrix",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "sustain"
+    ],
+    "keyStats": {
+      "AS": 15,
+      "StatOmnivamp": 0.10000000149011612
+    }
+  },
+  "TFT17_Item_PsyOps_TargetlockMod": {
+    "name": "Target-Lock Optics",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612,
+      "AP": 10,
+      "AS": 20
+    }
+  },
+  "TFT17_Item_PsyOps_SemiconductorMod_Radiant": {
+    "name": "Semiconductor",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 300
+    }
+  },
+  "TFT17_Item_PsyOps_TargetlockMod_Radiant": {
+    "name": "Target-Lock Optics",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30,
+      "AS": 30
+    }
+  },
+  "TFT17_Item_PsyOps_GrenadeMod_Radiant": {
+    "name": "Biomatter Preserver",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 650
+    }
+  },
+  "TFT17_Item_PsyOps_DroneMod": {
+    "name": "Drone Uplink",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_Item_PsyOps_SemiconductorMod": {
+    "name": "Semiconductor",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 200
+    }
+  },
+  "TFT17_Item_PsyOps_SympatheticImplantMod": {
+    "name": "Sympathetic Implant",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 15
+    }
+  },
+  "TFT17_Item_PsyOps_SympatheticImplantMod_Radiant": {
+    "name": "Sympathetic Implant",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 20
+    }
+  },
+  "TFT17_Item_PsyOps_GrenadeMod": {
+    "name": "Biomatter Preserver",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 250
+    }
+  },
+  "TFT17_Item_Artifact_ZekesHeraldShadow": {
+    "name": "Zeke's Bleak Herald",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612,
+      "Health": 150
+    }
+  },
+  "TFT16_Consumable_GwensScissors": {
+    "name": "Gwen's Scissors",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT16_Consumable_GwensScissors_2": {
+    "name": "Gwen's Scissors <rules>(2 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT16_Consumable_GwensScissors_3": {
+    "name": "Gwen's Scissors <rules>(3 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT16_Consumable_GwensScissors_4": {
+    "name": "Gwen's Scissors <rules>(4 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT16_Consumable_GwensScissors_5": {
+    "name": "Gwen's Scissors <rules>(5 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Backup": {
+    "name": "Tune-Up",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_BlastRadius": {
+    "name": "Blast Radius",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_VoidCoefficient": {
+    "name": "Void Coefficient",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Fission3": {
+    "name": "Fission++",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Fission2": {
+    "name": "Fission+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_AimAssistant": {
+    "name": "Aim-Assistant",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_FrameDefense": {
+    "name": "Reinforced Frame",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_TripleTap": {
+    "name": "Triple Tap",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Heartseeker": {
+    "name": "Heartseeker",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Meltthrough": {
+    "name": "Meltthrough",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Buckshot3": {
+    "name": "Buckshot++",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Buckshot2": {
+    "name": "Buckshot+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_FrameSupport": {
+    "name": "Support Frame",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Coolant": {
+    "name": "Coolant",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_GravBooster": {
+    "name": "Grav Booster",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_DoubleTap2": {
+    "name": "Double Tap",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Nanomachines": {
+    "name": "Nanomachines",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Tankbuster": {
+    "name": "Tankbuster",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_FragmentationRounds2": {
+    "name": "Fragmentation Rounds+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_SheerMass": {
+    "name": "Sheer Mass",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_ReactiveArmor": {
+    "name": "Reactive Armor",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Shockwave": {
+    "name": "Shockwave",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_FrameOffense": {
+    "name": "Assault Frame",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_LeechingImplants": {
+    "name": "Leeching Implants",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Buckshot": {
+    "name": "Buckshot",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_PrecisionScope2": {
+    "name": "Precision Scope+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_PrecisionScope3": {
+    "name": "Precision Scope++",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_DoubleTap": {
+    "name": "Marksman Frame",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_EmergencyShielding": {
+    "name": "Emergency Shielding",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_RevUp2": {
+    "name": "Rev-Up+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Fission": {
+    "name": "Fission",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_EmergencyShielding2": {
+    "name": "Emergency Shielding+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_RipperBullets": {
+    "name": "Ripper Bullets",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Coolant2": {
+    "name": "Coolant+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_RipperBullets2": {
+    "name": "Ripper Bullets+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_CloseQuarters": {
+    "name": "Assault Frame",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_APRounds": {
+    "name": "AP Rounds",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_RevUp": {
+    "name": "Rev-Up",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_HeavyPlating": {
+    "name": "Heavy Plating",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_FragmentationRounds": {
+    "name": "Fragmentation Rounds",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_GravBooster2": {
+    "name": "Grav Booster+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Choke": {
+    "name": "Choke",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_LeechingImplants2": {
+    "name": "Leeching Implants+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_LatentExplosion": {
+    "name": "Latent Explosion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_SharpshooterModule": {
+    "name": "Power Frame",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_LaserBallistics": {
+    "name": "Laser Ballistics",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_LaserBallistics3": {
+    "name": "LaserBallistics++",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_LaserBallistics2": {
+    "name": "Laser Ballistics+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Heartseeker3": {
+    "name": "Heartseeker++",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_Heartseeker2": {
+    "name": "Heartseeker+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_BlastRadius2": {
+    "name": "Blast Radius+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_BlastRadius3": {
+    "name": "Blast Radius++",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_PrecisionScope": {
+    "name": "Precision Scope",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_SympatheticDetonation": {
+    "name": "Sympathetic Detonation",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_GravesTrait_Offense_APRounds2": {
+    "name": "AP Rounds+",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_AnimaSquadItem_Tier2_LionessLament": {
+    "name": "Lioness's Lament",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 25,
+      "Health": 200,
+      "MagicResist": 25
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier1_SavageSlicer": {
+    "name": "Savage Slicer",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612,
+      "StatOmnivamp": 0.10000000149011612
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier2_UwuBlaster": {
+    "name": "UwU Blaster",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AS": 45
+    }
+  },
+  "TFT17_ChampionItem_Jinx_2Star": {
+    "name": "2-star Jinx",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Aurora_2Star": {
+    "name": "2-star Aurora",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Aurora": {
+    "name": "1-star Aurora",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Illaoi": {
+    "name": "1-star Illaoi",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Fiora_3Star": {
+    "name": "3-star Fiora",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Fiora": {
+    "name": "1-star Fiora",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Briar_3Star": {
+    "name": "3-star Briar",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Briar_2Star": {
+    "name": "2-star Briar",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Briar": {
+    "name": "1-star Briar",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Fiora_2Star": {
+    "name": "2-star Fiora",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Jinx_3Star": {
+    "name": "3-star Jinx",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Illaoi_2Star": {
+    "name": "2-star Illaoi",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Jinx": {
+    "name": "1-star Jinx",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Illaoi_3Star": {
+    "name": "3-star Illaoi",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Aurora_3Star": {
+    "name": "3-star Aurora",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_AnimaSquadItem_Tier2_SearingShortbow": {
+    "name": "Searing Shortbow",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448,
+      "AP": 45
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier3_IceblastArmor": {
+    "name": "Deep Freeze",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 30,
+      "Health": 550,
+      "MagicResist": 30
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier3_Annihilator": {
+    "name": "Animapocalypse",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier1_GuidingHex": {
+    "name": "Guiding Hex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 15
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier3_RadiantField": {
+    "name": "Solar Eclipse",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 800
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier2_RadiantField": {
+    "name": "Radiant Field",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 400
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier1_RocketSwarm": {
+    "name": "Rocket Swarm",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier2_EchoingBatblades": {
+    "name": "Echoing Batblades",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AS": 20
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier3_EchoingBatblades": {
+    "name": "Vayne's Chromablades",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AS": 50
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier2_BattleBunnyCrossbow": {
+    "name": "Battle Bunny Crossbow",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AS": 25,
+      "CritChance": 35
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier2_IceblastArmor": {
+    "name": "Iceblast Armor",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 30,
+      "Health": 250,
+      "MagicResist": 30
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier0_ClunkyPrototype": {
+    "name": "Broken Prototype",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 100
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier0_LeakyPrototype": {
+    "name": "Leaky Prototype",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 15
+    }
+  },
+  "TFT17_AnimaSquad_Gold": {
+    "name": "Gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_AnimaSquadItem_Tier3_BattleBunnyCrossbow": {
+    "name": "Bunny Prime Ballista",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AS": 50,
+      "CritChance": 50
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier0_SparkingPrototype": {
+    "name": "Sparking Prototype",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier3_CyclonicSlicers": {
+    "name": "Unceasing Cyclone",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30,
+      "Armor": 40,
+      "MagicResist": 40
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier1_TentacleSlam": {
+    "name": "Tentacle Slam",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier2_Annihilator": {
+    "name": "The Annihilator",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AP": 25
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier4_Omniweapon": {
+    "name": "Omniweapon",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 1,
+      "AP": 100,
+      "AS": 100,
+      "Armor": 100,
+      "CritChance": 75,
+      "Health": 10000,
+      "MagicResist": 100,
+      "StatOmnivamp": 1
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier2_CyclonicSlicers": {
+    "name": "Cyclonic Slicers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AP": 20,
+      "Armor": 15,
+      "MagicResist": 15
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier3_SearingShortbow": {
+    "name": "Evolved Embershot",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.4000000059604645,
+      "AP": 45
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier3_UwuBlaster": {
+    "name": "OwO Blaster",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.3499999940395355,
+      "AS": 75
+    }
+  },
+  "TFT17_AnimaSquadItem_Tier3_LionessLament": {
+    "name": "Leonine Lamentation",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 40,
+      "Health": 400,
+      "MagicResist": 40
+    }
+  },
   "TFT_Item_InfinityEdge": {
     "name": "Infinity Edge",
     "isComponent": false,
@@ -28,6 +2077,477 @@
       "CritChance": 35
     }
   },
+  "TFT5_Item_DragonsClawRadiant": {
+    "name": "Radiant Dragon's Claw",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "MagicResist": 120,
+      "PercentMaxHP": 0.2800000011920929
+    }
+  },
+  "TFT5_Item_TrapClawRadiant": {
+    "name": "Radiant Striker's Flail",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 20,
+      "CritChance": 40,
+      "Health": 300
+    }
+  },
+  "TFT5_Item_IonicSparkRadiant": {
+    "name": "Radiant Ionic Spark",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 30,
+      "Health": 500,
+      "MagicResist": 70
+    }
+  },
+  "TFT5_Item_QuicksilverRadiant": {
+    "name": "Radiant Quicksilver",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 40,
+      "CritChance": 40,
+      "MagicResist": 40
+    }
+  },
+  "TFT5_Item_HextechGunbladeRadiant": {
+    "name": "Radiant Hextech Gunblade",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 0.4000000059604645,
+      "AP": 40,
+      "StatOmnivamp": 0.30000001192092896
+    }
+  },
+  "TFT5_Item_StatikkShivRadiant": {
+    "name": "Radiant Void Staff",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 75,
+      "AS": 30
+    }
+  },
+  "TFT5_Item_FrozenHeartRadiant": {
+    "name": "Radiant Protector's Vow",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "Armor": 50,
+      "MagicResist": 50
+    }
+  },
+  "TFT5_Item_BlueBuffRadiant": {
+    "name": "Radiant Blue Buff",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30
+    }
+  },
+  "TFT5_Item_ArchangelsStaffRadiant": {
+    "name": "Radiant Archangel's Staff",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 60
+    }
+  },
+  "TFT5_Item_MorellonomiconRadiant": {
+    "name": "Radiant Morellonomicon",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 35,
+      "Health": 300
+    }
+  },
+  "TFT5_Item_BrambleVestRadiant": {
+    "name": "Radiant Bramble Vest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 100,
+      "PercentMaxHP": 0.11999999731779099
+    }
+  },
+  "TFT5_Item_ZzRotPortalRadiant": {
+    "name": "Zz'Rot Portal",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT5_Item_RunaansHurricaneRadiant": {
+    "name": "Radiant Kraken's Fury",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AS": 20,
+      "MagicResist": 40
+    }
+  },
+  "TFT5_Item_GuinsoosRagebladeRadiant": {
+    "name": "Radiant Guinsoo's Rageblade",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 20,
+      "AS": 25
+    }
+  },
+  "TFT5_Item_HandOfJusticeRadiant": {
+    "name": "Radiant Hand of Justice",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "CritChance": 40
+    }
+  },
+  "TFT5_Item_SunfireCapeRadiant": {
+    "name": "Radiant Sunfire Cape",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 40,
+      "BonusPercentHP": 0.1599999964237213,
+      "Health": 300
+    }
+  },
+  "TFT5_Item_LastWhisperRadiant": {
+    "name": "Radiant Last Whisper",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.44999998807907104,
+      "AS": 40,
+      "CritChance": 40
+    }
+  },
+  "TFT5_Item_ThiefsGlovesRadiant": {
+    "name": "Radiant Thief's Gloves",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "CritChance": 20,
+      "Health": 150
+    }
+  },
+  "TFT5_Item_WarmogsArmorRadiant": {
+    "name": "Radiant Warmog's Armor",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "BonusPercentHP": 0.36000001430511475,
+      "Health": 1200
+    }
+  },
+  "TFT5_Item_SteraksGageRadiant": {
+    "name": "Radiant Sterak's Gage",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.8999999761581421,
+      "Health": 600
+    }
+  },
+  "TFT5_Item_RedemptionRadiant": {
+    "name": "Radiant Spirit Visage",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 700
+    }
+  },
+  "TFT5_Item_GuardianAngelRadiant": {
+    "name": "Radiant Edge of Night",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30,
+      "AS": 30,
+      "Armor": 40
+    }
+  },
+  "TFT5_Item_RapidFirecannonRadiant": {
+    "name": "Radiant Red Buff",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 80
+    }
+  },
+  "TFT5_Item_NightHarvesterRadiant": {
+    "name": "Radiant Steadfast Heart",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 40,
+      "CritChance": 40,
+      "Health": 600
+    }
+  },
+  "TFT5_Item_TitansResolveRadiant": {
+    "name": "Radiant Titan's Resolve",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 20,
+      "Armor": 40
+    }
+  },
+  "TFT5_Item_GiantSlayerRadiant": {
+    "name": "Radiant Giant Slayer",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30,
+      "AS": 30
+    }
+  },
+  "TFT5_Item_CrownguardRadiant": {
+    "name": "Radiant Crownguard",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 40,
+      "Armor": 40,
+      "Health": 200
+    }
+  },
+  "TFT5_Item_BloodthirsterRadiant": {
+    "name": "Radiant Bloodthirster",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30,
+      "LifeSteal": 40,
+      "MagicResist": 40,
+      "StatOmnivamp": 0.4000000059604645
+    }
+  },
+  "TFT5_Item_RabadonsDeathcapRadiant": {
+    "name": "Radiant Rabadon's Deathcap",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 100
+    }
+  },
+  "TFT5_Item_JeweledGauntletRadiant": {
+    "name": "Radiant Jeweled Gauntlet",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 75,
+      "CritChance": 75
+    }
+  },
+  "TFT5_Item_GargoyleStoneplateRadiant": {
+    "name": "Radiant Gargoyle Stoneplate",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 50,
+      "Health": 300,
+      "MagicResist": 50
+    }
+  },
+  "TFT5_Item_LeviathanRadiant": {
+    "name": "Radiant Nashor's Tooth",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 30,
+      "AS": 20,
+      "CritChance": 40,
+      "Health": 300
+    }
+  },
+  "TFT5_Item_SpearOfShojinRadiant": {
+    "name": "Radiant Spear of Shojin",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30
+    }
+  },
+  "TFT5_Item_SpectralGauntletRadiant": {
+    "name": "Radiant Evenshroud",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 500,
+      "MagicResist": 40
+    }
+  },
+  "TFT5_Item_InfinityEdgeRadiant": {
+    "name": "Radiant Infinity Edge",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.75,
+      "CritChance": 75
+    }
+  },
+  "TFT5_Item_DeathbladeRadiant": {
+    "name": "Radiant Deathblade",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 1
+    }
+  },
+  "TFT5_Item_AdaptiveHelmRadiant": {
+    "name": "Radiant Adaptive Helm",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "MagicResist": 40
+    }
+  },
   "TFT_Item_GrantCompletedAnvil": {
     "name": "Completed Item Anvil",
     "isComponent": false,
@@ -35,169 +2555,64 @@
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_GrantOrnnAnvil": {
-    "name": "Artifact Anvil",
+  "TFT_Assist_Gold_34": {
+    "name": "34 gold",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_GrantOrbs5": {
-    "name": "@OrbsToGive@ loot orbs",
+  "TFT_Assist_Gold_30": {
+    "name": "30 gold",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_GrantOrbs4": {
-    "name": "@OrbsToGive@ loot orbs",
+  "TFT_Assist_Gold_15": {
+    "name": "15 gold",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_GrantOrbs7": {
-    "name": "@OrbsToGive@ loot orbs",
+  "TFT_Assist_Gold_16": {
+    "name": "16 gold",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_GrantOrbs6": {
-    "name": "@OrbsToGive@ loot orbs",
+  "TFT_Assist_Gold_12": {
+    "name": "12 gold",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_GrantOrbs1": {
-    "name": "1 loot orb",
+  "TFT_Assist_Gold_55": {
+    "name": "55 gold",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_GrantOrbs3": {
-    "name": "@OrbsToGive@ loot orbs",
+  "TFT_Assist_Gold_25": {
+    "name": "25 gold",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_GrantOrbs2": {
-    "name": "@OrbsToGive@ loot orbs",
+  "TFT_Assist_Gold_20": {
+    "name": "20 gold",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_GrantOrbs9": {
-    "name": "@OrbsToGive@ loot orbs",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantOrbs8": {
-    "name": "@OrbsToGive@ loot orbs",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantTomeOfTraits": {
-    "name": "Tome of Traits",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponent2": {
-    "name": "@ItemsToGive@ components",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponent3": {
-    "name": "@ItemsToGive@ components",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponent1": {
-    "name": "1 component",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponent6": {
-    "name": "@ItemsToGive@ components",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponent7": {
-    "name": "@ItemsToGive@ components",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponent4": {
-    "name": "@ItemsToGive@ components",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponent5": {
-    "name": "@ItemsToGive@ components",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponent8": {
-    "name": "@ItemsToGive@ components",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponent9": {
-    "name": "@ItemsToGive@ components",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantComponentAnvil": {
-    "name": "Component Item Key",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantCompletedItem3": {
-    "name": "@ItemsToGive@ completed items",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantCompletedItem2": {
-    "name": "@ItemsToGive@ completed items",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_GrantCompletedItem1": {
-    "name": "1 completed item",
+  "TFT_Assist_Gold_40": {
+    "name": "40 gold",
     "isComponent": false,
     "composition": [],
     "tags": [],
@@ -231,6 +2646,545 @@
       "Health": 150
     }
   },
+  "TFT17_ChampionItem_Chosen_Blitzcrank": {
+    "name": "5-cost: Blitzcrank",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Morgana": {
+    "name": "4-cost: Morgana",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Lissandra_2star": {
+    "name": "2-star 1-cost: Lissandra",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Caitlyn": {
+    "name": "1-cost: Caitlyn",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_AurelionSol": {
+    "name": "4-cost: Aurelion Sol",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Leona_2star": {
+    "name": "2-star 1-cost: Leona",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Kindred": {
+    "name": "4-cost: Kindred",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Riven": {
+    "name": "4-cost: Riven",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Rhaast": {
+    "name": "3-cost: Rhaast",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Aatrox_2star": {
+    "name": "2-star 1-cost: Aatrox",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Vex": {
+    "name": "5-cost: Vex",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_IvernMinion": {
+    "name": "2-cost: Meepsie",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Nasus": {
+    "name": "1-cost: Nasus",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Graves": {
+    "name": "5-cost: Graves",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Poppy": {
+    "name": "1-cost: Poppy",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Chogath_2star": {
+    "name": "2-star 1-cost: Cho'Gath",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_TwistedFate": {
+    "name": "1-cost: Twisted Fate",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Jinx": {
+    "name": "2-cost: Jinx",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Talon_2star": {
+    "name": "2-star 1-cost Talon",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Nami": {
+    "name": "4-cost: Nami",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Gwen": {
+    "name": "2-cost: Gwen",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Leona": {
+    "name": "1-cost: Leona",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Bard": {
+    "name": "5-cost: Bard",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Rammus": {
+    "name": "4-cost: Rammus",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Chogath": {
+    "name": "1-cost: Cho'Gath",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Mordekaiser": {
+    "name": "2-cost: Mordekaiser",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Talon": {
+    "name": "1-cost: Talon",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Zoe": {
+    "name": "2-cost: Zoe",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_TahmKench": {
+    "name": "4-cost: Tahm Kench",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Teemo": {
+    "name": "1-cost: Teemo",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Veigar": {
+    "name": "1-cost: Veigar",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Ezreal": {
+    "name": "1-cost: Ezreal",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Milio": {
+    "name": "2-cost: Milio",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Illaoi": {
+    "name": "3-cost: Illaoi",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Briar": {
+    "name": "1-cost: Briar",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Diana": {
+    "name": "3-cost: Diana",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Viktor": {
+    "name": "3-cost: Viktor",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_MasterYi": {
+    "name": "4-cost: Master Yi",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_MissFortune": {
+    "name": "3-cost: Miss Fortune",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Zed": {
+    "name": "5-cost: Zed",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Gnar": {
+    "name": "2-cost: Gnar",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Teemo_2star": {
+    "name": "2-star 1-cost: Teemo",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Lulu": {
+    "name": "3-cost: Lulu",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Fizz": {
+    "name": "3-cost: Fizz",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Pyke": {
+    "name": "2-cost: Pyke",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Aurora": {
+    "name": "3-cost: Aurora",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Aatrox": {
+    "name": "1-cost: Aatrox",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Reksai_2star": {
+    "name": "2-star 1-cost: Rek'Sai",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Belveth": {
+    "name": "2-cost: Bel'Veth",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Kaisa": {
+    "name": "3-cost: Kai'Sa",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Jax": {
+    "name": "2-cost: Jax",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Nunu": {
+    "name": "4-cost: Nunu",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Maokai": {
+    "name": "3-cost: Maokai",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Akali": {
+    "name": "2-cost: Akali",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Reksai": {
+    "name": "1-cost: Rek'Sai",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Ornn": {
+    "name": "3-cost: Ornn",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Leblanc": {
+    "name": "4-cost: LeBlanc",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Veigar_2star": {
+    "name": "2-star 1-cost: Veigar",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_TwistedFate_2star": {
+    "name": "2-star 1-cost: Twisted Fate",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Xayah": {
+    "name": "4-cost: Xayah",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Nasus_2star": {
+    "name": "2-star 1-cost: Nasus",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Fiora": {
+    "name": "5-cost: Fiora",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Briar_2star": {
+    "name": "2-star 1-cost: Briar",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Poppy_2star": {
+    "name": "2-star 1-cost: Poppy",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Urgot": {
+    "name": "3-cost: Urgot",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Lissandra": {
+    "name": "1-cost: Lissandra",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Jhin": {
+    "name": "5-cost: Jhin",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Gragas": {
+    "name": "2-cost: Gragas",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Galio": {
+    "name": "4-cost: The Mighty Mech",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Caitlyn_2star": {
+    "name": "2-star 1-cost: Caitlyn",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Sona": {
+    "name": "5-cost: Sona",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Ezreal_2star": {
+    "name": "2-star 1-cost: Ezreal",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Shen": {
+    "name": "5-cost: Shen",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Karma": {
+    "name": "4-cost: Karma",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Samira": {
+    "name": "3-cost: Samira",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Corki": {
+    "name": "4-cost: Corki",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_ChampionItem_Chosen_Pantheon": {
+    "name": "2-cost: Pantheon",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_FrozenHeart": {
     "name": "Protector's Vow",
     "isComponent": false,
@@ -247,6 +3201,524 @@
       "MagicResist": 25
     }
   },
+  "TFT14_CypherArmoryItem_Specific5Costs": {
+    "name": "2 star Zac, Aurora, Urgot, and Samira",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT14_CypherArmoryItem_SpecificRadiantItems": {
+    "name": "12 radiant items",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_TacticiansCape_2": {
+    "name": "2 Tacticians' Capes",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Dummy_Shroud": {
+    "name": "Dummy with Shroud",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Dummy_2xZekes": {
+    "name": "Dummy with 2 Zeke's",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_2x3cost": {
+    "name": "2 3-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_5x4cost": {
+    "name": "5 4-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_6x5cost": {
+    "name": "6 5-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_1x2star2cost": {
+    "name": "2-star 2-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_1x3star5cost": {
+    "name": "3-star 5-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_7x5cost": {
+    "name": "7 5-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Dummy_2xLocked": {
+    "name": "Dummy with 2 Lockets",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_3x2cost": {
+    "name": "3 2-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_AllDoubleNonSpatItems": {
+    "name": "All double component items",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_2x4cost": {
+    "name": "2 4-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Deathblade_2": {
+    "name": "2 Deathblades",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Reforger_2": {
+    "name": "2 Reforgers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_5x1cost": {
+    "name": "5 1-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_MasterworkUpgrade_3": {
+    "name": "3 Masterwork Upgrades",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_1x3cost": {
+    "name": "3-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Remover_2": {
+    "name": "2 Item Removers",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_1x2star3cost": {
+    "name": "2-star 3-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_1x2cost": {
+    "name": "2-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_3x3cost": {
+    "name": "3 3-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_RandomRadiantItem_3": {
+    "name": "3 Radiant Items",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_RandomRadiantItem_2": {
+    "name": "2 Radiant Items",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Golem_2xAegis": {
+    "name": "Golem with 2 Aegises.",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_1x2star5cost": {
+    "name": "2-star 5-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_3x4cost": {
+    "name": "3 4-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_LesserDuplicator_6": {
+    "name": "6 Lesser Champion Duplicators",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_1x4cost": {
+    "name": "1-star 4-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_RandomComponent_4": {
+    "name": "4 components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_1x5cost": {
+    "name": "1-star 5-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_2x2star2cost": {
+    "name": "2 2-star 2-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_RandomComponent_9": {
+    "name": "9 components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_1x2star4cost": {
+    "name": "2-star 4-cost champion",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_3x5cost": {
+    "name": "3 5-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_4x2cost": {
+    "name": "4 2-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_4x5cost": {
+    "name": "4 5-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_2x5cost": {
+    "name": "2 5-cost champions",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_ChampionDuplicator_2": {
+    "name": "2 Champion Duplicators",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Spatula_3": {
+    "name": "3 Spatulas",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT14_Consumable_SpeedUp": {
+    "name": "Blessing: Speed",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT14_Consumable_SizeUp": {
+    "name": "Blessing: Size",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT14_Consumable_Salvager": {
+    "name": "Salvager",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Consumable_ChampionDuplicator_I": {
+    "name": "Tiny Champion Duplicator",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_SonaUnique_Consumable_GoldOnKill": {
+    "name": "Command Mod: Transmute",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_SonaUnique_Consumable_Experience": {
+    "name": "Command Mod: Analyze",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_SonaUnique_Consumable_Doublestrike": {
+    "name": "Command Mod: Doublestrike",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_SonaUnique_Consumable_Debuff": {
+    "name": "Command Mod: Exhaust",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_SonaUnique_Consumable_ReduceMana": {
+    "name": "Command Mod: Optimize",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_SonaUnique_Consumable_ReduceThreat": {
+    "name": "Command Mod: Disguise",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_SonaUnique_Consumable_TempItem": {
+    "name": "Command Mod: Fabricate",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_SonaUnique_Consumable_IncreaseThreat": {
+    "name": "Command Mod: Disrupt",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_RandomComponent": {
+    "name": "Random Component",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_9": {
+    "name": "9 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_8": {
+    "name": "8 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_3": {
+    "name": "3 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_2": {
+    "name": "2 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_1": {
+    "name": "1 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_7": {
+    "name": "7 Gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_6": {
+    "name": "6 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_5": {
+    "name": "5 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_4": {
+    "name": "4 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_ItemArmorySupport": {
+    "name": "Support Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_RandomOrnnItem": {
+    "name": "Artifact Item",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_LesserDuplicator_3": {
+    "name": "3 Lesser Champion Duplicators",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_ItemArmoryCompleted": {
+    "name": "Completed Item Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_Gold_10": {
+    "name": "10 gold",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_RandomComponent_2": {
+    "name": "2 Components",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_RandomRadiantItem": {
+    "name": "Radiant Item",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_ItemArmoryComponent": {
+    "name": "Component Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_RandomCompletedItem": {
+    "name": "Completed Item",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Assist_ItemArmoryOrnn": {
+    "name": "Artifact Anvil",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_Artifact_TheIndomitable": {
     "name": "The Indomitable",
     "isComponent": false,
@@ -260,15 +3732,16 @@
       "MagicResist": 20
     }
   },
-  "TFT_Item_Hush": {
-    "name": "tft_item_name_Hush",
+  "TFT9_Item_OrnnHullbreaker": {
+    "name": "Hullcrusher",
     "isComponent": false,
     "composition": [],
     "tags": [
       "tank"
     ],
     "keyStats": {
-      "MagicResist": 25
+      "Armor": 60,
+      "MagicResist": 60
     }
   },
   "TFT_Item_Shroud": {
@@ -307,6 +3780,27 @@
       "Health": 150
     }
   },
+  "TFT17_Consumable_BlessingWealth": {
+    "name": "Blessing: Wealth",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_Consumable_BlessingProsperityPlus": {
+    "name": "Blessing: Prosperity +",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_Consumable_BlessingProsperity": {
+    "name": "Blessing: Prosperity",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_Artifact_ShadowPuppet": {
     "name": "Shadow Puppet",
     "isComponent": false,
@@ -332,23 +3826,136 @@
       "Health": 150
     }
   },
-  "TFT_Item_Hex_Ocean": {
-    "name": "tft_item_name_OceanHexBuff",
+  "TFT_Consumable_ItemRemover_UsesLeft8": {
+    "name": "Magnetic Remover <rules>(8 uses left!)</rules>",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_Artifact_WitheringRelic": {
-    "name": "Withered Relic",
+  "TFT_Consumable_ItemRemover_UsesLeft9": {
+    "name": "Magnetic Remover <rules>(9 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT4_Item_OrnnMuramana": {
+    "name": "Manazane",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448,
+      "AP": 10,
+      "AS": 15
+    }
+  },
+  "TFT7_Item_ShimmerscaleMogulsMail_HR": {
+    "name": "Mogul's Mail",
     "isComponent": false,
     "composition": [],
     "tags": [
       "tank"
     ],
     "keyStats": {
-      "Armor": 40,
-      "MagicResist": 40
+      "Health": 300
+    }
+  },
+  "TFT7_Item_ShimmerscaleMogulsMail": {
+    "name": "Mogul's Mail",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 300
+    }
+  },
+  "TFT7_Item_ShimmerscaleGamblersBlade_HR": {
+    "name": "Gambler's Blade",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 15
+    }
+  },
+  "TFT7_Item_ShimmerscaleHeartOfGold": {
+    "name": "Needlessly Big Gem",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT7_Item_ShimmerscaleGamblersBlade": {
+    "name": "Gambler's Blade",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 55
+    }
+  },
+  "TFT7_Item_ShimmerscaleDeterminedInvestor": {
+    "name": "Determined Investor",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
+    }
+  },
+  "TFT7_Item_ShimmerscaleHeartOfGold_HR": {
+    "name": "Needlessly Big Gem",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 250
+    }
+  },
+  "TFT7_Item_ShimmerscaleDiamondHands": {
+    "name": "Diamond Hands",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AP": 25,
+      "Health": 200
+    }
+  },
+  "TFT9_Item_OrnnTrickstersGlass": {
+    "name": "Trickster's Glass",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 10,
+      "Armor": 10,
+      "CritChance": 15,
+      "MagicResist": 10
     }
   },
   "TFT_Item_TacticiansRing": {
@@ -372,8 +3979,8 @@
       "AP": 40
     }
   },
-  "TFT_Item_BladeOfTheRuinedKing": {
-    "name": "TFT_item_name_BladeOfTheRuinedKing",
+  "TFT_Consumable_ItemReroller": {
+    "name": "Reforger",
     "isComponent": false,
     "composition": [],
     "tags": [],
@@ -391,6 +3998,20 @@
       "Health": 150
     }
   },
+  "TFT_Consumable_ItemRemover_UsesLeft2": {
+    "name": "Magnetic Remover <rules>(2 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Consumable_ItemReroller_UsesLeft10": {
+    "name": "Reforger <rules>(10 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_ThiefsGloves": {
     "name": "Thief's Gloves",
     "isComponent": false,
@@ -407,6 +4028,13 @@
       "Health": 150
     }
   },
+  "TFT_Consumable_ItemRemover_UsesLeft3": {
+    "name": "Magnetic Remover <rules>(3 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_GuinsoosRageblade": {
     "name": "Guinsoo's Rageblade",
     "isComponent": false,
@@ -421,6 +4049,20 @@
       "AP": 10,
       "AS": 10
     }
+  },
+  "TFT_Consumable_ItemRemover_UsesLeft4": {
+    "name": "Magnetic Remover <rules>(4 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Consumable_ItemRemover_UsesLeft5": {
+    "name": "Magnetic Remover <rules>(5 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
   },
   "TFT_Item_IonicSpark": {
     "name": "Ionic Spark",
@@ -439,6 +4081,13 @@
       "MagicResist": 35
     }
   },
+  "TFT_Consumable_ItemRemover_UsesLeft6": {
+    "name": "Magnetic Remover <rules>(6 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_Artifact_HellfireHatchet": {
     "name": "Hellfire Hatchet",
     "isComponent": false,
@@ -453,6 +4102,13 @@
       "Health": 150,
       "StatOmnivamp": 0.20000000298023224
     }
+  },
+  "TFT_Consumable_ItemRemover_UsesLeft7": {
+    "name": "Magnetic Remover <rules>(7 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
   },
   "TFT_Item_SteraksGage": {
     "name": "Sterak's Gage",
@@ -486,6 +4142,20 @@
       "PercentMaxHP": 0.05999999865889549
     }
   },
+  "TFT_Consumable_ItemRemover": {
+    "name": "Magnetic Remover",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Consumable_RecommendedArmoryRadiant": {
+    "name": "Radiant Lucky Item Chest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_Artifact_LichBane": {
     "name": "Lich Bane",
     "isComponent": false,
@@ -496,19 +4166,6 @@
     "keyStats": {
       "AP": 55,
       "AS": 10
-    }
-  },
-  "TFT_Item_PhantomDancer": {
-    "name": "TFT_item_name_PhantomDancer",
-    "isComponent": false,
-    "composition": [],
-    "tags": [
-      "offense",
-      "tank"
-    ],
-    "keyStats": {
-      "AS": 15,
-      "Armor": 25
     }
   },
   "TFT_Item_PowerGauntlet": {
@@ -527,6 +4184,13 @@
       "CritChance": 20,
       "Health": 150
     }
+  },
+  "TFT_Consumable_TrashToTreasure_Reforger": {
+    "name": "Reforger",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
   },
   "TFT_Item_SentinelSwarm": {
     "name": "Sentinel Swarm",
@@ -548,6 +4212,293 @@
       "MagicResist": 25
     }
   },
+  "TFT17_Item_FavoredEmblemItem": {
+    "name": "Arbiter Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_NegatronCloak"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 30,
+      "Armor": 20,
+      "MagicResist": 20
+    }
+  },
+  "TFT17_Item_RangedTraitEmblemItem": {
+    "name": "Sniper Emblem",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 20
+    }
+  },
+  "TFT17_Item_ShieldTankEmblemItem": {
+    "name": "Vanguard Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_FryingPan",
+      "TFT_Item_NegatronCloak"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 20,
+      "MagicResist": 20
+    }
+  },
+  "TFT17_Item_AnimaSquadEmblemItem": {
+    "name": "Anima Emblem",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 250
+    }
+  },
+  "TFT17_Item_PulsefireEmblemItem": {
+    "name": "Timebreaker Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_RecurveBow"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 15,
+      "Health": 200
+    }
+  },
+  "TFT17_Item_DRXEmblemItem": {
+    "name": "N.O.V.A. Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_SparringGloves"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "CritChance": 20,
+      "Health": 200
+    }
+  },
+  "TFT17_Item_AstronautEmblemItem": {
+    "name": "Meeple Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_ChainVest"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 20,
+      "MagicResist": 20
+    }
+  },
+  "TFT17_Item_SummonTraitEmblemItem": {
+    "name": "Shepherd Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_FryingPan",
+      "TFT_Item_TearOfTheGoddess"
+    ],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_Item_PsyOpsEmblemItem": {
+    "name": "Psionic Emblem",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AP": 20,
+      "AS": 20,
+      "Health": 300
+    }
+  },
+  "TFT17_Item_HPTankEmblemItem": {
+    "name": "Brawler Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_FryingPan",
+      "TFT_Item_GiantsBelt"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 250
+    }
+  },
+  "TFT17_Item_AssassinTraitEmblemItem": {
+    "name": "Rogue Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_FryingPan",
+      "TFT_Item_SparringGloves"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "CritChance": 20
+    }
+  },
+  "TFT17_Item_ASTraitEmblemItem": {
+    "name": "Challenger Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_FryingPan",
+      "TFT_Item_RecurveBow"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AS": 30
+    }
+  },
+  "TFT17_Item_DarkStarEmblemItem": {
+    "name": "Dark Star Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_BFSword"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.18000000715255737,
+      "AP": 18
+    }
+  },
+  "TFT17_Item_StargazerEmblemItem": {
+    "name": "Stargazer Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_NeedlesslyLargeRod"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.15000000596046448,
+      "AP": 15
+    }
+  },
+  "TFT17_Item_MeleeTraitEmblemItem": {
+    "name": "Marauder Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_FryingPan",
+      "TFT_Item_BFSword"
+    ],
+    "tags": [
+      "offense",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "StatOmnivamp": 0.10000000149011612
+    }
+  },
+  "TFT17_Item_SpaceGrooveEmblemItem": {
+    "name": "Space Groove Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_TearOfTheGoddess"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 200
+    }
+  },
+  "TFT17_Item_ResistTankEmblemItem": {
+    "name": "Bastion Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_FryingPan",
+      "TFT_Item_ChainVest"
+    ],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 30,
+      "MagicResist": 30
+    }
+  },
+  "TFT17_Item_FlexTraitEmblemItem": {
+    "name": "Voyager Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_FryingPan",
+      "TFT_Item_NeedlesslyLargeRod"
+    ],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AP": 20
+    }
+  },
+  "TFT17_Item_PrimordianEmblemItem": {
+    "name": "Primordian Emblem",
+    "isComponent": false,
+    "composition": [
+      "TFT_Item_Spatula",
+      "TFT_Item_GiantsBelt"
+    ],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 450
+    }
+  },
+  "TFT_Consumable_NeekosHelp": {
+    "name": "Champion Duplicator",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Augment_Changeling_GlamourItemTier4": {
+    "name": "Changing Glamour",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_Artifact_MirroredPersona": {
     "name": "Mirrored Persona",
     "isComponent": false,
@@ -565,16 +4516,33 @@
       "MagicResist": 10
     }
   },
-  "TFT_Item_Thornmail": {
-    "name": "game_item_displayname_3075",
+  "TFT_Augment_Changeling_GlamourItemTier5": {
+    "name": "Changing Glamour",
     "isComponent": false,
     "composition": [],
-    "tags": [
-      "tank"
-    ],
-    "keyStats": {
-      "Armor": 50
-    }
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Augment_Changeling_GlamourItemTier2": {
+    "name": "Changing Glamour",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Augment_Changeling_GlamourItemTier3": {
+    "name": "Changing Glamour",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Augment_Changeling_GlamourItemTier1": {
+    "name": "Changing Glamour",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
   },
   "TFT_Item_Artifact_Fishbones": {
     "name": "Fishbones",
@@ -656,19 +4624,8 @@
       "MagicResist": 70
     }
   },
-  "TFT_Item_IcebornGauntlet": {
-    "name": "tft_item_name_FrozenFist",
-    "isComponent": false,
-    "composition": [],
-    "tags": [
-      "tank"
-    ],
-    "keyStats": {
-      "Armor": 25
-    }
-  },
-  "TFT_Item_SpellThiefsEdge": {
-    "name": "tft_item_name_SpellThiefsEdge",
+  "TFT_Consumable_PocketRecombobulator": {
+    "name": "Pocket Recombobulator<br><br>",
     "isComponent": false,
     "composition": [],
     "tags": [],
@@ -686,15 +4643,46 @@
       "Health": 350
     }
   },
-  "TFT_Item_Catalyst": {
-    "name": "TFT_item_name_Catalyst",
+  "TFT4_Item_OrnnEternalWinter": {
+    "name": "Eternal Winter",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Armor": 20,
+      "Health": 200
+    }
+  },
+  "TFT17_Item_Artifact_YasuoArtifact": {
+    "name": "Yasuo's Bladework",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AS": 20
+    }
+  },
+  "TFT17_Item_MissFortuneUniqueFlexTraitStance": {
+    "name": "Replicator Mode",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_Hex_Wind": {
-    "name": "tft_item_name_WindHexBuff",
+  "TFT17_Item_MissFortuneUniqueManaTraitStance": {
+    "name": "Conduit Mode",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT17_Item_MissFortuneUniqueASTraitStance": {
+    "name": "Challenger Mode",
     "isComponent": false,
     "composition": [],
     "tags": [],
@@ -727,13 +4715,6 @@
       "AS": 15
     }
   },
-  "TFT_Item_Hex_Inferno": {
-    "name": "tft_item_name_InfernoHexBuff",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
   "TFT_Item_Artifact_MendingEchoes": {
     "name": "Mending Echoes",
     "isComponent": false,
@@ -743,6 +4724,17 @@
     ],
     "keyStats": {
       "Health": 200
+    }
+  },
+  "TFT4_Item_OrnnObsidianCleaver": {
+    "name": "Obsidian Cleaver",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 150
     }
   },
   "TFT_Item_RedBuff": {
@@ -772,38 +4764,31 @@
       "Health": 150
     }
   },
-  "TFT_Item_ThiefsGloves_AcademyCopy1": {
-    "name": "Thief's Gloves",
+  "TFT17_Item_Artifact_ThreshLantern": {
+    "name": "Thresh's Lantern",
     "isComponent": false,
     "composition": [],
     "tags": [
-      "offense",
       "tank"
     ],
     "keyStats": {
-      "CritChance": 20,
-      "Health": 150
+      "Armor": 35,
+      "Health": 400,
+      "MagicResist": 35
     }
   },
-  "TFT_Item_ThiefsGloves_AcademyCopy2": {
-    "name": "Thief's Gloves",
+  "TFT17_Item_Artifact_KayleArtifact_Radiant": {
+    "name": "Kayle's Radiant Exaltation",
     "isComponent": false,
     "composition": [],
     "tags": [
-      "offense",
-      "tank"
+      "offense"
     ],
     "keyStats": {
-      "CritChance": 20,
-      "Health": 150
+      "AD": 0.5,
+      "AP": 50,
+      "AS": 30
     }
-  },
-  "TFT_Item_SwordOfTheDivine": {
-    "name": "tft_item_name_SwordOfTheDivine2",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
   },
   "TFT_Item_UnstableConcoction": {
     "name": "Hand Of Justice",
@@ -817,22 +4802,6 @@
     ],
     "keyStats": {
       "CritChance": 20
-    }
-  },
-  "TFT_Item_CursedBlade": {
-    "name": "tft_item_name_CursedBlade",
-    "isComponent": false,
-    "composition": [
-      "TFT_Item_CursedBlade",
-      "TFT_Item_CursedBlade"
-    ],
-    "tags": [
-      "offense",
-      "tank"
-    ],
-    "keyStats": {
-      "AS": 15,
-      "MagicResist": 25
     }
   },
   "TFT_Item_GuardianAngel": {
@@ -853,28 +4822,6 @@
       "Armor": 20
     }
   },
-  "TFT_Item_SeraphsEmbrace": {
-    "name": "Blue Buff",
-    "isComponent": false,
-    "composition": [],
-    "tags": [
-      "offense"
-    ],
-    "keyStats": {
-      "AP": 10
-    }
-  },
-  "TFT_Item_CrestOfCinders": {
-    "name": "Crest Of Cinders",
-    "isComponent": false,
-    "composition": [],
-    "tags": [
-      "tank"
-    ],
-    "keyStats": {
-      "Health": 250
-    }
-  },
   "TFT_Item_TearOfTheGoddess": {
     "name": "Tear of the Goddess",
     "isComponent": true,
@@ -882,8 +4829,8 @@
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_Artifact_CursedBlade": {
-    "name": "Cursed Blade",
+  "TFT4_Item_OrnnZhonyasParadox": {
+    "name": "Zhonya's Paradox",
     "isComponent": false,
     "composition": [],
     "tags": [
@@ -891,19 +4838,9 @@
       "tank"
     ],
     "keyStats": {
-      "AS": 35,
-      "MagicResist": 20
-    }
-  },
-  "TFT_Item_MacaoMode_HextechSniper": {
-    "name": "Hextech Sniper Rifle",
-    "isComponent": false,
-    "composition": [],
-    "tags": [
-      "tank"
-    ],
-    "keyStats": {
-      "Health": 150
+      "AP": 25,
+      "Armor": 25,
+      "MagicResist": 25
     }
   },
   "TFT_Item_NegatronCloak": {
@@ -944,8 +4881,15 @@
       "Health": 50
     }
   },
-  "TFT_Item_ChonccsChalice": {
-    "name": "Choncc's Chalice",
+  "TFT17_Consumable_Anomaly_HungerForPower": {
+    "name": "Hunger For Power Anomaly",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Consumable_MasterworkUpgrade": {
+    "name": "Masterwork Upgrade",
     "isComponent": false,
     "composition": [],
     "tags": [],
@@ -994,8 +4938,8 @@
       "MagicResist": 20
     }
   },
-  "TFT_Item_IsYordle": {
-    "name": "tft_item_name_Mittens",
+  "TFT_Augment_GrowingUp_SkipOption": {
+    "name": "All Done<br><tftitemrules>Stop transforming, and allow me to star up</tftitemrules>",
     "isComponent": false,
     "composition": [],
     "tags": [],
@@ -1022,6 +4966,13 @@
     "keyStats": {
       "AS": 65
     }
+  },
+  "TFT9_Consumable_GoldenItemRemover": {
+    "name": "Golden Item Remover",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
   },
   "TFT_Item_Bloodthirster": {
     "name": "Bloodthirster",
@@ -1053,6 +5004,19 @@
     "keyStats": {
       "AP": 15,
       "AS": 50
+    }
+  },
+  "TFT9_Item_OrnnHorizonFocus": {
+    "name": "Sniper's Focus",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.20000000298023224,
+      "AP": 20,
+      "AS": 20
     }
   },
   "TFT_Item_UnstableTreasureChest": {
@@ -1092,15 +5056,41 @@
       "Health": 400
     }
   },
-  "TFT_Item_KnightsVow": {
-    "name": "Knight's Vow",
+  "TFT17_Item_Artifact_EvelynnArtifact": {
+    "name": "Evelynn's Instinct",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 0.10000000149011612,
+      "AP": 10,
+      "AS": 40,
+      "StatOmnivamp": 0.15000000596046448
+    }
+  },
+  "TFT17_Item_Artifact_SorakaArtifact": {
+    "name": "Soraka's Miracle",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "tank"
+    ],
+    "keyStats": {
+      "Health": 100
+    }
+  },
+  "TFT17_Item_Artifact_VarusArtifact": {
+    "name": "Varus's Obsession",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
   },
-  "TFT_Item_FrozenMallet": {
-    "name": "TFT_item_name_FrozenMallet",
+  "TFT_Consumable_ChampionDuplicator_III": {
+    "name": "Lesser Champion Duplicator",
     "isComponent": false,
     "composition": [],
     "tags": [],
@@ -1131,15 +5121,29 @@
       "Health": 150
     }
   },
-  "TFT_Item_HextechChestguard": {
-    "name": "tft_item_name_HextechChestguard",
+  "TFT17_Item_Artifact_AhriArtifact": {
+    "name": "Ahri's Aura",
     "isComponent": false,
-    "composition": [
-      "TFT_Item_HextechChestguard",
-      "TFT_Item_HextechChestguard"
+    "composition": [],
+    "tags": [
+      "offense"
     ],
-    "tags": [],
-    "keyStats": {}
+    "keyStats": {
+      "AP": 20
+    }
+  },
+  "TFT9_Item_CrownOfDemacia": {
+    "name": "Crown of Demacia",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AS": 30,
+      "Health": 300
+    }
   },
   "TFT_Item_EternalFlame": {
     "name": "The Eternal Flame",
@@ -1151,6 +5155,13 @@
     "keyStats": {
       "Health": 150
     }
+  },
+  "TFT17_EkkoOffering_AnomalyItem": {
+    "name": "Anomaly",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
   },
   "TFT_Item_Artifact_LightshieldCrest": {
     "name": "Lightshield Crest",
@@ -1164,12 +5175,28 @@
       "MagicResist": 55
     }
   },
-  "TFT_Item_Darkin": {
-    "name": "tft_item_name_Darkin",
+  "TFT17_Consumable_MechaTransformer": {
+    "name": "Mecha-Former",
     "isComponent": false,
     "composition": [],
     "tags": [],
     "keyStats": {}
+  },
+  "TFT4_Item_OrnnDeathsDefiance": {
+    "name": "Death's Defiance",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank",
+      "sustain"
+    ],
+    "keyStats": {
+      "AD": 0.25,
+      "AS": 15,
+      "Armor": 40,
+      "StatOmnivamp": 0.25
+    }
   },
   "TFT_Item_SpearOfShojin": {
     "name": "Spear of Shojin",
@@ -1185,13 +5212,6 @@
       "AD": 0.15000000596046448,
       "AP": 15
     }
-  },
-  "TFT_Item_YoumuusGhostblade": {
-    "name": "Youmuu's Ghostblade",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
   },
   "TFT_Item_SpectralGauntlet": {
     "name": "Evenshroud",
@@ -1214,6 +5234,19 @@
     "composition": [],
     "tags": [],
     "keyStats": {}
+  },
+  "TFT9_Item_OrnnPrototypeForge": {
+    "name": "Blacksmith's Gloves",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "CritChance": 30,
+      "Health": 200
+    }
   },
   "TFT_Item_Artifact_BlightingJewel": {
     "name": "Blighting Jewel",
@@ -1238,6 +5271,23 @@
       "AD": 0.20000000298023224,
       "AP": 20,
       "Health": 450
+    }
+  },
+  "TFT4_Item_OrnnInfinityForce": {
+    "name": "Infinity Force",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "AD": 0.30000001192092896,
+      "AP": 30,
+      "AS": 30,
+      "Armor": 30,
+      "Health": 300,
+      "MagicResist": 30
     }
   },
   "TFT_Item_LocketOfTheIronSolari": {
@@ -1268,13 +5318,6 @@
       "CritChance": 20,
       "Health": 150
     }
-  },
-  "TFT_Item_Yuumi": {
-    "name": "TFT_item_name_Yuumi",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
   },
   "TFT_Item_Artifact_SuspiciousTrenchCoat": {
     "name": "Suspicious Trench Coat",
@@ -1318,6 +5361,13 @@
     "keyStats": {
       "AS": 45
     }
+  },
+  "TFT_Consumable_TrainingDummy": {
+    "name": "Training Dummy",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
   },
   "TFT_Item_Crownguard": {
     "name": "Crownguard",
@@ -1372,6 +5422,31 @@
       "MagicResist": 20
     }
   },
+  "TFT_Consumable_ShopReroller": {
+    "name": "Loaded Dice",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT9_Item_OrnnDeathfireGrasp": {
+    "name": "Deathfire Grasp",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AP": 30
+    }
+  },
+  "TFT_Consumable_ItemRemover_UsesLeft10": {
+    "name": "Magnetic Remover <rules>(10 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_Artifact_NavoriFlickerblades": {
     "name": "Flickerblades",
     "isComponent": false,
@@ -1382,30 +5457,6 @@
     "keyStats": {
       "AP": 10,
       "AS": 20
-    }
-  },
-  "TFT_Item_Spite": {
-    "name": "Spite",
-    "isComponent": false,
-    "composition": [],
-    "tags": [
-      "tank"
-    ],
-    "keyStats": {
-      "Health": 150
-    }
-  },
-  "TFT_Item_ZhonyasHourglass": {
-    "name": "TFT_item_name_ZhonyasHourglass",
-    "isComponent": false,
-    "composition": [],
-    "tags": [
-      "offense",
-      "tank"
-    ],
-    "keyStats": {
-      "AP": 20,
-      "Armor": 25
     }
   },
   "TFT_Item_BlueBuff": {
@@ -1491,8 +5542,8 @@
       "MagicResist": 20
     }
   },
-  "TFT_Item_JammedSlot": {
-    "name": "Jammed!",
+  "TFT17_DRXSelector": {
+    "name": "Striker Selector",
     "isComponent": false,
     "composition": [],
     "tags": [],
@@ -1509,25 +5560,16 @@
       "AP": 10
     }
   },
-  "TFT_Item_Artifact_HorizonFocus": {
-    "name": "Horizon Focus",
+  "TFT4_Item_OrnnRanduinsSanctum": {
+    "name": "Randuin's Omen",
     "isComponent": false,
     "composition": [],
     "tags": [
       "tank"
     ],
     "keyStats": {
-      "Armor": 20,
-      "Health": 250,
-      "MagicResist": 20
+      "Health": 150
     }
-  },
-  "TFT_Item_MortalReminder": {
-    "name": "game_item_displayname_3033",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
   },
   "TFT_Item_NightHarvester": {
     "name": "Steadfast Heart",
@@ -1569,18 +5611,6 @@
     ],
     "keyStats": {
       "Health": 150
-    }
-  },
-  "TFT_Item_Vengeance": {
-    "name": "tft_item_name_SwordOfTheDivine2",
-    "isComponent": false,
-    "composition": [],
-    "tags": [
-      "offense"
-    ],
-    "keyStats": {
-      "AS": 15,
-      "CritChance": 20
     }
   },
   "TFT_Item_FryingPan": {
@@ -1642,13 +5672,6 @@
       "AD": 0.550000011920929
     }
   },
-  "TFT_Item_ChonccsCrown": {
-    "name": "Choncc's Crown",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
   "TFT_Item_Chalice": {
     "name": "Chalice of Power",
     "isComponent": false,
@@ -1695,6 +5718,33 @@
     "tags": [],
     "keyStats": {}
   },
+  "TFT_Consumable_RecommendedArmory": {
+    "name": "Lucky Item Chest",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT11_Item_ThiefsGlovesSupport": {
+    "name": "Accomplice's Gloves",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense",
+      "tank"
+    ],
+    "keyStats": {
+      "CritChance": 20,
+      "Health": 150
+    }
+  },
+  "TFT_Consumable_ItemReroller_UsesLeft5": {
+    "name": "Reforger <rules>(5 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_WarmogsArmor": {
     "name": "Warmog's Armor",
     "isComponent": false,
@@ -1709,6 +5759,20 @@
       "BonusPercentHP": 0.18000000715255737,
       "Health": 500
     }
+  },
+  "TFT_Consumable_ItemReroller_UsesLeft4": {
+    "name": "Reforger <rules>(4 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Consumable_ItemReroller_UsesLeft7": {
+    "name": "Reforger <rules>(7 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
   },
   "TFT_Item_Artifact_SeekersArmguard": {
     "name": "Seeker's Armguard",
@@ -1726,6 +5790,13 @@
       "StatOmnivamp": 0.20000000298023224
     }
   },
+  "TFT_Consumable_ItemReroller_UsesLeft6": {
+    "name": "Reforger <rules>(6 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_StatikkShiv": {
     "name": "Void Staff",
     "isComponent": false,
@@ -1740,6 +5811,32 @@
       "AP": 35,
       "AS": 15
     }
+  },
+  "TFT_Consumable_ItemReroller_UsesLeft3": {
+    "name": "Reforger <rules>(3 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT4_Item_OrnnTheCollector": {
+    "name": "Gold Collector",
+    "isComponent": false,
+    "composition": [],
+    "tags": [
+      "offense"
+    ],
+    "keyStats": {
+      "AD": 0.3499999940395355,
+      "CritChance": 20
+    }
+  },
+  "TFT_Consumable_ItemReroller_UsesLeft2": {
+    "name": "Reforger <rules>(2 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
   },
   "TFT_Item_Artifact_CappaJuice": {
     "name": "Cappa Juice",
@@ -1761,6 +5858,20 @@
     "tags": [],
     "keyStats": {}
   },
+  "TFT_Consumable_ItemReroller_UsesLeft9": {
+    "name": "Reforger <rules>(9 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
+  "TFT_Consumable_ItemReroller_UsesLeft8": {
+    "name": "Reforger <rules>(8 uses left!)</rules>",
+    "isComponent": false,
+    "composition": [],
+    "tags": [],
+    "keyStats": {}
+  },
   "TFT_Item_HextechGunblade": {
     "name": "Hextech Gunblade",
     "isComponent": false,
@@ -1777,33 +5888,5 @@
       "AP": 20,
       "StatOmnivamp": 0.15000000596046448
     }
-  },
-  "TFT_Item_Hex_Mountain": {
-    "name": "tft_item_name_MountainHexBuff",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
-  },
-  "TFT_Item_ChonccsSpork": {
-    "name": "Choncc's Spork",
-    "isComponent": false,
-    "composition": [],
-    "tags": [
-      "offense",
-      "tank"
-    ],
-    "keyStats": {
-      "AD": 0.30000001192092896,
-      "AP": 30,
-      "Health": 350
-    }
-  },
-  "TFT_Item_CarouselOfChaos_TimeUndilator": {
-    "name": "Time Undilator",
-    "isComponent": false,
-    "composition": [],
-    "tags": [],
-    "keyStats": {}
   }
 }

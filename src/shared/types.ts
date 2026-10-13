@@ -231,6 +231,7 @@ export interface NoteEvidence {
   placementDelta?: number;  // mean placement fired minus not fired; positive = worse finish
   ci?: [number, number];    // 95% bootstrap interval for placementDelta
   matches?: number;         // audited matches behind the verdict
+  matchesFired?: number;    // of those, how many the rule fired in at all
 }
 
 // What the player did in the window before a checkpoint note fired — observed
@@ -373,6 +374,8 @@ export interface CoachingReport {
   // Everything else the rule engine flagged — shown collapsed, never feeds
   // the priority fix or the tldr. Absent on pre-audit reports.
   other_notes?: CoachingNote[];
+  // Always-on rules, one summary line each, in place of their notes.
+  common_patterns?: string[];
   strengths: string[];
   round_trajectory?: RoundTrajectoryPoint[];
   plan: MatchPlan;
@@ -392,6 +395,9 @@ export interface MatchBrief {
   resolvedNotes: CoachingNote[];
   // Decision points that still need report prose.
   decisionPoints: DecisionPoint[];
+  // One line per always-on rule (fires in nearly every audited match): shown
+  // instead of its notes. Absent on briefs built before the split.
+  commonPatterns?: string[];
   // Grades computed from the full, pre-truncation decision-point list (see
   // rule-engine.ts) — deliberately independent of what made it into
   // resolvedNotes/decisionPoints after the MAX_POINTS/MAX_PER_RULE cuts.

@@ -43,6 +43,7 @@ interface RuleEvidenceFile {
     placementDelta?: number | null;
     ci?: [number | null, number | null] | null;
     matches?: number;
+    matchesFired?: number;
   }>;
 }
 
@@ -58,6 +59,10 @@ export interface RuleMeta {
   confidence: string;
   patch_sensitivity: string;
   tier: RuleTier;
+  // A rule written from audit findings: hidden from reports until matches
+  // recorded after defined_on confirm it (scripts/rule-audit.ts).
+  status?: 'candidate';
+  defined_on?: string;
 }
 
 interface RulesFile {
@@ -105,6 +110,7 @@ export function getRuleEvidence(ruleId: string | undefined): NoteEvidence {
     ...(typeof e.placementDelta === 'number' ? { placementDelta: e.placementDelta } : {}),
     ...(ci ? { ci } : {}),
     ...(typeof e.matches === 'number' ? { matches: e.matches } : {}),
+    ...(typeof e.matchesFired === 'number' ? { matchesFired: e.matchesFired } : {}),
   };
 }
 

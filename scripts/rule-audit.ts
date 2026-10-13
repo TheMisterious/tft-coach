@@ -52,7 +52,7 @@ import { buildMatchContext } from '../src/coach/match-context';
 import { buildMatchPlan } from '../src/coach/plan-builder';
 import { standingFor } from '../src/coach/lobby-context';
 import { extractFeatureVector } from '../src/profile/feature-vector';
-import { getAllRules } from '../src/coach/rules-loader';
+import { getAllRules, getRuleMeta } from '../src/coach/rules-loader';
 import {
   mean, sd, ranks, pearson, spearman, rng, PERMUTATIONS, permutationP,
   bootstrapDiffCI, bh, minimumDetectableEffect,
@@ -354,7 +354,11 @@ interface RuleRow {
   full: Comparison | null;
   q?: number;
   discovery: { n: number; delta: number | null; q: number | null } | null;
-  holdout: { n: number; delta: number | null; p: number | null; q: number | null } | null;
+  holdout: { kind: 'held-out' | 'prospective'; n: number; delta: number | null; p: number | null; q: number | null } | null;
+  // Set for a candidate rule: the date it was written. Its confirmation comes
+  // only from matches recorded after this, never from the older/newer split,
+  // because every match before it was seen while the rule was being designed.
+  candidateSince?: string;
   status: Status;
   strata: StratumRow[];
 }
@@ -385,14 +389,16 @@ function analyseRules(matches: MatchRecord[]): { rows: RuleRow[]; discoveryN: nu
     const { window, untestable } = chooseWindow(matches, ruleId);
     const firings = matches.reduce((a, m) => a + m.firings.filter(f => f.ruleId === ruleId).length, 0);
     const matchesFired = matches.filter(m => m.firings.some(f => f.ruleId === ruleId)).length;
+    const candidateSince = getRuleMeta(ruleId)?.status === 'candidate' ? getRuleMeta(ruleId)?.defined_on : undefined;
     const full = window ? compare(matches, ruleId, window, seed++) : null;
-    const disc = window ? compare(discovery, ruleId, window, seed++) : null;
+    const disc = window && !candidateSince ? compare(discovery, ruleId, window, seed++) : null;
     rows.push({
       ruleId, category: info.category,
       severity: [...info.severity.entries()].sort((a, b) => b[1] - a[1])[0][0],
       firings, matchesFired, window, untestable, full,
-      discovery: window ? { n: disc ? disc.fired.length + disc.not.length : 0, delta: disc?.delta ?? null, q: null } : null,
+      discovery: window && !candidateSince ? { n: disc ? disc.fired.length + disc.not.length : 0, delta: disc?.delta ?? null, q: null } : null,
       holdout: null,
+      ...(candidateSince ? { candidateSince } : {}),
       status: 'exploratory',
       strata: window && full ? stratify(matches, ruleId, window, seed += 10) : [],
     });
@@ -419,12 +425,33 @@ function analyseRules(matches: MatchRecord[]): { rows: RuleRow[]; discoveryN: nu
     const not = eligible.filter(m => !firedBy(m, r.ruleId, cut)).map(m => m.placement);
     const ok = fired.length >= 2 && not.length >= 2;
     const p = ok ? permutationP(fired, not, seed++, 'greater') : 1;
-    r.holdout = { n: eligible.length, delta: ok ? mean(fired) - mean(not) : null, p: ok ? p : null, q: null };
+    r.holdout = { kind: 'held-out', n: eligible.length, delta: ok ? mean(fired) - mean(not) : null, p: ok ? p : null, q: null };
     holdoutPs.push(p);
   }
   bh(holdoutPs).forEach((q, i) => {
     candidates[i].holdout!.q = q;
     if (q < CONFIRM_Q && (candidates[i].holdout!.delta ?? 0) > 0) candidates[i].status = 'confirmed';
+  });
+
+  // Candidate rules: confirmed only on matches recorded after they were
+  // written, one-sided in the direction they predict, corrected across the
+  // candidates that have enough such matches to test.
+  const prospectivePs: Array<{ row: RuleRow; p: number }> = [];
+  for (const r of rows.filter(x => x.candidateSince && x.window)) {
+    const since = Date.parse(r.candidateSince!);
+    const cut = roundNum(r.window!);
+    const eligible = matches.filter(m => m.startedAt >= since && reached(m, cut));
+    const fired = eligible.filter(m => firedBy(m, r.ruleId, cut)).map(m => m.placement);
+    const not = eligible.filter(m => !firedBy(m, r.ruleId, cut)).map(m => m.placement);
+    const ok = fired.length >= 2 && not.length >= 2;
+    const p = ok ? permutationP(fired, not, seed++, 'greater') : null;
+    r.holdout = { kind: 'prospective', n: eligible.length, delta: ok ? mean(fired) - mean(not) : null, p, q: null };
+    if (p !== null) prospectivePs.push({ row: r, p });
+  }
+  bh(prospectivePs.map(x => x.p)).forEach((q, i) => {
+    const r = prospectivePs[i].row;
+    r.holdout!.q = q;
+    if (q < CONFIRM_Q && (r.holdout!.delta ?? 0) > 0) r.status = 'confirmed';
   });
 
   return { rows, discoveryN: discovery.length, holdoutN: holdout.length, splitAt: holdout[0]?.startedAt ?? 0 };
@@ -513,6 +540,7 @@ function report(matches: MatchRecord[], excluded: MatchRecord[], a: ReturnType<t
   L.push(`- **Uncertainty.** 95% percentile-bootstrap interval for Δ (${4000} resamples per group). "Detectable" is the smallest |Δ| the comparison had 80% power to detect at two-sided α = 0.05, by the normal approximation 2.8 · sd · √(1/n₁ + 1/n₂); an approximation, not an exact power calculation.`);
   L.push(`- **Multiplicity.** Two-sided permutation p (${PERMUTATIONS} shuffles), Benjamini-Hochberg q across all ${rules.filter(r => r.full).length} rules that could be compared. Full-data "predictive" needs q < ${FULL_Q}.`);
   L.push(`- **Held-out confirmation.** Matches sorted by date: the older ${a.discoveryN} discover, the newer ${a.holdoutN} (from ${day(a.splitAt)}) confirm. A rule is a candidate if discovery q < ${DISCOVERY_Q} with a worse finish; it is **confirmed** only if the newer matches show a worse finish again at one-sided permutation q < ${CONFIRM_Q} (corrected across candidates). The ${pct(HOLDOUT_FRACTION)} split and every threshold were fixed before the held-out numbers were read.`);
+  L.push('- **Candidate rules** (status "candidate" in rules.core.json) were written after looking at these matches, so none of these matches can confirm one. Their full-data numbers are exploratory and they are left out of the older/newer split; only matches recorded after the date they were written can confirm them (one-sided, corrected across candidates). Until then the app keeps them out of reports.');
   L.push('- **Context.** Each tested rule\'s Δ split by the player\'s state at its cut round (same moment for fired and not-fired matches): HP above or below 50, and HP rank in the top or bottom half of the lobby. Cells under 5 matches read "too few".', '');
 
   L.push('## Rules', '');
@@ -523,7 +551,9 @@ function report(matches: MatchRecord[], excluded: MatchRecord[], a: ReturnType<t
     const name = registry.get(r.ruleId)?.human_readable_name ?? '';
     const c = r.full;
     const disc = r.discovery?.delta !== null && r.discovery?.delta !== undefined ? `${f2(r.discovery.delta)} (${r.discovery.q?.toFixed(3) ?? '—'})` : '—';
-    const hold = r.holdout ? `${f2(r.holdout.delta)} (${r.holdout.p?.toFixed(3) ?? '—'})` : '—';
+    const hold = r.holdout?.kind === 'prospective'
+      ? `prospective since ${r.candidateSince}: ${r.holdout.n} match${r.holdout.n === 1 ? '' : 'es'}${r.holdout.p !== null ? `, ${f2(r.holdout.delta)} (${r.holdout.p.toFixed(3)})` : ''}`
+      : r.holdout ? `${f2(r.holdout.delta)} (${r.holdout.p?.toFixed(3) ?? '—'})` : '—';
     L.push(`| ${r.ruleId} | ${name} | ${r.firings} (${r.matchesFired}) | ${pct(r.firings / totalNotes)} | ${r.window ?? '—'} | ${c ? `${c.fired.length}/${c.not.length}` : '—'} | ${c ? `${f2(c.delta)} ${ci2(c.ci)}` : '—'} | ${c ? '±' + c.mde.toFixed(2) : '—'} | ${c ? `${pct(c.top4[0])}/${pct(c.top4[1])}` : '—'} | ${c?.p.toFixed(3) ?? '—'} | ${r.q?.toFixed(3) ?? '—'} | ${disc} | ${hold} | ${verdictText(r)}${r.untestable ? ` — ${r.untestable}` : ''} |`);
   }
   L.push('');
@@ -572,12 +602,16 @@ function writeEvidence(matches: MatchRecord[], a: ReturnType<typeof analyseRules
       p: r3(c?.p),
       q: r3(r.q),
       discovery: r.discovery ? { n: r.discovery.n, delta: r2(r.discovery.delta), q: r3(r.discovery.q) } : null,
-      holdout: r.holdout ? { n: r.holdout.n, delta: r2(r.holdout.delta), p: r3(r.holdout.p), q: r3(r.holdout.q) } : null,
+      holdout: r.holdout ? { kind: r.holdout.kind, n: r.holdout.n, delta: r2(r.holdout.delta), p: r3(r.holdout.p), q: r3(r.holdout.q) } : null,
+      ...(r.candidateSince ? { candidateSince: r.candidateSince } : {}),
       context: r.strata.map(s => ({ state: s.stratum, group: s.group, nFired: s.nFired, nNot: s.nNot, delta: r2(s.delta), ci: s.ci ? [r2(s.ci[0]), r2(s.ci[1])] : null })),
     };
   }
   for (const id of getAllRules().map(r => r.unique_id).sort()) {
-    if (!(id in out)) out[id] = { verdict: 'never-fired', status: 'exploratory', placementDelta: null, matches: matches.length, matchesFired: 0 };
+    if (!(id in out)) {
+      const since = getRuleMeta(id)?.status === 'candidate' ? getRuleMeta(id)?.defined_on : undefined;
+      out[id] = { verdict: 'never-fired', status: 'exploratory', placementDelta: null, matches: matches.length, matchesFired: 0, ...(since ? { candidateSince: since } : {}) };
+    }
   }
   const file = {
     _meta: {

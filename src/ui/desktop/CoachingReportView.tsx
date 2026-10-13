@@ -185,6 +185,16 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
               </details>
             )}
 
+            {/* Always-on rules, one line each instead of their notes */}
+            {report.common_patterns && report.common_patterns.length > 0 && (
+              <section className={styles.stageSection}>
+                <div className={styles.stageTitle}>Shows up in most games</div>
+                <ul className={styles.commonPatterns}>
+                  {report.common_patterns.map((line, i) => <li key={i}>{line}</li>)}
+                </ul>
+              </section>
+            )}
+
             {/* Strengths */}
             {report.strengths.length > 0 && (
               <section className={styles.stageSection}>

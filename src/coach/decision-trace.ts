@@ -13,9 +13,10 @@
 // HP and level. So nothing here says a different choice would have been better.
 // Each line is a fact the player can check against their own memory of the game.
 
-import type { DecisionPoint, MatchSnapshot, RoundSnapshot, MetaData, BoardState, ContributingDecisions } from '../shared/types';
+import type { DecisionPoint, MatchSnapshot, RoundSnapshot, MetaData, ContributingDecisions } from '../shared/types';
 import { standingFor, ordinal } from './lobby-context';
 import { getChampionName } from '../enrichment/meta-lookup';
+import { upgradeCopiesOffered, pairsHeld } from './upgrades';
 
 // Checkpoint rules whose window is "the stage before this checkpoint". Each
 // fires at a stage-entry round ("4-1"), so the decisions behind it are the
@@ -97,8 +98,7 @@ function upgradeLine(window: RoundSnapshot[], last: RoundSnapshot, meta?: MetaDa
 
   const seen = new Map<string, number>();
   for (const r of window) {
-    const held = new Set([...unitsIn(r.board, meta), ...unitsIn(r.bench, meta)].map(u => u.name));
-    for (const id of r.shop) if (held.has(id)) seen.set(id, (seen.get(id) ?? 0) + 1);
+    for (const [id, n] of upgradeCopiesOffered(r, meta)) seen.set(id, (seen.get(id) ?? 0) + n);
   }
   const offered = [...seen.values()].reduce((a, b) => a + b, 0);
   if (offered > 0) {
@@ -107,11 +107,7 @@ function upgradeLine(window: RoundSnapshot[], last: RoundSnapshot, meta?: MetaDa
     parts.push(`end-of-round shops showed ${offered} cop${offered === 1 ? 'y' : 'ies'} of units you held (${top})`);
   }
 
-  const oneStar = new Map<string, number>();
-  for (const u of [...unitsIn(last.board, meta), ...unitsIn(last.bench, meta)]) {
-    if (u.level === 1) oneStar.set(u.name, (oneStar.get(u.name) ?? 0) + 1);
-  }
-  const pairs = [...oneStar.entries()].filter(([, n]) => n === 2).map(([id]) => nameOf(id, meta));
+  const pairs = pairsHeld(last, meta).map(id => nameOf(id, meta));
   if (pairs.length) parts.push(`${pairs.length} pair${pairs.length === 1 ? '' : 's'} one copy from a 2-star at ${last.label} (${pairs.slice(0, 3).join(', ')})`);
 
   if (!parts.length) return undefined;
@@ -123,16 +119,6 @@ function lobbyLine(checkpoint: RoundSnapshot): string | undefined {
   const s = standingFor(checkpoint);
   if (!s) return undefined;
   return `At ${checkpoint.label}: level ${s.level} against a lobby median of ${s.medianOpponentLevel}; HP ${s.health}, ${ordinal(s.hpRank)} of ${s.alive}.`;
-}
-
-// Board and bench also hold non-champions (TFT_ArmoryKeyComponent and other
-// set tokens). With the set's champion table loaded, only its champions count;
-// without one, nothing is filtered rather than guessed at.
-function unitsIn(board: BoardState | undefined, meta?: MetaData): Array<{ name: string; level: number }> {
-  const known = meta?.champions && Object.keys(meta.champions).length ? meta.champions : undefined;
-  return Object.values(board ?? {})
-    .filter(c => c?.name && c.name !== '0' && (!known || c.name in known))
-    .map(c => ({ name: c.name, level: Number(c.level) || 1 }));
 }
 
 function nameOf(id: string, meta?: MetaData): string {

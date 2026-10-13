@@ -1,5 +1,7 @@
 // LOBBY_001: Level behind the lobby at a stage checkpoint, while not ahead on HP.
 // LOBBY_002: HP far below the lobby in the early game, before any HP rule looks.
+// ROLL_006:  CANDIDATE — behind the lobby at a roll-down window, gold banked, no
+//            roll, with an upgrade on offer.
 //
 // Every other checker in this project measures the player against a fixed
 // constant — an interest bracket, a board-cost benchmark, level 8 by 4-2.
@@ -13,8 +15,9 @@
 // src/coach/lobby-context.ts), so nothing here infers anything about their
 // gold, boards, items or comps.
 
-import type { MatchSnapshot, DecisionPoint, Severity } from '../../shared/types';
+import type { MatchSnapshot, DecisionPoint, Severity, MetaData } from '../../shared/types';
 import { standingFor, ordinal } from '../lobby-context';
+import { upgradeWasOnOffer } from '../upgrades';
 
 // Stage-entry checkpoints, matching the rounds hp.ts and items.ts already
 // evaluate at, so a lobby note lands alongside the other stage-entry notes
@@ -38,11 +41,59 @@ const MIN_OPPONENTS = 3;
 const HP_BOTTOM_RANKS = 2;
 const MIN_HP_BELOW_MEDIAN = 20;
 
-export function checkLobby(match: MatchSnapshot): DecisionPoint[] {
+export function checkLobby(match: MatchSnapshot, meta?: MetaData): DecisionPoint[] {
   return [
     ...checkLevelBehindLobby(match),
     ...checkHealthBehindLobby(match),
+    ...checkBehindAtRolldownWindow(match, meta),
   ];
+}
+
+// ROLL_006 — CANDIDATE (defined 2026-10-14, status in data/core/rules.core.json).
+//
+// "Behind the lobby, so roll" is a beginner heuristic: being behind does not by
+// itself mean a roll would have helped. This only fires at a roll-down window
+// when every condition that makes the roll plausible holds at once — level
+// below the lobby median, no HP lead paying for staying low (the same gate
+// LOBBY_001 uses), gold banked, no roll-down that round, and something a roll
+// could hit (a held unit in the shop, or a pair one copy short). Thresholds
+// were fixed before the rule was run against any match; it stays out of
+// reports until games recorded after that date confirm it.
+const ROLLDOWN_WINDOWS = ['3-2', '4-1', '4-2'];
+const BANKED_GOLD = 30;
+const MAX_ROLLS_NOT_A_ROLLDOWN = 2;
+
+function checkBehindAtRolldownWindow(match: MatchSnapshot, meta?: MetaData): DecisionPoint[] {
+  const points: DecisionPoint[] = [];
+  for (const round of match.rounds) {
+    if (!ROLLDOWN_WINDOWS.includes(round.label)) continue;
+    const standing = standingFor(round);
+    if (!standing || standing.opponents < MIN_OPPONENTS) continue;
+    if (standing.level >= standing.medianOpponentLevel) continue;
+    if (standing.health >= standing.medianOpponentHealth) continue;
+    if (round.goldEnd < BANKED_GOLD || round.rollsSpent > MAX_ROLLS_NOT_A_ROLLDOWN) continue;
+    if (!upgradeWasOnOffer(round, meta)) continue;
+
+    points.push({
+      ruleId:   'ROLL_006',
+      round:    round.label,
+      category: 'rolling',
+      severity: 'moderate',
+      observed: `At ${round.label}: level ${standing.level} against a lobby median of ${standing.medianOpponentLevel}, ${standing.health} HP against ${standing.medianOpponentHealth}, ${round.goldEnd}g banked and ${round.rollsSpent} roll${round.rollsSpent === 1 ? '' : 's'}, with an upgrade on offer`,
+      recommended: `If the gold was not saved for a planned level, ${round.label} is a usual point to roll for the upgrade on offer`,
+      reasonMetrics: {
+        level: standing.level, medianOpponentLevel: standing.medianOpponentLevel,
+        health: standing.health, medianOpponentHealth: standing.medianOpponentHealth,
+        gold: round.goldEnd, rolls: round.rollsSpent,
+      },
+      coaching_text:
+        `${round.label} is a common roll-down point. You were behind the lobby on level (${standing.level} against a median of ${standing.medianOpponentLevel}) ` +
+        `and on HP (${standing.health} against ${standing.medianOpponentHealth}), held ${round.goldEnd}g, and rolled ${round.rollsSpent} time${round.rollsSpent === 1 ? '' : 's'}, ` +
+        `while a roll had something to hit: a unit you held was in the shop, or you held a pair one copy short. Whether rolling would have changed the ` +
+        `fight depends on what the shops would have shown, which the recording cannot tell.`,
+    });
+  }
+  return points;
 }
 
 // LOBBY_001

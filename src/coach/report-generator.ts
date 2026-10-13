@@ -25,6 +25,7 @@ export async function generateCoachingReport(brief: MatchBrief): Promise<Coachin
     priority_fix: buildPriorityFix(brief, notes),
     notes,
     ...(otherNotes ? { other_notes: otherNotes } : {}),
+    ...(brief.commonPatterns?.length ? { common_patterns: brief.commonPatterns } : {}),
     // Every note, measured or not: a category is only credited as clean when
     // nothing at all was flagged in it.
     strengths: buildStrengths(brief, allNotes),

@@ -248,6 +248,19 @@
   margin: 0 0 10px;
 }
 
+/* Always-on rules */
+.commonPatterns {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.commonPatterns li {
+  padding: 6px 0;
+  font-size: 12.5px;
+  color: #6c7086;
+  border-bottom: 1px solid #1e1e2e;
+}
+
 /* Strengths */
 .strengthsList {
   list-style: none;

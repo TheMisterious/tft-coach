@@ -93,7 +93,7 @@ export function extractDecisionPoints(
     ['augments',   () => checkAugments(match, meta, context)],
     ['positioning',() => checkPositioning(match, meta)],
     ['combat',     () => checkCombat(match, meta)],
-    ['lobby',      () => checkLobby(match)],
+    ['lobby',      () => checkLobby(match, meta)],
   ];
 
   const runnable = meta.setDataMissing

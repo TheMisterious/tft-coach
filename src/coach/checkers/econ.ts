@@ -2,11 +2,13 @@
 // ECON_002: Interest overcap — sat >50g for 3+ rounds without rolling/leveling
 // ECON_003: Pre-stage-3 excessive rolls — >10g spent on rolls before 3-1
 // ECON_004: Below the set's curated econ-benchmark curve at a checkpoint round
+// ECON_005: CANDIDATE — idle gold above 50 while losing fights, with an upgrade on offer
 
 import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, MatchContext } from '../../shared/types';
 import { NEUTRAL_CONTEXT } from '../match-context';
 import { pivotContextClause } from '../plan-builder';
 import { boardChampionIds } from '../../ledger/merge';
+import { upgradeWasOnOffer } from '../upgrades';
 
 function byHp(round: RoundSnapshot, t: { low: string; mid: string; high: string }): string {
   if (round.health <= 40) return t.low;
@@ -41,7 +43,49 @@ export function checkEcon(
     ...checkInterestOvercap(match, context),
     ...checkEarlyRolling(match, context),
     ...checkEconBenchmarks(match, meta),
+    ...checkIdleGoldWhileLosing(match, meta),
   ];
+  return points;
+}
+
+// ECON_005 — CANDIDATE (defined 2026-10-14, status in data/core/rules.core.json).
+//
+// ECON_002 flags idle gold above 50 whatever else is going on, and holding is
+// sometimes right: saving for a planned level or roll-down. This narrower
+// version only fires when the three things that make holding hard to defend
+// are all true in the same stage — the gold sat idle, the player kept losing,
+// and a roll could have bought an upgrade (a held unit in the shop, or a pair
+// one copy short). Every threshold below was fixed before the rule was run
+// against any match; it is not shown in reports until games recorded AFTER
+// that date confirm it (scripts/rule-audit.ts).
+const IDLE_GOLD = 50;
+const IDLE_STAGES = [3, 4, 5];
+const MIN_IDLE_ROUNDS = 2;
+const MIN_LOSSES = 2;
+
+function checkIdleGoldWhileLosing(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
+  const points: DecisionPoint[] = [];
+  for (const stage of IDLE_STAGES) {
+    const rounds = match.rounds.filter(r => stageOf(r.label) === stage);
+    const idle = rounds.filter(r => r.goldEnd >= IDLE_GOLD && r.rollsSpent === 0 && !r.xpBought);
+    const fights = rounds.filter(r => r.type === 'PVP' && r.outcome);
+    const losses = fights.filter(r => r.outcome === 'loss').length;
+    const withUpgrade = idle.filter(r => upgradeWasOnOffer(r, meta));
+    if (idle.length < MIN_IDLE_ROUNDS || losses < MIN_LOSSES || withUpgrade.length === 0) continue;
+
+    const last = idle[idle.length - 1];
+    const maxGold = Math.max(...idle.map(r => r.goldEnd));
+    points.push({
+      ruleId:   'ECON_005',
+      round:    last.label,
+      category: 'econ',
+      severity: 'moderate',
+      observed: `Held up to ${maxGold}g idle in ${idle.length} rounds of stage ${stage} while losing ${losses} of ${fights.length} fights, with an upgrade on offer in ${withUpgrade.length} of them`,
+      recommended: 'If the gold was not saved for a planned level or roll-down, spending some of it on the upgrades on offer is the usual way to slow the losses',
+      reasonMetrics: { stage, idleRounds: idle.length, losses, fights: fights.length, maxGold, upgradeRounds: withUpgrade.length },
+      coaching_text: `In stage ${stage} your gold sat at ${IDLE_GOLD}g or more without a roll or a level in ${idle.length} rounds, while you lost ${losses} of ${fights.length} fights. In ${withUpgrade.length} of those rounds a roll had something to hit: a unit you held was in the shop, or you held a pair one copy short. Holding can still be right when it is saved for a specific level or roll-down; the observations show what the HP and the lobby were doing meanwhile.`,
+    });
+  }
   return points;
 }
 

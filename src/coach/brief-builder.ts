@@ -9,16 +9,51 @@ import type { MatchSnapshot, DecisionPoint, MatchBrief, CoachingNote, MetaData, 
 import { getChampionName, getItemName } from '../enrichment/meta-lookup';
 import { overallGrade, categoryGrades, capRepeats } from './scoring';
 import { buildMatchPlan } from './plan-builder';
-import { getRuleEvidence } from './rules-loader';
+import { getRuleEvidence, getRuleMeta } from './rules-loader';
 
 // Maximum decision points (resolved + pending combined) before truncating.
 const MAX_POINTS = 20;
 
+// What the report shows, decided by the audit's evidence
+// (data/core/rule-evidence.json) and the rule registry:
+//  - a rule that fires in nearly every audited match cannot tell this game from
+//    any other, so it gets no note and no grade penalty, only one summary line;
+//  - a candidate rule (status 'candidate' in rules.core.json) stays out until
+//    matches recorded after it was written confirm it;
+//  - every other point is reported as before.
+// The full list still reaches the audit and the Player Trends features — only
+// the report is filtered.
+export function partitionForReport(points: DecisionPoint[]): { reportable: DecisionPoint[]; commonPatterns: string[] } {
+  const alwaysOn = new Map<string, number>();
+  const reportable: DecisionPoint[] = [];
+  for (const p of points) {
+    const evidence = getRuleEvidence(p.ruleId);
+    if (p.ruleId && evidence.verdict === 'always-on') {
+      alwaysOn.set(p.ruleId, (alwaysOn.get(p.ruleId) ?? 0) + 1);
+      continue;
+    }
+    if (p.ruleId && getRuleMeta(p.ruleId)?.status === 'candidate' && evidence.status !== 'confirmed') continue;
+    reportable.push(p);
+  }
+  return { reportable, commonPatterns: [...alwaysOn].map(([ruleId, n]) => commonPatternLine(ruleId, n)) };
+}
+
+function commonPatternLine(ruleId: string, count: number): string {
+  const name = getRuleMeta(ruleId)?.human_readable_name ?? ruleId;
+  const e = getRuleEvidence(ruleId);
+  const how = e.matchesFired !== undefined && e.matches !== undefined
+    ? `It shows up in ${e.matchesFired} of ${e.matches} audited games`
+    : 'It shows up in nearly every audited game';
+  return `${name}: ${count} time${count === 1 ? '' : 's'} this game. ${how}, so it says little about this one.`;
+}
+
 export function buildBrief(
   match: MatchSnapshot,
-  points: DecisionPoint[],
+  allPoints: DecisionPoint[],
   meta: MetaData
 ): MatchBrief {
+  const { reportable: points, commonPatterns } = partitionForReport(allPoints);
+
   // Cap repeat firings of the same rule before truncation. Without this, a
   // rule that legitimately fires many times in one match (e.g. ECON_001 "1g
   // short of a bracket", which can trip on nearly every round) eats the whole
@@ -61,10 +96,15 @@ export function buildBrief(
     plan:           buildMatchPlan(match, meta),
     resolvedNotes,
     decisionPoints: pendingPoints,
-    // Graded from the FULL `points` list (pre-truncation) and normalized by
-    // round count — see src/coach/scoring.ts for why both matter.
-    overallGrade:    overallGrade(match.finalPlacement, points, match.rounds.length),
-    categoryGrades:  categoryGrades(points, match.rounds.length),
+    commonPatterns,
+    // Graded from the FULL point list (pre-truncation, always-on rules
+    // included) and normalized by round count — see src/coach/scoring.ts.
+    // Always-on rules stay in on purpose: the S-D thresholds were set with them
+    // in, and dropping them moved 27 of 74 audited games to an S, an 8th place
+    // included. Re-deriving the grade is its own piece of work, not a side
+    // effect of trimming notes.
+    overallGrade:    overallGrade(match.finalPlacement, allPoints, match.rounds.length),
+    categoryGrades:  categoryGrades(allPoints, match.rounds.length),
   };
 }
 

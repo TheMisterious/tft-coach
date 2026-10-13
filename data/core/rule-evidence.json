@@ -20,14 +20,14 @@
       "status": "exploratory",
       "placementDelta": 2.03,
       "ci": [
-        0.13,
-        3.76
+        0.06,
+        3.73
       ],
       "matches": 71,
       "matchesFired": 6,
       "window": "4-5",
-      "p": 0.035,
-      "q": 0.106,
+      "p": 0.036,
+      "q": 0.118,
       "discovery": {
         "n": 0,
         "delta": null,
@@ -50,7 +50,7 @@
           "nNot": 30,
           "delta": 1.07,
           "ci": [
-            -1.07,
+            -1,
             2.9
           ]
         },
@@ -69,8 +69,8 @@
           "nNot": 30,
           "delta": 0.93,
           "ci": [
-            -1.1,
-            2.8
+            -1.03,
+            2.83
           ]
         }
       ]
@@ -122,8 +122,8 @@
       "status": "exploratory",
       "placementDelta": -0.01,
       "ci": [
-        -0.57,
-        0.51
+        -0.55,
+        0.55
       ],
       "matches": 50,
       "matchesFired": 24,
@@ -152,7 +152,7 @@
           "nNot": 32,
           "delta": -0.17,
           "ci": [
-            -0.8,
+            -0.83,
             0.49
           ]
         },
@@ -163,7 +163,7 @@
           "nNot": 19,
           "delta": 0.4,
           "ci": [
-            -0.18,
+            -0.19,
             0.99
           ]
         },
@@ -227,18 +227,18 @@
       "status": "exploratory",
       "placementDelta": 1.47,
       "ci": [
-        0.24,
+        0.2,
         2.64
       ],
       "matches": 71,
       "matchesFired": 21,
       "window": "4-5",
       "p": 0.013,
-      "q": 0.046,
+      "q": 0.05,
       "discovery": {
         "n": 43,
         "delta": 1.45,
-        "q": 0.177
+        "q": 0.146
       },
       "holdout": null,
       "context": [
@@ -249,8 +249,8 @@
           "nNot": 25,
           "delta": 1.34,
           "ci": [
-            0.22,
-            2.4
+            0.24,
+            2.38
           ]
         },
         {
@@ -260,8 +260,8 @@
           "nNot": 26,
           "delta": 1.65,
           "ci": [
-            -0.31,
-            3.36
+            -0.43,
+            3.42
           ]
         },
         {
@@ -271,8 +271,8 @@
           "nNot": 25,
           "delta": 0.8,
           "ci": [
-            -0.32,
-            1.94
+            -0.3,
+            1.92
           ]
         },
         {
@@ -282,8 +282,8 @@
           "nNot": 26,
           "delta": 2.18,
           "ci": [
-            0.48,
-            3.58
+            0.56,
+            3.57
           ]
         }
       ]
@@ -293,14 +293,14 @@
       "status": "exploratory",
       "placementDelta": 0.51,
       "ci": [
-        -0.82,
-        1.85
+        -0.79,
+        1.83
       ],
       "matches": 74,
       "matchesFired": 14,
       "window": "3-2",
-      "p": 0.484,
-      "q": 0.781,
+      "p": 0.477,
+      "q": 0.731,
       "discovery": {
         "n": 0,
         "delta": null,
@@ -315,8 +315,8 @@
           "nNot": 60,
           "delta": 0.42,
           "ci": [
-            -0.91,
-            1.81
+            -0.94,
+            1.82
           ]
         },
         {
@@ -334,8 +334,8 @@
           "nNot": 34,
           "delta": -0.74,
           "ci": [
-            -1.9,
-            0.38
+            -1.85,
+            0.41
           ]
         },
         {
@@ -345,8 +345,8 @@
           "nNot": 26,
           "delta": 1.19,
           "ci": [
-            -0.53,
-            2.88
+            -0.54,
+            2.81
           ]
         }
       ]
@@ -363,11 +363,11 @@
       "matchesFired": 59,
       "window": "4-5",
       "p": 0.689,
-      "q": 0.852,
+      "q": 0.835,
       "discovery": {
         "n": 43,
         "delta": 0.19,
-        "q": 0.947
+        "q": 0.95
       },
       "holdout": null,
       "context": [
@@ -417,23 +417,89 @@
         }
       ]
     },
+    "ECON_005": {
+      "verdict": "unproven",
+      "status": "exploratory",
+      "placementDelta": 0.9,
+      "ci": [
+        -0.13,
+        2
+      ],
+      "matches": 66,
+      "matchesFired": 34,
+      "window": "5-1",
+      "p": 0.086,
+      "q": 0.247,
+      "discovery": null,
+      "holdout": {
+        "kind": "prospective",
+        "n": 0,
+        "delta": null,
+        "p": null,
+        "q": null
+      },
+      "candidateSince": "2026-10-14",
+      "context": [
+        {
+          "state": "HP at the cut round",
+          "group": "HP 50+",
+          "nFired": 3,
+          "nNot": 15,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP at the cut round",
+          "group": "HP under 50",
+          "nFired": 22,
+          "nNot": 26,
+          "delta": 0.35,
+          "ci": [
+            -0.95,
+            1.6
+          ]
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "top half",
+          "nFired": 8,
+          "nNot": 27,
+          "delta": 0.87,
+          "ci": [
+            -0.37,
+            2.06
+          ]
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "bottom half",
+          "nFired": 17,
+          "nNot": 14,
+          "delta": -0.4,
+          "ci": [
+            -1.89,
+            1.07
+          ]
+        }
+      ]
+    },
     "HP_001": {
       "verdict": "predictive",
       "status": "exploratory",
       "placementDelta": 1.51,
       "ci": [
-        0.47,
-        2.58
+        0.43,
+        2.6
       ],
       "matches": 74,
       "matchesFired": 27,
       "window": "3-2",
-      "p": 0.007,
-      "q": 0.03,
+      "p": 0.009,
+      "q": 0.04,
       "discovery": {
         "n": 44,
         "delta": 1.5,
-        "q": 0.328
+        "q": 0.297
       },
       "holdout": null,
       "context": [
@@ -444,8 +510,8 @@
           "nNot": 47,
           "delta": 1.49,
           "ci": [
-            0.37,
-            2.62
+            0.35,
+            2.61
           ]
         },
         {
@@ -471,8 +537,8 @@
           "nNot": 9,
           "delta": 0.42,
           "ci": [
-            -1.53,
-            2.48
+            -1.48,
+            2.4
           ]
         }
       ]
@@ -489,17 +555,18 @@
       "matchesFired": 32,
       "window": "4-1",
       "p": 0,
-      "q": 0.004,
+      "q": 0.005,
       "discovery": {
         "n": 44,
         "delta": 2.1,
         "q": 0.058
       },
       "holdout": {
+        "kind": "held-out",
         "n": 30,
         "delta": 2.13,
-        "p": 0.007,
-        "q": 0.011
+        "p": 0.012,
+        "q": 0.017
       },
       "context": [
         {
@@ -544,24 +611,25 @@
       "status": "confirmed",
       "placementDelta": 2.76,
       "ci": [
-        1.81,
-        3.71
+        1.79,
+        3.69
       ],
       "matches": 66,
       "matchesFired": 19,
       "window": "5-1",
       "p": 0,
-      "q": 0.004,
+      "q": 0.005,
       "discovery": {
         "n": 42,
         "delta": 3.45,
-        "q": 0.006
+        "q": 0.003
       },
       "holdout": {
+        "kind": "held-out",
         "n": 24,
         "delta": 2.31,
-        "p": 0.001,
-        "q": 0.004
+        "p": 0.002,
+        "q": 0.005
       },
       "context": [
         {
@@ -580,7 +648,7 @@
           "delta": 2.53,
           "ci": [
             1.43,
-            3.61
+            3.62
           ]
         },
         {
@@ -598,8 +666,8 @@
           "nNot": 12,
           "delta": 2.01,
           "ci": [
-            0.63,
-            3.39
+            0.61,
+            3.38
           ]
         }
       ]
@@ -609,14 +677,14 @@
       "status": "exploratory",
       "placementDelta": 1.67,
       "ci": [
-        -0.17,
-        3.36
+        -0.13,
+        3.35
       ],
       "matches": 74,
       "matchesFired": 8,
       "window": "4-1",
-      "p": 0.101,
-      "q": 0.265,
+      "p": 0.103,
+      "q": 0.263,
       "discovery": {
         "n": 0,
         "delta": null,
@@ -677,8 +745,8 @@
       "status": "exploratory",
       "placementDelta": -0.02,
       "ci": [
-        -1.14,
-        1.02
+        -1.07,
+        1.04
       ],
       "matches": 74,
       "matchesFired": 35,
@@ -688,7 +756,7 @@
       "discovery": {
         "n": 44,
         "delta": 0.13,
-        "q": 0.947
+        "q": 0.95
       },
       "holdout": null,
       "context": [
@@ -699,8 +767,8 @@
           "nNot": 30,
           "delta": -0.57,
           "ci": [
-            -1.58,
-            0.43
+            -1.62,
+            0.45
           ]
         },
         {
@@ -710,8 +778,8 @@
           "nNot": 9,
           "delta": -0.18,
           "ci": [
-            -2.18,
-            1.96
+            -2.31,
+            1.98
           ]
         },
         {
@@ -721,8 +789,8 @@
           "nNot": 25,
           "delta": 0.01,
           "ci": [
-            -0.92,
-            0.92
+            -0.95,
+            0.93
           ]
         },
         {
@@ -732,8 +800,8 @@
           "nNot": 14,
           "delta": -1.07,
           "ci": [
-            -2.74,
-            0.61
+            -2.68,
+            0.63
           ]
         }
       ]
@@ -743,18 +811,18 @@
       "status": "exploratory",
       "placementDelta": 0.58,
       "ci": [
-        -0.66,
-        1.71
+        -0.67,
+        1.74
       ],
       "matches": 74,
       "matchesFired": 29,
       "window": "4-1",
-      "p": 0.322,
-      "q": 0.563,
+      "p": 0.324,
+      "q": 0.574,
       "discovery": {
         "n": 44,
         "delta": -0.84,
-        "q": 0.78
+        "q": 0.771
       },
       "holdout": null,
       "context": [
@@ -765,8 +833,8 @@
           "nNot": 42,
           "delta": -1.21,
           "ci": [
-            -2.22,
-            -0.21
+            -2.23,
+            -0.18
           ]
         },
         {
@@ -776,8 +844,8 @@
           "nNot": 7,
           "delta": -0.07,
           "ci": [
-            -2.19,
-            2.07
+            -2.08,
+            2.02
           ]
         },
         {
@@ -788,7 +856,7 @@
           "delta": -0.77,
           "ci": [
             -1.77,
-            0.26
+            0.22
           ]
         },
         {
@@ -798,8 +866,8 @@
           "nNot": 15,
           "delta": -0.28,
           "ci": [
-            -1.99,
-            1.4
+            -1.98,
+            1.43
           ]
         }
       ]
@@ -809,18 +877,18 @@
       "status": "exploratory",
       "placementDelta": -0.29,
       "ci": [
-        -1.32,
-        0.74
+        -1.33,
+        0.78
       ],
       "matches": 74,
       "matchesFired": 47,
       "window": "3-2",
-      "p": 0.646,
-      "q": 0.852,
+      "p": 0.636,
+      "q": 0.835,
       "discovery": {
         "n": 44,
         "delta": -0.5,
-        "q": 0.836
+        "q": 0.834
       },
       "holdout": null,
       "context": [
@@ -831,8 +899,8 @@
           "nNot": 27,
           "delta": -0.33,
           "ci": [
-            -1.36,
-            0.75
+            -1.33,
+            0.74
           ]
         },
         {
@@ -850,8 +918,8 @@
           "nNot": 16,
           "delta": -1.04,
           "ci": [
-            -2.27,
-            0.13
+            -2.23,
+            0.15
           ]
         },
         {
@@ -861,8 +929,8 @@
           "nNot": 11,
           "delta": 0.4,
           "ci": [
-            -1.31,
-            2
+            -1.25,
+            2.01
           ]
         }
       ]
@@ -872,18 +940,18 @@
       "status": "exploratory",
       "placementDelta": -0.81,
       "ci": [
-        -1.89,
-        0.36
+        -1.93,
+        0.26
       ],
       "matches": 74,
       "matchesFired": 26,
       "window": "4-1",
-      "p": 0.166,
-      "q": 0.354,
+      "p": 0.156,
+      "q": 0.349,
       "discovery": {
         "n": 44,
         "delta": 0.16,
-        "q": 0.947
+        "q": 0.95
       },
       "holdout": null,
       "context": [
@@ -894,8 +962,8 @@
           "nNot": 26,
           "delta": -0.43,
           "ci": [
-            -1.42,
-            0.65
+            -1.43,
+            0.64
           ]
         },
         {
@@ -913,8 +981,8 @@
           "nNot": 22,
           "delta": -1.2,
           "ci": [
-            -2.01,
-            -0.33
+            -2.02,
+            -0.35
           ]
         },
         {
@@ -924,7 +992,7 @@
           "nNot": 26,
           "delta": 1.06,
           "ci": [
-            -1.06,
+            -1,
             2.94
           ]
         }
@@ -935,18 +1003,18 @@
       "status": "exploratory",
       "placementDelta": -0.25,
       "ci": [
-        -1.27,
-        0.83
+        -1.33,
+        0.77
       ],
       "matches": 71,
       "matchesFired": 31,
       "window": "4-5",
       "p": 0.679,
-      "q": 0.852,
+      "q": 0.835,
       "discovery": {
         "n": 43,
         "delta": 0.08,
-        "q": 0.947
+        "q": 0.95
       },
       "holdout": null,
       "context": [
@@ -957,8 +1025,8 @@
           "nNot": 18,
           "delta": 0.29,
           "ci": [
-            -0.59,
-            1.21
+            -0.57,
+            1.26
           ]
         },
         {
@@ -968,8 +1036,8 @@
           "nNot": 22,
           "delta": -0.42,
           "ci": [
-            -2.1,
-            1.29
+            -2.13,
+            1.17
           ]
         },
         {
@@ -979,8 +1047,8 @@
           "nNot": 18,
           "delta": -0.06,
           "ci": [
-            -0.95,
-            0.86
+            -0.92,
+            0.88
           ]
         },
         {
@@ -990,8 +1058,8 @@
           "nNot": 22,
           "delta": -0.01,
           "ci": [
-            -1.66,
-            1.55
+            -1.63,
+            1.56
           ]
         }
       ]
@@ -1002,17 +1070,17 @@
       "placementDelta": -0.81,
       "ci": [
         -1.82,
-        0.22
+        0.23
       ],
       "matches": 74,
       "matchesFired": 30,
       "window": "4-1",
-      "p": 0.18,
-      "q": 0.354,
+      "p": 0.167,
+      "q": 0.349,
       "discovery": {
         "n": 44,
         "delta": -0.81,
-        "q": 0.57
+        "q": 0.553
       },
       "holdout": null,
       "context": [
@@ -1023,8 +1091,8 @@
           "nNot": 31,
           "delta": -0.01,
           "ci": [
-            -1.07,
-            1.07
+            -1.1,
+            1.05
           ]
         },
         {
@@ -1034,8 +1102,8 @@
           "nNot": 18,
           "delta": -2,
           "ci": [
-            -4.11,
-            0.17
+            -4.06,
+            0.22
           ]
         },
         {
@@ -1046,7 +1114,7 @@
           "delta": -0.09,
           "ci": [
             -0.99,
-            0.84
+            0.81
           ]
         },
         {
@@ -1056,8 +1124,8 @@
           "nNot": 24,
           "delta": -1.33,
           "ci": [
-            -3.17,
-            0.5
+            -3.16,
+            0.53
           ]
         }
       ]
@@ -1067,18 +1135,18 @@
       "status": "exploratory",
       "placementDelta": -0.1,
       "ci": [
-        -0.91,
-        0.65
+        -0.93,
+        0.69
       ],
       "matches": 50,
       "matchesFired": 14,
       "window": "5-5",
-      "p": 0.91,
+      "p": 0.906,
       "q": 1,
       "discovery": {
         "n": 32,
         "delta": -0.39,
-        "q": 0.836
+        "q": 0.819
       },
       "holdout": null,
       "context": [
@@ -1097,8 +1165,8 @@
           "nNot": 32,
           "delta": 0.25,
           "ci": [
-            -0.61,
-            1.12
+            -0.63,
+            1.11
           ]
         },
         {
@@ -1119,8 +1187,8 @@
           "nNot": 19,
           "delta": 0.03,
           "ci": [
-            -1.23,
-            1.12
+            -1.25,
+            1.15
           ]
         }
       ]
@@ -1130,8 +1198,8 @@
       "status": "exploratory",
       "placementDelta": 0,
       "ci": [
-        -1.24,
-        1.32
+        -1.3,
+        1.35
       ],
       "matches": 74,
       "matchesFired": 17,
@@ -1141,7 +1209,7 @@
       "discovery": {
         "n": 44,
         "delta": -1.52,
-        "q": 0.387
+        "q": 0.367
       },
       "holdout": null,
       "context": [
@@ -1152,8 +1220,8 @@
           "nNot": 40,
           "delta": -0.8,
           "ci": [
-            -1.77,
-            0.1
+            -1.75,
+            0.13
           ]
         },
         {
@@ -1163,8 +1231,8 @@
           "nNot": 17,
           "delta": 0.67,
           "ci": [
-            -1.79,
-            2.83
+            -1.77,
+            2.79
           ]
         },
         {
@@ -1174,8 +1242,8 @@
           "nNot": 30,
           "delta": -0.43,
           "ci": [
-            -1.3,
-            0.5
+            -1.37,
+            0.47
           ]
         },
         {
@@ -1185,8 +1253,8 @@
           "nNot": 27,
           "delta": 0.88,
           "ci": [
-            -1.5,
-            2.91
+            -1.41,
+            2.89
           ]
         }
       ]
@@ -1196,24 +1264,25 @@
       "status": "exploratory",
       "placementDelta": 1.88,
       "ci": [
-        0.49,
-        3.23
+        0.44,
+        3.14
       ],
       "matches": 66,
       "matchesFired": 15,
       "window": "5-1",
-      "p": 0.004,
-      "q": 0.029,
+      "p": 0.003,
+      "q": 0.02,
       "discovery": {
         "n": 42,
         "delta": 2.18,
-        "q": 0.059
+        "q": 0.063
       },
       "holdout": {
+        "kind": "held-out",
         "n": 24,
         "delta": 1.33,
-        "p": 0.11,
-        "q": 0.11
+        "p": 0.109,
+        "q": 0.109
       },
       "context": [
         {
@@ -1231,8 +1300,8 @@
           "nNot": 34,
           "delta": 1.47,
           "ci": [
-            -0.03,
-            2.86
+            0.03,
+            2.85
           ]
         },
         {
@@ -1250,8 +1319,8 @@
           "nNot": 18,
           "delta": 0.82,
           "ci": [
-            -0.8,
-            2.37
+            -0.79,
+            2.33
           ]
         }
       ]
@@ -1262,13 +1331,13 @@
       "placementDelta": 2.32,
       "ci": [
         0.85,
-        3.65
+        3.69
       ],
       "matches": 74,
       "matchesFired": 9,
       "window": "3-2",
-      "p": 0.007,
-      "q": 0.03,
+      "p": 0.005,
+      "q": 0.029,
       "discovery": {
         "n": 0,
         "delta": null,
@@ -1283,8 +1352,8 @@
           "nNot": 65,
           "delta": 2.36,
           "ci": [
-            0.73,
-            3.85
+            0.76,
+            3.87
           ]
         },
         {
@@ -1310,8 +1379,8 @@
           "nNot": 25,
           "delta": 1.69,
           "ci": [
-            -0.06,
-            3.3
+            0.04,
+            3.31
           ]
         }
       ]
@@ -1363,18 +1432,18 @@
       "status": "exploratory",
       "placementDelta": -0.37,
       "ci": [
-        -1.61,
-        0.92
+        -1.59,
+        0.81
       ],
       "matches": 74,
       "matchesFired": 18,
       "window": "4-1",
-      "p": 0.624,
-      "q": 0.852,
+      "p": 0.623,
+      "q": 0.835,
       "discovery": {
         "n": 44,
         "delta": -0.45,
-        "q": 0.861
+        "q": 0.853
       },
       "holdout": null,
       "context": [
@@ -1385,8 +1454,8 @@
           "nNot": 39,
           "delta": 0.11,
           "ci": [
-            -1.2,
-            1.36
+            -1.17,
+            1.39
           ]
         },
         {
@@ -1404,7 +1473,7 @@
           "nNot": 32,
           "delta": 0.84,
           "ci": [
-            -0.66,
+            -0.59,
             2.22
           ]
         },
@@ -1415,8 +1484,8 @@
           "nNot": 28,
           "delta": -1.75,
           "ci": [
-            -3.61,
-            0.21
+            -3.56,
+            0.32
           ]
         }
       ]
@@ -1449,6 +1518,69 @@
       "holdout": null,
       "context": []
     },
+    "ROLL_006": {
+      "verdict": "unproven",
+      "status": "exploratory",
+      "placementDelta": 0.8,
+      "ci": [
+        -1.14,
+        2.74
+      ],
+      "matches": 74,
+      "matchesFired": 12,
+      "window": "4-1",
+      "p": 0.36,
+      "q": 0.591,
+      "discovery": null,
+      "holdout": {
+        "kind": "prospective",
+        "n": 0,
+        "delta": null,
+        "p": null,
+        "q": null
+      },
+      "candidateSince": "2026-10-14",
+      "context": [
+        {
+          "state": "HP at the cut round",
+          "group": "HP 50+",
+          "nFired": 2,
+          "nNot": 48,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP at the cut round",
+          "group": "HP under 50",
+          "nFired": 7,
+          "nNot": 17,
+          "delta": -1.95,
+          "ci": [
+            -4.18,
+            0.37
+          ]
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "top half",
+          "nFired": 0,
+          "nNot": 40,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "bottom half",
+          "nFired": 9,
+          "nNot": 25,
+          "delta": -0.6,
+          "ci": [
+            -2.68,
+            1.45
+          ]
+        }
+      ]
+    },
     "STREAK_001": {
       "verdict": "unproven",
       "status": "exploratory",
@@ -1461,11 +1593,11 @@
       "matchesFired": 46,
       "window": "5-5",
       "p": 0.185,
-      "q": 0.354,
+      "q": 0.355,
       "discovery": {
         "n": 32,
         "delta": 0.65,
-        "q": 0.57
+        "q": 0.553
       },
       "holdout": null,
       "context": [

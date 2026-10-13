@@ -1,5 +1,5 @@
 {
-  "_comment": "Core rules — mechanics that are true regardless of set/patch (interest math, streak gold, HP damage formula fundamentals, bench management). Safe to reuse unmodified when a new set drops. Season-specific rules (comp/level/HP benchmarks that shift with balance patches) live in data/sets/set{N}/rules.season.json.",
+  "_comment": "Core rules — mechanics that are true regardless of set/patch (interest math, streak gold, HP damage formula fundamentals, bench management). Safe to reuse unmodified when a new set drops. Season-specific rules (comp/level/HP benchmarks that shift with balance patches) live in data/sets/set{N}/rules.season.json. A rule with \"status\": \"candidate\" was written from audit findings on \"defined_on\"; it stays out of reports until matches recorded after that date confirm it (scripts/rule-audit.ts), because the matches that suggested it cannot also test it.",
   "rules": [
     {
       "unique_id": "ECON_001",
@@ -209,6 +209,32 @@
       "severity": "medium",
       "confidence": "high",
       "patch_sensitivity": "low"
+    },
+    {
+      "unique_id": "ECON_005",
+      "human_readable_name": "Idle Gold While Losing, With an Upgrade on Offer",
+      "category": "economy",
+      "subcategory": "interest",
+      "short_summary": "In one of stages 3-5, gold sat at 50g+ with no roll or level in 2+ rounds while the player lost 2+ fights, and a roll could have hit an upgrade (a held unit in the end-of-round shop, or a pair one copy short).",
+      "source_tier": "candidate",
+      "severity": "medium",
+      "confidence": "low",
+      "patch_sensitivity": "low",
+      "status": "candidate",
+      "defined_on": "2026-10-14"
+    },
+    {
+      "unique_id": "ROLL_006",
+      "human_readable_name": "Behind the Lobby at a Roll-Down Window, Gold Banked",
+      "category": "rolling",
+      "subcategory": "stabilization",
+      "short_summary": "At 3-2, 4-1 or 4-2 the player was below the lobby median on both level and HP, held 30g+, rolled at most twice, and a roll could have hit an upgrade.",
+      "source_tier": "candidate",
+      "severity": "medium",
+      "confidence": "low",
+      "patch_sensitivity": "low",
+      "status": "candidate",
+      "defined_on": "2026-10-14"
     }
   ]
 }

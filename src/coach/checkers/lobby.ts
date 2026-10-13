@@ -98,8 +98,8 @@ function checkLevelBehindLobby(match: MatchSnapshot): DecisionPoint[] {
       severity,
       observed: `Level ${standing.level} at ${round.label} — ${ordinal(standing.levelRank)} of ${standing.alive} in the lobby, behind ${aheadText}, at ${standing.health} HP against a median of ${standing.medianOpponentHealth}`,
       recommended: behindBy > 0
-        ? `Match the lobby's tempo: the table was up to level ${standing.topOpponentLevel} here, and you had no HP lead to pay for staying low`
-        : `Level up at ${round.label} — the rest of the table had already committed to this level break`,
+        ? `The table was up to level ${standing.topOpponentLevel} here and you had no HP lead to pay for staying low; levelling at the next window is the usual answer unless you were saving for a planned roll-down`
+        : `The rest of the table had already taken this level; consider taking it at ${round.label} too unless you were saving for a planned roll-down`,
       reasonMetrics: {
         level:                standing.level,
         levelRank:            standing.levelRank,
@@ -114,7 +114,7 @@ function checkLevelBehindLobby(match: MatchSnapshot): DecisionPoint[] {
         `At ${round.label} you were level ${standing.level} while ${aheadText} had already levelled past you` +
         `${behindBy > 0 ? `, the highest at ${standing.topOpponentLevel}` : ''}` +
         `. That is ${ordinal(standing.levelRank)} of ${standing.alive} on level, against a lobby median of ${standing.medianOpponentLevel}. ` +
-        `Staying low on level is a real strategy when it buys gold or HP, but it wasn't buying either here — you were on ${standing.health} HP ` +
+        `Staying low on level is a real strategy when it buys gold or HP, and it was not buying HP here: you were on ${standing.health} HP ` +
         `against a median of ${standing.medianOpponentHealth}, so you were behind the table on both. The players ahead of you were seeing better ` +
         `shop odds and fielding more units in the exact fights you had to survive. Level benchmarks describe an average lobby; this one was faster, ` +
         `and the lobby is the target that matters. Measured from the real roster, not a benchmark.`,
@@ -149,7 +149,7 @@ function checkHealthBehindLobby(match: MatchSnapshot): DecisionPoint[] {
       category: 'hp',
       severity: 'moderate',
       observed: `${standing.health} HP at ${round.label} — ${ordinal(standing.hpRank)} of ${standing.alive}, ${belowMedian} below the lobby median of ${standing.medianOpponentHealth}`,
-      recommended: `Treat ${round.label} as the point to spend on board strength — you were already paying more HP per round than the rest of the table`,
+      recommended: `If the HP was not traded for a planned loss streak, ${round.label} is a cheap point to spend on board strength: you were paying more HP per round than the rest of the table`,
       reasonMetrics: {
         health:               standing.health,
         hpRank:               standing.hpRank,
@@ -160,10 +160,10 @@ function checkHealthBehindLobby(match: MatchSnapshot): DecisionPoint[] {
       coaching_text:
         `At ${round.label} you were on ${standing.health} HP — ${ordinal(standing.hpRank)} of the ${standing.alive} players alive, and ${belowMedian} below ` +
         `the lobby median of ${standing.medianOpponentHealth}. Nothing else in this report looks at HP this early: the usual checkpoints are 4-1 and 5-1, ` +
-        `and by then a gap this size has usually already decided the game. An HP deficit like this in stage ${stage} is not variance — it means your board ` +
-        `was losing fights the rest of the table was winning. The cheapest fix is here, while a few gold still buys a real power spike: slam components ` +
-        `onto whoever holds them, take the strongest units available even off-comp, and stop paying full HP for rounds you could have split. Measured ` +
-        `against the real lobby, not a benchmark.`,
+        `and a gap this size at those points goes with a low finish in the audited games. A deficit like this in stage ${stage} means your board was ` +
+        `losing fights the rest of the table was winning, which is fine if it was a planned loss streak and costly if it was not. If it was not, this is ` +
+        `the cheapest point to answer it: slamming held components and fielding the strongest units available, even off-comp. Measured against the ` +
+        `real lobby, not a benchmark.`,
     });
   }
 

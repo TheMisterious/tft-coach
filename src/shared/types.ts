@@ -200,6 +200,9 @@ export interface DecisionPoint {
   // instead of only marking the opponent's threat.
   recommendedPosition?: HexPosition;
   moveUnitName?: string;
+  // Set by src/coach/decision-trace.ts on checkpoint notes: what the player did
+  // in the window before the checkpoint.
+  contributing?: ContributingDecisions;
 }
 
 // ─── Coaching report ────────────────────────────────────────────────────────
@@ -220,8 +223,23 @@ export type RuleVerdict =
 
 export interface NoteEvidence {
   verdict: RuleVerdict;
+  // 'confirmed' only when the association found on older matches showed up
+  // again on newer matches it was not discovered on; everything else is
+  // 'exploratory'. Either way it is an association in audited games, not proof
+  // that the flagged behaviour caused the result.
+  status?: 'confirmed' | 'exploratory';
   placementDelta?: number;  // mean placement fired minus not fired; positive = worse finish
+  ci?: [number, number];    // 95% bootstrap interval for placementDelta
   matches?: number;         // audited matches behind the verdict
+}
+
+// What the player did in the window before a checkpoint note fired — observed
+// facts only (src/coach/decision-trace.ts). Shown as "likely contributing
+// decisions": the coach cannot see the options that were available, so it
+// lists what happened rather than ruling on it.
+export interface ContributingDecisions {
+  window: string;           // e.g. "stage 3 (3-1 to 3-7)"
+  observations: string[];
 }
 
 export interface CoachingNote {
@@ -232,6 +250,7 @@ export interface CoachingNote {
   // Absent on reports generated before the rule audit existed; the report
   // view treats a report with no evidence on any note as unpartitioned.
   evidence?: NoteEvidence;
+  contributing?: ContributingDecisions;
   what_happened: string;
   what_should_have_happened: string;
   why: string;

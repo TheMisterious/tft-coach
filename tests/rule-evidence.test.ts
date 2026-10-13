@@ -57,6 +57,15 @@ describe('rule-evidence.json', () => {
     expect(ids.map(([id]) => id).filter(id => !registry.has(id))).toEqual([]);
   });
 
+  it('marks every rule confirmed or exploratory, and confirms only predictive ones', () => {
+    const raw = evidence.rules as Record<string, { verdict: RuleVerdict; status?: string }>;
+    for (const [id, e] of Object.entries(raw)) {
+      expect(['confirmed', 'exploratory'], id).toContain(e.status ?? 'exploratory');
+      if (e.status === 'confirmed') expect(['predictive', 'inverted'], id).toContain(e.verdict);
+    }
+    expect(getRuleEvidence('NOT_A_RULE').status).toBeUndefined(); // unaudited: no evidence, so no status
+  });
+
   it('uses only known verdicts', () => {
     expect(ids.filter(([, e]) => !VERDICTS.includes(e.verdict))).toEqual([]);
   });
@@ -92,7 +101,7 @@ describe('report split by evidence', () => {
     const report = await generateCoachingReport(brief([note(UNPROVEN!)]));
     expect(report.priority_fix).toBeUndefined();
     expect(report.notes).toEqual([]);
-    expect(report.tldr).toContain('None of the rules with a measured link');
+    expect(report.tldr).toContain('None of the rules linked to placement');
     expect(report.tldr).toContain('1 other observation');
   });
 

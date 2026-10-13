@@ -56,6 +56,39 @@
   cursor: help;
 }
 
+.contributing {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #181825;
+  border: 1px solid #313244;
+}
+
+.contributingLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #a6adc8;
+  margin-bottom: 4px;
+}
+
+.contributingList {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: #cdd6f4;
+  line-height: 1.5;
+}
+
+.contributingHint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #6c7086;
+}
+
 .tier {
   font-size: 10px;
   font-weight: 600;

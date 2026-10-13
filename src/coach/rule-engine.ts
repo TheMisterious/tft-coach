@@ -22,6 +22,7 @@ import { buildMatchPlan }        from './plan-builder';
 import { linkCompoundingPatterns } from './decision-links';
 import { lobbyClause }           from './lobby-context';
 import { attachHistoryContext }  from './history-context';
+import { attachContributingDecisions } from './decision-trace';
 import type { MatchHistoryEntry } from './history-context';
 
 const SEVERITY_ORDER: Record<Severity, number> = {
@@ -116,6 +117,7 @@ export function extractDecisionPoints(
   points = linkCompoundingPatterns(points);
   points = attachLobbyContext(points, match);
   points = attachHistoryContext(points, history);
+  points = attachContributingDecisions(points, match, meta);
 
   console.log('[rule-engine] total decision points:', points.length);
 

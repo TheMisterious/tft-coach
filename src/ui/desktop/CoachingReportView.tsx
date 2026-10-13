@@ -156,7 +156,7 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
             {byStage.size === 0 && (
               <p style={{ color: '#6c7086', fontStyle: 'italic' }}>
                 {report.other_notes && report.notes.length === 0
-                  ? 'No rule with a measured link to placement fired this game.'
+                  ? 'None of the rules linked to placement in audited games fired this game.'
                   : 'No notes match the current filter.'}
               </p>
             )}

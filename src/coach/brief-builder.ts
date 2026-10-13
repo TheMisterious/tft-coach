@@ -116,6 +116,7 @@ function toCoachingNote(dp: DecisionPoint): CoachingNote {
     severity:                  dp.severity,
     tier:                      dp.tier,
     evidence:                  getRuleEvidence(dp.ruleId),
+    ...(dp.contributing ? { contributing: dp.contributing } : {}),
     what_happened:             dp.observed,
     what_should_have_happened: dp.recommended,
     why:                       dp.coaching_text!,

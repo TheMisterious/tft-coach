@@ -1,11 +1,10 @@
-// Rule audit — does each coaching rule actually predict a worse placement?
+// Rule audit — is each coaching rule associated with a worse placement, and
+// how sure can we be?
 //
-// Every rule in src/coach/checkers/ was written from TFT knowledge and then
-// checked only for "does it fire on the right rounds". Nothing has ever checked
-// the claim each one implicitly makes: that the mistake it flags COSTS
-// PLACEMENT. This replays every recorded match through the real pipeline and
-// measures that, per rule, against the one ground truth every match carries —
-// where the player finished.
+// Every rule in src/coach/checkers/ was written from TFT knowledge and checked
+// only for "does it fire on the right rounds". This replays every recorded
+// match through the real pipeline and measures, per rule, the one ground truth
+// every match carries — where the player finished.
 //
 // Usage:
 //   npx ts-node --transpile-only scripts/rule-audit.ts            extract + analyse
@@ -13,22 +12,32 @@
 //   ... --write   also regenerate data/core/rule-evidence.json, which decides
 //                 which notes lead the in-app report (src/coach/rules-loader.ts)
 //
-// Ledger directories default to the two recording folders on this machine;
+// Ledger directories default to the recording folders on this machine;
 // override with TFT_LEDGER_DIRS (semicolon-separated). Output lands in
-// results/rule-audit/ (git-ignored): matches.json (per-match firings, no
-// player names) and report.md.
+// results/rule-audit/ (git-ignored): matches.json (per-match firings and
+// per-round state, no player names) and report.md.
 //
-// THE ONE TRAP THIS IS BUILT AROUND: survivorship. A rule that can fire on any
-// round fires more often in a long match, and long matches are good placements
-// — so a naive "fired vs not fired" comparison makes almost every rule look
-// like it IMPROVES placement. Three views are reported, and only the third is
-// safe to act on:
-//   naive      fired anywhere vs never fired. Biased; shown so the bias is visible.
-//   rate       firings per round played, Spearman vs placement. Still biased
-//              when a rule's opportunity depends on the stage reached.
-//   windowed   firings at or before a fixed round, among matches that REACHED
-//              that round. Every match in the comparison had the same chance
-//              to trigger the rule, so a difference is not a length effect.
+// WHAT THE NUMBERS CAN AND CANNOT SAY. Everything here is an association in one
+// player's games, so every finding is EXPLORATORY unless it survives a
+// held-out check (below). "Fired -> finished worse" says the rule marks a game
+// that was going badly; it does not say the flagged behaviour caused it.
+//
+// Four guards, each against a specific way this goes wrong:
+//
+//   windowing     A rule that can fire on any round fires more in long matches,
+//                 and long matches are good ones — a naive fired-vs-not
+//                 comparison makes most rules look GOOD. Only firings at or
+//                 before a cut round count, among matches that reached it, so
+//                 every match had the same chance to trigger the rule. The cut
+//                 is chosen from where the rule fires, never from outcomes.
+//   uncertainty   Every difference carries a 95% percentile-bootstrap interval
+//                 and the smallest effect its sample could detect.
+//   multiplicity  Testing ~35 rules makes some look predictive by chance.
+//                 Benjamini-Hochberg q-values across all tested rules.
+//   held-out      Matches are split by DATE: rules are discovered on the older
+//                 60% and must then show the same direction, at one-sided
+//                 p < 0.05 after correction, on the newer 40% they never saw.
+//                 Only that earns "confirmed".
 
 import '../tests/setup/fetch-polyfill';
 import crypto from 'crypto';
@@ -41,8 +50,13 @@ import { detectSet, loadMeta } from '../src/enrichment/meta-lookup';
 import { extractDecisionPoints } from '../src/coach/rule-engine';
 import { buildMatchContext } from '../src/coach/match-context';
 import { buildMatchPlan } from '../src/coach/plan-builder';
+import { standingFor } from '../src/coach/lobby-context';
 import { extractFeatureVector } from '../src/profile/feature-vector';
 import { getAllRules } from '../src/coach/rules-loader';
+import {
+  mean, sd, ranks, pearson, spearman, rng, PERMUTATIONS, permutationP,
+  bootstrapDiffCI, bh, minimumDetectableEffect,
+} from './audit-stats';
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'results', 'rule-audit');
@@ -61,14 +75,29 @@ interface Firing {
   category: string;
 }
 
+// The player's state at the END of a round — what the context breakdown
+// stratifies on. hpRank/alive come from the lobby roster and are absent before
+// the first roster update.
+interface RoundState {
+  label: string;
+  hp: number;
+  level: number;
+  gold: number;
+  hpRank?: number;
+  levelRank?: number;
+  alive?: number;
+}
+
 interface MatchRecord {
   file: string;
+  startedAt: number;         // first ledger timestamp — the held-out split orders by it
   setId: string;
   gameMode: string;
   placement: number;
   placementSource: PlacementSource;
   rounds: string[];          // labels in play order
   lastRound: string | null;
+  states: RoundState[];
   firings: Firing[];
   features: Record<string, number | null> | null;
   error?: string;
@@ -112,19 +141,19 @@ function readLedger(file: string): LedgerEntry[] {
 }
 
 async function muted<T>(fn: () => Promise<T> | T): Promise<T> {
-  const { log, warn, info } = console;
-  console.log = console.warn = console.info = () => {};
-  try { return await fn(); } finally { Object.assign(console, { log, warn, info }); }
+  const { log, warn, info, error } = console;
+  console.log = console.warn = console.info = console.error = () => {};
+  try { return await fn(); } finally { Object.assign(console, { log, warn, info, error }); }
 }
 
 async function extractMatch(file: string): Promise<MatchRecord> {
   const entries = readLedger(file);
   const base: MatchRecord = {
-    file: path.basename(file), setId: '?', gameMode: '?', placement: 0,
+    file: path.basename(file), startedAt: entries[0]?.ts ?? 0, setId: '?', gameMode: '?', placement: 0,
     // Source 'none' is a placeholder 8th, not a result; such matches are
     // excluded from analysis (src/ledger/placement.ts).
     placementSource: findFinalPlacement(entries)?.source ?? 'none', rounds: [], lastRound: null,
-    firings: [], features: null,
+    states: [], firings: [], features: null,
   };
   try {
     return await muted(async () => {
@@ -146,6 +175,13 @@ async function extractMatch(file: string): Promise<MatchRecord> {
         placement: snapshot.finalPlacement,
         rounds,
         lastRound: rounds.at(-1) ?? null,
+        states: snapshot.rounds.map(r => {
+          const standing = standingFor(r);
+          return {
+            label: r.label, hp: r.health, level: r.level, gold: r.goldEnd,
+            ...(standing ? { hpRank: standing.hpRank, levelRank: standing.levelRank, alive: standing.alive } : {}),
+          };
+        }),
         firings: points.map(p => ({
           ruleId: p.ruleId ?? `(${p.category})`,
           round: p.round,
@@ -160,7 +196,7 @@ async function extractMatch(file: string): Promise<MatchRecord> {
   }
 }
 
-// ─── Statistics ──────────────────────────────────────────────────────────────
+// ─── Match selection ─────────────────────────────────────────────────────────
 
 // Checkers also emit two non-round labels: "N-x" for a whole-stage judgment
 // (ECON_003's "2-x"), placed at that stage's last round, and "match" for a
@@ -192,87 +228,120 @@ function coverage(m: MatchRecord): number {
   return m.rounds.length / (expectedRounds(m.lastRound) - expectedRounds(first) + 1);
 }
 
-const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
-
-function ranks(xs: number[]): number[] {
-  const order = xs.map((x, i) => [x, i] as const).sort((a, b) => a[0] - b[0]);
-  const r = new Array<number>(xs.length);
-  for (let i = 0; i < order.length;) {
-    let j = i;
-    while (j + 1 < order.length && order[j + 1][0] === order[i][0]) j++;
-    const avg = (i + j) / 2 + 1;
-    for (let k = i; k <= j; k++) r[order[k][1]] = avg;
-    i = j + 1;
-  }
-  return r;
+function exclusionReason(m: MatchRecord): string | null {
+  if (m.error) return `pipeline error (${m.error})`;
+  if (m.rounds.length < 5) return 'fewer than 5 rounds (post-game spectate fragments, not matches)';
+  if (m.placementSource === 'none') return 'no placement signal (client closed before GEP sent one)';
+  if (coverage(m) < MIN_COVERAGE) return `partial recording (started after ${LATEST_START}, or under ${Math.round(MIN_COVERAGE * 100)}% of rounds captured)`;
+  return null;
 }
 
-function pearson(xs: number[], ys: number[]): number {
-  const mx = mean(xs), my = mean(ys);
-  let sxy = 0, sxx = 0, syy = 0;
-  for (let i = 0; i < xs.length; i++) {
-    sxy += (xs[i] - mx) * (ys[i] - my);
-    sxx += (xs[i] - mx) ** 2;
-    syy += (ys[i] - my) ** 2;
-  }
-  return sxx === 0 || syy === 0 ? NaN : sxy / Math.sqrt(sxx * syy);
-}
+// ─── One comparison ──────────────────────────────────────────────────────────
 
-const spearman = (xs: number[], ys: number[]) => pearson(ranks(xs), ranks(ys));
-
-// Seeded so the report is reproducible run to run.
-function rng(seed: number) {
-  let s = seed >>> 0;
-  return () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const PERMUTATIONS = 5000;
-
-/** Two-sided permutation p-value for a difference in mean placement. */
-function permutationP(fired: number[], notFired: number[], seed = 1): number {
-  const all = [...fired, ...notFired];
-  const observed = Math.abs(mean(fired) - mean(notFired));
-  const rand = rng(seed);
-  let extreme = 0;
-  for (let p = 0; p < PERMUTATIONS; p++) {
-    for (let i = all.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1));
-      [all[i], all[j]] = [all[j], all[i]];
-    }
-    const a = all.slice(0, fired.length), b = all.slice(fired.length);
-    if (Math.abs(mean(a) - mean(b)) >= observed - 1e-12) extreme++;
-  }
-  return (extreme + 1) / (PERMUTATIONS + 1);
-}
-
-/** Benjamini-Hochberg q-values, same order as input. */
-function bh(ps: number[]): number[] {
-  const idx = ps.map((p, i) => [p, i] as const).sort((a, b) => a[0] - b[0]);
-  const q = new Array<number>(ps.length);
-  let min = 1;
-  for (let k = idx.length - 1; k >= 0; k--) {
-    min = Math.min(min, (idx[k][0] * idx.length) / (k + 1));
-    q[idx[k][1]] = min;
-  }
-  return q;
-}
-
-// ─── Analysis ────────────────────────────────────────────────────────────────
-
-// Candidate cut rounds for the windowed view. Each rule gets the EARLIEST cut
-// that covers WINDOW_COVERAGE of its own firings — chosen from where the rule
-// fires, never from which cut gives the best p-value. A later cut keeps more of
-// a late rule's firings but drops the matches that died before it, so it only
-// moves later when the earlier one leaves a group too small to compare.
+// Candidate cut rounds. Each rule gets the EARLIEST cut covering
+// WINDOW_COVERAGE of its own firings — chosen from where the rule fires, never
+// from which cut gives the best p-value. A later cut keeps more of a late
+// rule's firings but drops the matches that died before it, so it only moves
+// later when the earlier one leaves a group too small to compare.
 const WINDOWS = ['3-2', '4-1', '4-5', '5-1', '5-5'];
 const WINDOW_COVERAGE = 0.75;
 const MIN_GROUP = 5;   // fewer than this on either side and no comparison is made
+
+const reached = (m: MatchRecord, cut: number) => m.rounds.some(r => roundNum(r) >= cut);
+const firedBy = (m: MatchRecord, ruleId: string, cut: number) =>
+  m.firings.some(f => f.ruleId === ruleId && roundNum(f.round) <= cut);
+
+interface Comparison {
+  fired: number[];
+  not: number[];
+  delta: number;            // mean placement fired - not; positive = worse finish when fired
+  ci: [number, number];
+  p: number;                // two-sided permutation
+  mde: number;
+  top4: [number, number];
+}
+
+function compare(matches: MatchRecord[], ruleId: string, window: string, seed: number,
+                 filter: (m: MatchRecord) => boolean = () => true): Comparison | null {
+  const cut = roundNum(window);
+  const eligible = matches.filter(m => reached(m, cut) && filter(m));
+  const fired = eligible.filter(m => firedBy(m, ruleId, cut)).map(m => m.placement);
+  const not = eligible.filter(m => !firedBy(m, ruleId, cut)).map(m => m.placement);
+  if (fired.length < MIN_GROUP || not.length < MIN_GROUP) return null;
+  const top4 = (xs: number[]) => xs.filter(x => x <= 4).length / xs.length;
+  return {
+    fired, not,
+    delta: mean(fired) - mean(not),
+    ci: bootstrapDiffCI(fired, not, seed),
+    p: permutationP(fired, not, seed),
+    mde: minimumDetectableEffect(sd([...fired, ...not]), fired.length, not.length),
+    top4: [top4(fired), top4(not)],
+  };
+}
+
+// The rule's own window, from where it fires across ALL usable matches (the
+// choice reads firing rounds only, never placements, so it does not leak the
+// held-out outcomes into discovery).
+function chooseWindow(matches: MatchRecord[], ruleId: string): { window: string | null; untestable?: Untestable } {
+  const allRounds = matches.flatMap(m => m.firings.filter(f => f.ruleId === ruleId)).map(f => roundNum(f.round)).filter(Number.isFinite);
+  if (allRounds.length === 0) return { window: null, untestable: 'whole-match judgment' };
+  const first = WINDOWS.findIndex(w => allRounds.filter(r => r <= roundNum(w)).length >= WINDOW_COVERAGE * allRounds.length);
+  let failure: Untestable = 'too rare';
+  for (const w of WINDOWS.slice(first === -1 ? WINDOWS.length - 1 : first)) {
+    const cut = roundNum(w);
+    const eligible = matches.filter(m => reached(m, cut));
+    const nFired = eligible.filter(m => firedBy(m, ruleId, cut)).length;
+    const nNot = eligible.length - nFired;
+    if (nFired >= MIN_GROUP && nNot >= MIN_GROUP) return { window: w };
+    failure = nNot < MIN_GROUP && nFired >= MIN_GROUP ? 'fires in nearly every match' : 'too rare';
+  }
+  return { window: null, untestable: failure };
+}
+
+// ─── Context strata ──────────────────────────────────────────────────────────
+
+// Effect modification: does the rule's association hold in every game state, or
+// only in some? Strata are read at the rule's CUT round — the same moment for
+// matches where it fired and where it did not — so they never peek at the
+// firing itself. A rule defined BY one of these states (HP_002 is "under 60 HP
+// at 4-1") leaves one stratum empty; that reads "too few", which is correct.
+const STRATA: Array<{ name: string; groups: Array<{ label: string; test: (s: RoundState) => boolean }> }> = [
+  { name: 'HP at the cut round', groups: [
+    { label: 'HP 50+', test: s => s.hp >= 50 },
+    { label: 'HP under 50', test: s => s.hp < 50 },
+  ] },
+  { name: 'HP rank in the lobby', groups: [
+    { label: 'top half', test: s => s.hpRank !== undefined && s.alive !== undefined && s.hpRank <= s.alive / 2 },
+    { label: 'bottom half', test: s => s.hpRank !== undefined && s.alive !== undefined && s.hpRank > s.alive / 2 },
+  ] },
+];
+
+function stateAt(m: MatchRecord, window: string): RoundState | undefined {
+  const cut = roundNum(window);
+  let last: RoundState | undefined;
+  for (const s of m.states) if (roundNum(s.label) <= cut) last = s;
+  return last;
+}
+
+interface StratumRow { stratum: string; group: string; nFired: number; nNot: number; delta: number | null; ci: [number, number] | null }
+
+function stratify(matches: MatchRecord[], ruleId: string, window: string, seed: number): StratumRow[] {
+  const rows: StratumRow[] = [];
+  for (const s of STRATA) for (const g of s.groups) {
+    const filter = (m: MatchRecord) => { const st = stateAt(m, window); return !!st && g.test(st); };
+    const c = compare(matches, ruleId, window, seed++, filter);
+    const cut = roundNum(window);
+    const eligible = matches.filter(m => reached(m, cut) && filter(m));
+    const nFired = eligible.filter(m => firedBy(m, ruleId, cut)).length;
+    rows.push({ stratum: s.name, group: g.label, nFired, nNot: eligible.length - nFired, delta: c?.delta ?? null, ci: c?.ci ?? null });
+  }
+  return rows;
+}
+
+// ─── Per-rule analysis ───────────────────────────────────────────────────────
+
+type Untestable = 'fires in nearly every match' | 'too rare' | 'whole-match judgment';
+type Status = 'confirmed' | 'exploratory';
 
 interface RuleRow {
   ruleId: string;
@@ -280,85 +349,99 @@ interface RuleRow {
   severity: string;
   firings: number;
   matchesFired: number;
-  naiveDelta: number | null;     // mean placement fired - not fired (positive = rule predicts WORSE)
-  rateRho: number | null;        // Spearman(firings per round, placement)
   window: string | null;
-  windowN: [number, number] | null;
-  windowDelta: number | null;
-  windowTop4: [number, number] | null;  // top-4 rate fired / not fired
-  windowP: number | null;
-  windowQ?: number | null;
-  // Smallest |Δ| this comparison could detect (80% power, two-sided 0.05).
-  // "No measurable effect" means the effect is below this, not that it is zero.
-  windowMde: number | null;
-  untestable?: 'fires in nearly every match' | 'too rare' | 'whole-match judgment';
+  untestable?: Untestable;
+  full: Comparison | null;
+  q?: number;
+  discovery: { n: number; delta: number | null; q: number | null } | null;
+  holdout: { n: number; delta: number | null; p: number | null; q: number | null } | null;
+  status: Status;
+  strata: StratumRow[];
 }
 
-function analyseRules(matches: MatchRecord[]): RuleRow[] {
-  const ids = new Map<string, { category: string; severity: Map<string, number> }>();
+// Pre-registered before any held-out number is looked at.
+const HOLDOUT_FRACTION = 0.4;
+const DISCOVERY_Q = 0.1;
+const CONFIRM_Q = 0.05;
+const FULL_Q = 0.1;
+
+function analyseRules(matches: MatchRecord[]): { rows: RuleRow[]; discoveryN: number; holdoutN: number; splitAt: number } {
+  const byDate = [...matches].sort((a, b) => a.startedAt - b.startedAt);
+  const cutIdx = Math.round(byDate.length * (1 - HOLDOUT_FRACTION));
+  const discovery = byDate.slice(0, cutIdx);
+  const holdout = byDate.slice(cutIdx);
+
+  const meta = new Map<string, { category: string; severity: Map<string, number> }>();
   for (const m of matches) for (const f of m.firings) {
-    const e = ids.get(f.ruleId) ?? { category: f.category, severity: new Map() };
+    const e = meta.get(f.ruleId) ?? { category: f.category, severity: new Map() };
     e.severity.set(f.severity, (e.severity.get(f.severity) ?? 0) + 1);
-    ids.set(f.ruleId, e);
+    meta.set(f.ruleId, e);
   }
 
-  const rows: RuleRow[] = [];
   let seed = 1;
-  for (const [ruleId, info] of ids) {
-    const per = matches.map(m => m.firings.filter(f => f.ruleId === ruleId));
-    const firedIdx = per.map(p => p.length > 0);
-    const placeFired = matches.filter((_, i) => firedIdx[i]).map(m => m.placement);
-    const placeNot = matches.filter((_, i) => !firedIdx[i]).map(m => m.placement);
-    const naiveDelta = placeFired.length && placeNot.length ? mean(placeFired) - mean(placeNot) : null;
-    const rates = per.map((p, i) => p.length / Math.max(1, matches[i].rounds.length));
-    const rateRho = new Set(rates).size > 1 ? spearman(rates, matches.map(m => m.placement)) : null;
-
-    let best: Pick<RuleRow, 'window' | 'windowN' | 'windowDelta' | 'windowTop4' | 'windowP' | 'windowMde' | 'untestable'> =
-      { window: null, windowN: null, windowDelta: null, windowTop4: null, windowP: null, windowMde: null };
-    const allRounds = per.flat().map(f => roundNum(f.round)).filter(Number.isFinite);
-    const firstCut = WINDOWS.findIndex(w =>
-      allRounds.filter(r => r <= roundNum(w)).length >= WINDOW_COVERAGE * allRounds.length);
-    let lastFailure: RuleRow['untestable'] = 'too rare';
-    for (const w of WINDOWS.slice(firstCut === -1 ? WINDOWS.length - 1 : firstCut)) {
-      const cut = roundNum(w);
-      const eligible = matches
-        .map((m, i) => ({ m, p: per[i] }))
-        .filter(({ m }) => m.rounds.some(r => roundNum(r) >= cut));
-      const fired = eligible.filter(({ p }) => p.some(f => roundNum(f.round) <= cut)).map(({ m }) => m.placement);
-      const not = eligible.filter(({ p }) => !p.some(f => roundNum(f.round) <= cut)).map(({ m }) => m.placement);
-      if (fired.length < MIN_GROUP || not.length < MIN_GROUP) {
-        lastFailure = not.length < MIN_GROUP && fired.length >= MIN_GROUP ? 'fires in nearly every match' : 'too rare';
-        continue;
-      }
-      const all = [...fired, ...not];
-      const sd = Math.sqrt(all.reduce((a, x) => a + (x - mean(all)) ** 2, 0) / (all.length - 1));
-      const top4 = (xs: number[]) => xs.filter(x => x <= 4).length / xs.length;
-      best = {
-        window: w,
-        windowN: [fired.length, not.length],
-        windowDelta: mean(fired) - mean(not),
-        windowTop4: [top4(fired), top4(not)],
-        windowP: permutationP(fired, not, seed++),
-        windowMde: 2.8 * sd * Math.sqrt(1 / fired.length + 1 / not.length),
-      };
-      break;
-    }
-    if (best.window === null) best.untestable = allRounds.length === 0 ? 'whole-match judgment' : lastFailure;
-
-    const sev = [...info.severity.entries()].sort((a, b) => b[1] - a[1])[0][0];
+  const rows: RuleRow[] = [];
+  const discP = new Map<string, number>();   // discovery two-sided p, by rule
+  for (const [ruleId, info] of meta) {
+    const { window, untestable } = chooseWindow(matches, ruleId);
+    const firings = matches.reduce((a, m) => a + m.firings.filter(f => f.ruleId === ruleId).length, 0);
+    const matchesFired = matches.filter(m => m.firings.some(f => f.ruleId === ruleId)).length;
+    const full = window ? compare(matches, ruleId, window, seed++) : null;
+    const disc = window ? compare(discovery, ruleId, window, seed++) : null;
     rows.push({
-      ruleId, category: info.category, severity: sev,
-      firings: per.reduce((a, p) => a + p.length, 0),
-      matchesFired: placeFired.length,
-      naiveDelta, rateRho, ...best,
+      ruleId, category: info.category,
+      severity: [...info.severity.entries()].sort((a, b) => b[1] - a[1])[0][0],
+      firings, matchesFired, window, untestable, full,
+      discovery: window ? { n: disc ? disc.fired.length + disc.not.length : 0, delta: disc?.delta ?? null, q: null } : null,
+      holdout: null,
+      status: 'exploratory',
+      strata: window && full ? stratify(matches, ruleId, window, seed += 10) : [],
     });
+    if (disc) discP.set(ruleId, disc.p);
   }
 
-  const tested = rows.filter(r => r.windowP !== null);
-  const qs = bh(tested.map(r => r.windowP!));
-  tested.forEach((r, i) => { r.windowQ = qs[i]; });
-  return rows;
+  // Multiplicity: full-data q across every rule that could be compared.
+  const tested = rows.filter(r => r.full);
+  bh(tested.map(r => r.full!.p)).forEach((q, i) => { tested[i].q = q; });
+
+  // Discovery: q across rules testable in the older games; candidates are the
+  // ones associated with a WORSE finish there.
+  const discTested = rows.filter(r => discP.has(r.ruleId));
+  bh(discTested.map(r => discP.get(r.ruleId)!)).forEach((q, i) => { discTested[i].discovery!.q = q; });
+  const candidates = discTested.filter(r => (r.discovery!.q ?? 1) < DISCOVERY_Q && (r.discovery!.delta ?? 0) > 0);
+
+  // Confirmation: only the candidates are tested on the newer games, one-sided
+  // in the direction discovery found, corrected across the candidates.
+  const holdoutPs: number[] = [];
+  for (const r of candidates) {
+    const cut = roundNum(r.window!);
+    const eligible = holdout.filter(m => reached(m, cut));
+    const fired = eligible.filter(m => firedBy(m, r.ruleId, cut)).map(m => m.placement);
+    const not = eligible.filter(m => !firedBy(m, r.ruleId, cut)).map(m => m.placement);
+    const ok = fired.length >= 2 && not.length >= 2;
+    const p = ok ? permutationP(fired, not, seed++, 'greater') : 1;
+    r.holdout = { n: eligible.length, delta: ok ? mean(fired) - mean(not) : null, p: ok ? p : null, q: null };
+    holdoutPs.push(p);
+  }
+  bh(holdoutPs).forEach((q, i) => {
+    candidates[i].holdout!.q = q;
+    if (q < CONFIRM_Q && (candidates[i].holdout!.delta ?? 0) > 0) candidates[i].status = 'confirmed';
+  });
+
+  return { rows, discoveryN: discovery.length, holdoutN: holdout.length, splitAt: holdout[0]?.startedAt ?? 0 };
 }
+
+// The app-facing classification of the FULL-data result. Status (confirmed or
+// exploratory) is separate and says how far to trust it.
+function toVerdict(r: RuleRow): string {
+  if (!r.full) {
+    return r.untestable === 'fires in nearly every match' ? 'always-on'
+      : r.untestable === 'whole-match judgment' ? 'whole-match' : 'rare';
+  }
+  if ((r.q ?? 1) < FULL_Q) return r.full.delta > 0 ? 'predictive' : 'inverted';
+  return 'unproven';
+}
+
+// ─── Behaviour features ──────────────────────────────────────────────────────
 
 interface FeatureRow { feature: string; n: number; rho: number; p: number; q?: number }
 
@@ -376,9 +459,8 @@ function analyseFeatures(matches: MatchRecord[]): FeatureRow[] {
     if (pairs.length < 15 || new Set(pairs.map(p => p[0])).size < 3) continue;
     const xs = pairs.map(p => p[0]), ys = pairs.map(p => p[1]);
     const rho = spearman(xs, ys);
-    // Permutation p for Spearman.
     const rand = rng(seed++);
-    const ry = ranks(ys), rx = ranks(xs);
+    const rx = ranks(xs), ry = ranks(ys);
     let extreme = 0;
     for (let i = 0; i < PERMUTATIONS; i++) {
       const sh = [...ry];
@@ -390,8 +472,7 @@ function analyseFeatures(matches: MatchRecord[]): FeatureRow[] {
     }
     rows.push({ feature: k, n: pairs.length, rho, p: (extreme + 1) / (PERMUTATIONS + 1) });
   }
-  const qs = bh(rows.map(r => r.p));
-  rows.forEach((r, i) => { r.q = qs[i]; });
+  bh(rows.map(r => r.p)).forEach((q, i) => { rows[i].q = q; });
   return rows.sort((a, b) => a.p - b.p);
 }
 
@@ -399,56 +480,69 @@ function analyseFeatures(matches: MatchRecord[]): FeatureRow[] {
 
 const f2 = (x: number | null | undefined, d = 2) =>
   x === null || x === undefined || Number.isNaN(x) ? '—' : (x > 0 ? '+' : '') + x.toFixed(d);
+const ci2 = (c: [number, number] | null | undefined) => c ? `[${f2(c[0], 1)}, ${f2(c[1], 1)}]` : '—';
 const pct = (x: number) => `${Math.round(x * 100)}%`;
+const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
-function verdict(r: RuleRow): string {
-  if (r.windowP === null) return `untestable — ${r.untestable}`;
-  if ((r.windowQ ?? 1) < 0.1) return r.windowDelta! > 0 ? 'KEEP — predicts worse placement' : 'INVERTED — predicts better placement';
-  if (r.windowP < 0.05) return r.windowDelta! > 0 ? 'lean keep (not significant after correction)' : 'lean inverted (not significant after correction)';
-  return 'no measurable effect';
+function verdictText(r: RuleRow): string {
+  const v = toVerdict(r);
+  if (v === 'predictive' || v === 'inverted') return `${v} (${r.status})`;
+  return v;
 }
 
-function report(matches: MatchRecord[], excluded: MatchRecord[], rules: RuleRow[], features: FeatureRow[]): string {
+function report(matches: MatchRecord[], excluded: MatchRecord[], a: ReturnType<typeof analyseRules>, features: FeatureRow[]): string {
   const registry = new Map(getAllRules().map(r => [r.unique_id, r]));
+  const rules = a.rows;
   const neverFired = [...registry.keys()].filter(id => !rules.some(r => r.ruleId === id)).sort();
   const placements = matches.map(m => m.placement);
   const dist = [1, 2, 3, 4, 5, 6, 7, 8].map(p => `${p}:${placements.filter(x => x === p).length}`).join(' ');
-  const reached = (w: string) => matches.filter(m => m.rounds.some(r => roundNum(r) >= roundNum(w))).length;
+  const totalNotes = rules.reduce((s, r) => s + r.firings, 0);
 
   const L: string[] = [];
   L.push(`# Rule audit — ${new Date().toISOString().slice(0, 10)}`, '');
-  L.push(`${matches.length} matches analysed (${excluded.length} excluded). Mean placement ${mean(placements).toFixed(2)}, distribution ${dist}.`);
-  L.push(`Reached 3-2: ${reached('3-2')}. Reached 4-1: ${reached('4-1')}.`, '');
+  L.push(`${matches.length} matches analysed (${excluded.length} excluded), sets ${[...new Set(matches.map(m => m.setId))].sort().join(', ')}. Mean placement ${mean(placements).toFixed(2)}, distribution ${dist}. ${totalNotes} notes, ${(totalNotes / matches.length).toFixed(1)} per match before the report's per-rule cap.`, '');
   L.push('Exclusions:');
   const why = new Map<string, number>();
-  for (const m of excluded) {
-    const k = m.error ? `pipeline error (${m.error})`
-      : m.rounds.length < 5 ? 'fewer than 5 rounds (post-game spectate fragments, not matches)'
-      : m.placementSource === 'none' ? 'no placement signal (client closed before GEP sent one)'
-      : coverage(m) < MIN_COVERAGE ? `partial recording (started after ${LATEST_START}, or under ${pct(MIN_COVERAGE)} of rounds captured)`
-      : 'other';
-    why.set(k, (why.get(k) ?? 0) + 1);
-  }
+  for (const m of excluded) { const k = exclusionReason(m) ?? 'other'; why.set(k, (why.get(k) ?? 0) + 1); }
   for (const [k, v] of why) L.push(`- ${k}: ${v}`);
   L.push('');
-  L.push('**How to read this.** Δ is mean placement when the rule fired minus when it did not; **positive = the rule predicts a WORSE finish**, which is what a correct mistake-detector should do. The windowed columns only count firings at or before the window round, among matches that reached it, so match length cannot fake an effect. p is a two-sided permutation test; q is Benjamini-Hochberg across every tested rule. With this many rules and this few matches, treat anything with q above 0.1 as unproven, not as disproven.', '');
 
-  const totalNotes = rules.reduce((a, r) => a + r.firings, 0);
-  L.push(`${totalNotes} notes across ${matches.length} matches — ${(totalNotes / matches.length).toFixed(1)} per match before the report's per-rule cap.`, '');
+  L.push('## Method', '');
+  L.push('**Every finding here is exploratory unless marked confirmed.** All matches are one player\'s; a rule that tracks this player\'s results may not track anyone else\'s, and an association is not a cause: a rule that fires in games that end badly marks those games, it does not show that the flagged behaviour lost them.', '');
+  L.push(`- **Windowed comparison.** For each rule, mean placement of matches where it fired at or before a cut round, minus matches that reached that round without it firing. **Positive Δ = finished worse when it fired.** The cut is the earliest of ${WINDOWS.join(', ')} that covers ${pct(WINDOW_COVERAGE)} of the rule's firings, chosen from firing rounds only. Groups under ${MIN_GROUP} matches are not compared.`);
+  L.push(`- **Uncertainty.** 95% percentile-bootstrap interval for Δ (${4000} resamples per group). "Detectable" is the smallest |Δ| the comparison had 80% power to detect at two-sided α = 0.05, by the normal approximation 2.8 · sd · √(1/n₁ + 1/n₂); an approximation, not an exact power calculation.`);
+  L.push(`- **Multiplicity.** Two-sided permutation p (${PERMUTATIONS} shuffles), Benjamini-Hochberg q across all ${rules.filter(r => r.full).length} rules that could be compared. Full-data "predictive" needs q < ${FULL_Q}.`);
+  L.push(`- **Held-out confirmation.** Matches sorted by date: the older ${a.discoveryN} discover, the newer ${a.holdoutN} (from ${day(a.splitAt)}) confirm. A rule is a candidate if discovery q < ${DISCOVERY_Q} with a worse finish; it is **confirmed** only if the newer matches show a worse finish again at one-sided permutation q < ${CONFIRM_Q} (corrected across candidates). The ${pct(HOLDOUT_FRACTION)} split and every threshold were fixed before the held-out numbers were read.`);
+  L.push('- **Context.** Each tested rule\'s Δ split by the player\'s state at its cut round (same moment for fired and not-fired matches): HP above or below 50, and HP rank in the top or bottom half of the lobby. Cells under 5 matches read "too few".', '');
 
-  const sorted = [...rules].sort((a, b) => (a.windowP ?? 2) - (b.windowP ?? 2) || b.firings - a.firings);
-  L.push('| rule | name | sev | notes (matches) | share of notes | naive Δ | window | n fired/not | windowed Δ | detectable Δ | top-4 fired/not | p | q | verdict |');
+  L.push('## Rules', '');
+  const sorted = [...rules].sort((x, y) => (x.full?.p ?? 2) - (y.full?.p ?? 2) || y.firings - x.firings);
+  L.push('| rule | name | notes (matches) | share | window | n fired/not | Δ [95% CI] | detectable | top-4 fired/not | p | q | discovery Δ (q) | held-out Δ (p) | verdict |');
   L.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
   for (const r of sorted) {
     const name = registry.get(r.ruleId)?.human_readable_name ?? '';
-    L.push(`| ${r.ruleId} | ${name} | ${r.severity} | ${r.firings} (${r.matchesFired}) | ${pct(r.firings / totalNotes)} | ${f2(r.naiveDelta)} | ${r.window ?? '—'} | ${r.windowN ? r.windowN.join('/') : '—'} | ${f2(r.windowDelta)} | ${r.windowMde === null ? '—' : '±' + r.windowMde.toFixed(2)} | ${r.windowTop4 ? `${pct(r.windowTop4[0])}/${pct(r.windowTop4[1])}` : '—'} | ${r.windowP?.toFixed(3) ?? '—'} | ${r.windowQ?.toFixed(3) ?? '—'} | ${verdict(r)} |`);
+    const c = r.full;
+    const disc = r.discovery?.delta !== null && r.discovery?.delta !== undefined ? `${f2(r.discovery.delta)} (${r.discovery.q?.toFixed(3) ?? '—'})` : '—';
+    const hold = r.holdout ? `${f2(r.holdout.delta)} (${r.holdout.p?.toFixed(3) ?? '—'})` : '—';
+    L.push(`| ${r.ruleId} | ${name} | ${r.firings} (${r.matchesFired}) | ${pct(r.firings / totalNotes)} | ${r.window ?? '—'} | ${c ? `${c.fired.length}/${c.not.length}` : '—'} | ${c ? `${f2(c.delta)} ${ci2(c.ci)}` : '—'} | ${c ? '±' + c.mde.toFixed(2) : '—'} | ${c ? `${pct(c.top4[0])}/${pct(c.top4[1])}` : '—'} | ${c?.p.toFixed(3) ?? '—'} | ${r.q?.toFixed(3) ?? '—'} | ${disc} | ${hold} | ${verdictText(r)}${r.untestable ? ` — ${r.untestable}` : ''} |`);
   }
   L.push('');
   L.push(`**Registered but never fired on any match (${neverFired.length}):** ${neverFired.join(', ') || 'none'}`, '');
 
+  const ctx = sorted.filter(r => r.full && ((r.q ?? 1) < 0.2));
+  if (ctx.length) {
+    L.push('## Context: does the association hold in every game state?', '');
+    L.push('Δ within each state at the rule\'s cut round, with its 95% interval. A rule whose Δ only appears in one state is conditional, and an automated judgement should say so.', '');
+    L.push('| rule | state | group | n fired/not | Δ [95% CI] |', '|---|---|---|---|---|');
+    for (const r of ctx) for (const s of r.strata) {
+      L.push(`| ${r.ruleId} | ${s.stratum} | ${s.group} | ${s.nFired}/${s.nNot} | ${s.delta === null ? 'too few' : `${f2(s.delta)} ${ci2(s.ci)}`} |`);
+    }
+    L.push('');
+  }
+
   if (features.length) {
     L.push('## Behaviour features vs placement', '');
-    L.push('Spearman ρ between each per-match feature (src/profile/feature-vector.ts) and placement. **Positive ρ = more of this, worse finish.** Several are partly length-driven (counts over the whole match), noted where obvious.', '');
+    L.push('Spearman ρ between each per-match feature (src/profile/feature-vector.ts) and placement. **Positive ρ = more of this, worse finish.** Whole-match counts are inflated by match length: a long game is a good game and has more rounds to count in. Exploratory throughout.', '');
     L.push('| feature | n | ρ | p | q |', '|---|---|---|---|---|');
     for (const r of features) L.push(`| ${r.feature} | ${r.n} | ${f2(r.rho)} | ${r.p.toFixed(3)} | ${r.q!.toFixed(3)} |`);
     L.push('');
@@ -460,32 +554,30 @@ function report(matches: MatchRecord[], excluded: MatchRecord[], rules: RuleRow[
 
 const EVIDENCE_PATH = path.join(ROOT, 'data', 'core', 'rule-evidence.json');
 
-function toVerdict(r: RuleRow): string {
-  if (r.windowP === null) {
-    return r.untestable === 'fires in nearly every match' ? 'always-on'
-      : r.untestable === 'whole-match judgment' ? 'whole-match' : 'rare';
-  }
-  if ((r.windowQ ?? 1) < 0.1) return r.windowDelta! > 0 ? 'predictive' : 'inverted';
-  return 'unproven';
-}
-
-function writeEvidence(matches: MatchRecord[], rules: RuleRow[]): void {
-  const round2 = (x: number | null) => x === null ? null : Math.round(x * 100) / 100;
+function writeEvidence(matches: MatchRecord[], a: ReturnType<typeof analyseRules>): void {
+  const r2 = (x: number | null | undefined) => x === null || x === undefined ? null : Math.round(x * 100) / 100;
+  const r3 = (x: number | null | undefined) => x === null || x === undefined ? null : Math.round(x * 1000) / 1000;
   const out: Record<string, unknown> = {};
-  for (const r of [...rules].sort((a, b) => a.ruleId.localeCompare(b.ruleId))) {
+  for (const r of [...a.rows].sort((x, y) => x.ruleId.localeCompare(y.ruleId))) {
     if (r.ruleId.startsWith('(')) continue;  // a point with no ruleId
+    const c = r.full;
     out[r.ruleId] = {
       verdict: toVerdict(r),
-      placementDelta: round2(r.windowDelta),
-      matches: r.windowN ? r.windowN[0] + r.windowN[1] : matches.length,
+      status: r.status,
+      placementDelta: r2(c?.delta),
+      ci: c ? [r2(c.ci[0]), r2(c.ci[1])] : null,
+      matches: c ? c.fired.length + c.not.length : matches.length,
       matchesFired: r.matchesFired,
       window: r.window,
-      p: r.windowP === null ? null : Math.round(r.windowP * 1000) / 1000,
-      q: r.windowQ === null || r.windowQ === undefined ? null : Math.round(r.windowQ * 1000) / 1000,
+      p: r3(c?.p),
+      q: r3(r.q),
+      discovery: r.discovery ? { n: r.discovery.n, delta: r2(r.discovery.delta), q: r3(r.discovery.q) } : null,
+      holdout: r.holdout ? { n: r.holdout.n, delta: r2(r.holdout.delta), p: r3(r.holdout.p), q: r3(r.holdout.q) } : null,
+      context: r.strata.map(s => ({ state: s.stratum, group: s.group, nFired: s.nFired, nNot: s.nNot, delta: r2(s.delta), ci: s.ci ? [r2(s.ci[0]), r2(s.ci[1])] : null })),
     };
   }
   for (const id of getAllRules().map(r => r.unique_id).sort()) {
-    if (!(id in out)) out[id] = { verdict: 'never-fired', placementDelta: null, matches: matches.length, matchesFired: 0 };
+    if (!(id in out)) out[id] = { verdict: 'never-fired', status: 'exploratory', placementDelta: null, matches: matches.length, matchesFired: 0 };
   }
   const file = {
     _meta: {
@@ -493,7 +585,8 @@ function writeEvidence(matches: MatchRecord[], rules: RuleRow[]): void {
       by: 'scripts/rule-audit.ts --write — do not hand-edit',
       matches: matches.length,
       sets: [...new Set(matches.map(m => m.setId))].sort(),
-      method: 'Per rule: mean placement in matches where it fired at or before a cut round vs matches that reached that round without it firing; two-sided permutation test, Benjamini-Hochberg across rules. predictive = q < 0.1 with a worse finish when fired. All matches are one player\'s own recordings.',
+      split: { discovery: a.discoveryN, holdout: a.holdoutN, holdoutFrom: day(a.splitAt) },
+      method: 'Exploratory association in one player\'s games, not causation. Per rule: mean placement where it fired at or before a cut round vs matches that reached that round without it firing, 95% bootstrap CI, two-sided permutation test, Benjamini-Hochberg across rules. verdict is the full-data result (predictive = q < 0.1 with a worse finish). status is confirmed only when a rule discovered on the older 60% of matches (by date) shows a worse finish again on the newer 40% (one-sided, corrected); otherwise exploratory. See results/rule-audit/report.md.',
     },
     rules: out,
   };
@@ -522,19 +615,14 @@ async function main() {
     fs.writeFileSync(cachePath, JSON.stringify(records, null, 1));
   }
 
-  // No game-mode filter: every ledger's raw match_info.game_mode is "TFT", and
-  // snapshot.gameMode reads "lol" for all of them because rounds.ts compares
-  // against lowercase 'tft'. Nothing downstream reads that field.
-  const ok = (m: MatchRecord) => !m.error && m.placementSource !== 'none' && m.rounds.length >= 5
-    && coverage(m) >= MIN_COVERAGE;
-  const matches = records.filter(ok);
-  const excluded = records.filter(m => !ok(m));
-  const rules = analyseRules(matches);
+  const matches = records.filter(m => exclusionReason(m) === null);
+  const excluded = records.filter(m => exclusionReason(m) !== null);
+  const analysis = analyseRules(matches);
   const features = analyseFeatures(matches);
-  const md = report(matches, excluded, rules, features);
+  const md = report(matches, excluded, analysis, features);
   fs.writeFileSync(path.join(OUT_DIR, 'report.md'), md);
   console.log(md);
-  if (process.argv.includes('--write')) writeEvidence(matches, rules);
+  if (process.argv.includes('--write')) writeEvidence(matches, analysis);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

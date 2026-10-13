@@ -166,7 +166,7 @@ function checkInterestOvercap(match: MatchSnapshot, context: MatchContext): Deci
     // requires 3 more idle-overcap rounds before the next one can fire.
     if (streak === 3) {
       const rerollNote = context.isRerollComp
-        ? ` You're running ${context.matchedComp?.name ?? 'a reroll comp'} — that gold has one job here: funding rolls toward your 3-star, not sitting idle. Holding it past the cap isn't a normal econ slip, it's working against the strategy you already committed to.`
+        ? ` You're running ${context.matchedComp?.name ?? 'a reroll comp'}, where gold above the cap usually funds rolls toward the 3-star rather than sitting idle.`
         : '';
 
       points.push({
@@ -177,9 +177,9 @@ function checkInterestOvercap(match: MatchSnapshot, context: MatchContext): Deci
         observed: `Held ${r.goldEnd}g (above the ${INTEREST_CAP}g cap) for ${streak} consecutive rounds without rolling or leveling`,
         recommended: context.isRerollComp
           ? 'You are playing a reroll comp — spend this gold rolling for your carry, not holding it above the interest cap'
-          : 'Plan a spend — level up or roll down — when you are above the 50g interest cap and HP is stable',
+          : 'Gold above 50 earns no extra interest; a level or a roll-down is usually the better use of it, unless you were saving for a specific spike',
         reasonMetrics: { goldEnd: r.goldEnd, streak, streakStartRound: streakStart },
-        coaching_text: `You sat above ${INTEREST_CAP}g for ${streak} rounds in a row (starting ${streakStart}) without rolling or buying XP. Interest caps at 50g — every gold above that earns nothing extra. Plan a level-up or rolldown spike when you are overcap and your HP is not critical.${rerollNote}` + pivotContextClause(context.plan, r.label),
+        coaching_text: `You sat above ${INTEREST_CAP}g for ${streak} rounds in a row (starting ${streakStart}) without rolling or buying XP. Interest stops at 50g, so the gold above it earned nothing. Holding can still be right when it is saved for a specific level or roll-down; the observations show what your HP and the lobby were doing meanwhile.${rerollNote}` + pivotContextClause(context.plan, r.label),
       });
       streak = 0;
     }

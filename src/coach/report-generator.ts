@@ -100,6 +100,7 @@ function toCoachingNote(dp: DecisionPoint): CoachingNote {
     severity: dp.severity,
     tier: dp.tier,
     evidence: getRuleEvidence(dp.ruleId),
+    ...(dp.contributing ? { contributing: dp.contributing } : {}),
     what_happened: dp.observed,
     what_should_have_happened: dp.recommended,
     why: dp.coaching_text ?? buildWhy(dp.reasonMetrics, dp.recommended),
@@ -137,13 +138,13 @@ function buildTldr(brief: MatchBrief, notes: CoachingNote[]): string {
 function buildAuditedTldr(brief: MatchBrief, measured: CoachingNote[], other: CoachingNote[]): string {
   const placementText = `You finished ${ordinal(brief.placement)}.`;
   const otherClause = other.length > 0
-    ? ` ${other.length} other observation${other.length === 1 ? '' : 's'} ${other.length === 1 ? 'is' : 'are'} listed below, from rules with no measured link to placement yet.`
+    ? ` ${other.length} other observation${other.length === 1 ? '' : 's'} ${other.length === 1 ? 'is' : 'are'} listed below, from rules with no measured link to placement in audited games.`
     : '';
   if (measured.length === 0) {
-    return `${placementText} None of the rules with a measured link to placement fired this game.${otherClause}`;
+    return `${placementText} None of the rules linked to placement in audited games fired this game.${otherClause}`;
   }
   const themes = topCategories(measured);
-  return `${placementText} ${measured.length} note${measured.length === 1 ? '' : 's'} from rules with a measured link to worse placement, in ${joinList(themes)} — start there.${otherClause}`;
+  return `${placementText} ${measured.length} note${measured.length === 1 ? '' : 's'} from rules linked to worse placement in audited games, in ${joinList(themes)} — start there.${otherClause}`;
 }
 
 // Categories with zero notes get credit here — these are actual performance

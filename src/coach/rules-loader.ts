@@ -37,7 +37,13 @@ const mvpData = require('../../data/rules.mvp.json') as { mvp_top_20: Array<{ pr
 const evidenceData = require('../../data/core/rule-evidence.json') as RuleEvidenceFile;
 
 interface RuleEvidenceFile {
-  rules: Record<string, { verdict: RuleVerdict; placementDelta?: number | null; matches?: number }>;
+  rules: Record<string, {
+    verdict: RuleVerdict;
+    status?: 'confirmed' | 'exploratory';
+    placementDelta?: number | null;
+    ci?: [number | null, number | null] | null;
+    matches?: number;
+  }>;
 }
 
 export type RuleTier = 'core' | 'season';
@@ -90,9 +96,14 @@ export function getSeasonRules(): RuleMeta[] {
 export function getRuleEvidence(ruleId: string | undefined): NoteEvidence {
   const e = ruleId ? evidenceData.rules[ruleId] : undefined;
   if (!e) return { verdict: 'unaudited' };
+  const ci = e.ci && typeof e.ci[0] === 'number' && typeof e.ci[1] === 'number' ? [e.ci[0], e.ci[1]] as [number, number] : undefined;
   return {
     verdict: e.verdict,
+    // An evidence file written before held-out confirmation existed carries no
+    // status; nothing in it was confirmed.
+    status: e.status ?? 'exploratory',
     ...(typeof e.placementDelta === 'number' ? { placementDelta: e.placementDelta } : {}),
+    ...(ci ? { ci } : {}),
     ...(typeof e.matches === 'number' ? { matches: e.matches } : {}),
   };
 }

@@ -2,26 +2,27 @@
   "_meta": {
     "generated": "2026-10-13",
     "by": "scripts/rule-audit.ts --write — do not hand-edit",
-    "matches": 72,
+    "matches": 74,
     "sets": [
-      "set17"
+      "set17",
+      "set18"
     ],
     "method": "Per rule: mean placement in matches where it fired at or before a cut round vs matches that reached that round without it firing; two-sided permutation test, Benjamini-Hochberg across rules. predictive = q < 0.1 with a worse finish when fired. All matches are one player's own recordings."
   },
   "rules": {
     "AUGMENT_001": {
       "verdict": "unproven",
-      "placementDelta": 2,
-      "matches": 69,
+      "placementDelta": 2.03,
+      "matches": 71,
       "matchesFired": 6,
       "window": "4-5",
-      "p": 0.046,
-      "q": 0.137
+      "p": 0.038,
+      "q": 0.115
     },
     "AUGMENT_002": {
       "verdict": "whole-match",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 3,
       "window": null,
       "p": null,
@@ -30,7 +31,7 @@
     "AUGMENT_004": {
       "verdict": "whole-match",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 1,
       "window": null,
       "p": null,
@@ -39,25 +40,34 @@
     "BOARD_001": {
       "verdict": "always-on",
       "placementDelta": null,
-      "matches": 72,
-      "matchesFired": 72,
+      "matches": 74,
+      "matchesFired": 74,
       "window": null,
       "p": null,
       "q": null
     },
     "BOARD_003": {
       "verdict": "unproven",
-      "placementDelta": -0.02,
-      "matches": 48,
-      "matchesFired": 22,
+      "placementDelta": -0.01,
+      "matches": 50,
+      "matchesFired": 24,
       "window": "5-5",
       "p": 1,
       "q": 1
     },
+    "COMBAT_001": {
+      "verdict": "rare",
+      "placementDelta": null,
+      "matches": 74,
+      "matchesFired": 1,
+      "window": null,
+      "p": null,
+      "q": null
+    },
     "COMP_002": {
       "verdict": "rare",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 1,
       "window": null,
       "p": null,
@@ -66,79 +76,79 @@
     "ECON_001": {
       "verdict": "always-on",
       "placementDelta": null,
-      "matches": 72,
-      "matchesFired": 69,
+      "matches": 74,
+      "matchesFired": 71,
       "window": null,
       "p": null,
       "q": null
     },
     "ECON_002": {
       "verdict": "predictive",
-      "placementDelta": 1.44,
-      "matches": 69,
+      "placementDelta": 1.47,
+      "matches": 71,
       "matchesFired": 21,
       "window": "4-5",
-      "p": 0.015,
-      "q": 0.051
+      "p": 0.014,
+      "q": 0.049
     },
     "ECON_003": {
       "verdict": "unproven",
-      "placementDelta": 0.47,
-      "matches": 72,
+      "placementDelta": 0.51,
+      "matches": 74,
       "matchesFired": 14,
       "window": "3-2",
-      "p": 0.528,
-      "q": 0.792
+      "p": 0.493,
+      "q": 0.797
     },
     "ECON_004": {
       "verdict": "unproven",
-      "placementDelta": 0.15,
-      "matches": 69,
+      "placementDelta": 0.26,
+      "matches": 71,
       "matchesFired": 59,
       "window": "4-5",
-      "p": 0.853,
-      "q": 0.997
+      "p": 0.689,
+      "q": 0.852
     },
     "HP_001": {
       "verdict": "predictive",
-      "placementDelta": 1.59,
-      "matches": 72,
-      "matchesFired": 26,
+      "placementDelta": 1.51,
+      "matches": 74,
+      "matchesFired": 27,
       "window": "3-2",
       "p": 0.006,
-      "q": 0.029
+      "q": 0.025
     },
     "HP_002": {
       "verdict": "predictive",
-      "placementDelta": 2.08,
-      "matches": 72,
-      "matchesFired": 31,
+      "placementDelta": 2.01,
+      "matches": 74,
+      "matchesFired": 32,
       "window": "4-1",
       "p": 0,
-      "q": 0.002
+      "q": 0.004
     },
     "HP_003": {
       "verdict": "predictive",
-      "placementDelta": 2.91,
-      "matches": 64,
-      "matchesFired": 18,
+      "placementDelta": 2.76,
+      "matches": 66,
+      "matchesFired": 19,
       "window": "5-1",
       "p": 0,
-      "q": 0.002
+      "q": 0.004
     },
     "ITEM_001": {
       "verdict": "unproven",
-      "placementDelta": 1.64,
-      "matches": 72,
+      "placementDelta": 1.67,
+      "matches": 74,
       "matchesFired": 8,
       "window": "4-1",
-      "p": 0.13,
-      "q": 0.311
+      "p": 0.105,
+      "q": 0.275
     },
     "ITEM_002": {
       "verdict": "rare",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 4,
       "window": null,
       "p": null,
@@ -146,99 +156,99 @@
     },
     "ITEM_003": {
       "verdict": "unproven",
-      "placementDelta": -0.09,
-      "matches": 72,
+      "placementDelta": -0.02,
+      "matches": 74,
       "matchesFired": 35,
       "window": "4-1",
-      "p": 0.889,
-      "q": 0.997
+      "p": 1,
+      "q": 1
     },
     "ITEM_005": {
       "verdict": "unproven",
-      "placementDelta": 0.53,
-      "matches": 72,
+      "placementDelta": 0.58,
+      "matches": 74,
       "matchesFired": 29,
       "window": "4-1",
-      "p": 0.367,
-      "q": 0.642
+      "p": 0.306,
+      "q": 0.535
     },
     "LEVEL_001": {
       "verdict": "unproven",
-      "placementDelta": -0.41,
-      "matches": 72,
+      "placementDelta": -0.29,
+      "matches": 74,
       "matchesFired": 47,
       "window": "3-2",
-      "p": 0.484,
-      "q": 0.782
+      "p": 0.639,
+      "q": 0.852
     },
     "LEVEL_002": {
       "verdict": "unproven",
-      "placementDelta": -0.88,
-      "matches": 72,
+      "placementDelta": -0.81,
+      "matches": 74,
       "matchesFired": 26,
       "window": "4-1",
-      "p": 0.133,
-      "q": 0.311
+      "p": 0.16,
+      "q": 0.372
     },
     "LEVEL_003": {
       "verdict": "unproven",
       "placementDelta": -0.25,
-      "matches": 69,
-      "matchesFired": 30,
+      "matches": 71,
+      "matchesFired": 31,
       "window": "4-5",
-      "p": 0.664,
-      "q": 0.872
+      "p": 0.668,
+      "q": 0.852
     },
     "LEVEL_004": {
       "verdict": "unproven",
       "placementDelta": -0.81,
-      "matches": 72,
-      "matchesFired": 29,
+      "matches": 74,
+      "matchesFired": 30,
       "window": "4-1",
-      "p": 0.183,
-      "q": 0.353
+      "p": 0.177,
+      "q": 0.372
     },
     "LEVEL_005": {
       "verdict": "unproven",
       "placementDelta": -0.1,
-      "matches": 48,
+      "matches": 50,
       "matchesFired": 14,
       "window": "5-5",
-      "p": 0.902,
-      "q": 0.997
+      "p": 0.901,
+      "q": 1
     },
     "LEVEL_006": {
       "verdict": "unproven",
-      "placementDelta": -0.05,
-      "matches": 72,
+      "placementDelta": 0,
+      "matches": 74,
       "matchesFired": 17,
       "window": "4-1",
-      "p": 0.957,
+      "p": 1,
       "q": 1
     },
     "LOBBY_001": {
       "verdict": "predictive",
-      "placementDelta": 1.86,
-      "matches": 64,
+      "placementDelta": 1.88,
+      "matches": 66,
       "matchesFired": 15,
       "window": "5-1",
-      "p": 0.006,
-      "q": 0.029
+      "p": 0.003,
+      "q": 0.021
     },
     "LOBBY_002": {
       "verdict": "predictive",
-      "placementDelta": 2.29,
-      "matches": 72,
+      "placementDelta": 2.32,
+      "matches": 74,
       "matchesFired": 9,
       "window": "3-2",
-      "p": 0.007,
-      "q": 0.029
+      "p": 0.005,
+      "q": 0.024
     },
     "POSITION_001": {
       "verdict": "always-on",
       "placementDelta": null,
-      "matches": 72,
-      "matchesFired": 70,
+      "matches": 74,
+      "matchesFired": 72,
       "window": null,
       "p": null,
       "q": null
@@ -246,8 +256,8 @@
     "ROLL_001": {
       "verdict": "rare",
       "placementDelta": null,
-      "matches": 72,
-      "matchesFired": 3,
+      "matches": 74,
+      "matchesFired": 4,
       "window": null,
       "p": null,
       "q": null
@@ -255,7 +265,7 @@
     "ROLL_002": {
       "verdict": "rare",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 2,
       "window": null,
       "p": null,
@@ -263,17 +273,17 @@
     },
     "ROLL_003": {
       "verdict": "unproven",
-      "placementDelta": -0.41,
-      "matches": 72,
+      "placementDelta": -0.37,
+      "matches": 74,
       "matchesFired": 18,
       "window": "4-1",
-      "p": 0.583,
-      "q": 0.817
+      "p": 0.613,
+      "q": 0.852
     },
     "ROLL_004": {
       "verdict": "rare",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 2,
       "window": null,
       "p": null,
@@ -282,7 +292,7 @@
     "ROLL_005": {
       "verdict": "rare",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 2,
       "window": null,
       "p": null,
@@ -290,17 +300,17 @@
     },
     "STREAK_001": {
       "verdict": "unproven",
-      "placementDelta": 0.58,
-      "matches": 48,
-      "matchesFired": 45,
+      "placementDelta": 0.55,
+      "matches": 50,
+      "matchesFired": 46,
       "window": "5-5",
-      "p": 0.185,
-      "q": 0.353
+      "p": 0.196,
+      "q": 0.373
     },
     "STREAK_002": {
       "verdict": "rare",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 2,
       "window": null,
       "p": null,
@@ -309,8 +319,8 @@
     "STREAK_003": {
       "verdict": "whole-match",
       "placementDelta": null,
-      "matches": 72,
-      "matchesFired": 27,
+      "matches": 74,
+      "matchesFired": 28,
       "window": null,
       "p": null,
       "q": null
@@ -318,8 +328,8 @@
     "TRAIT_001": {
       "verdict": "always-on",
       "placementDelta": null,
-      "matches": 72,
-      "matchesFired": 69,
+      "matches": 74,
+      "matchesFired": 71,
       "window": null,
       "p": null,
       "q": null
@@ -327,43 +337,37 @@
     "AUGMENT_003": {
       "verdict": "never-fired",
       "placementDelta": null,
-      "matches": 72,
-      "matchesFired": 0
-    },
-    "COMBAT_001": {
-      "verdict": "never-fired",
-      "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 0
     },
     "ITEM_004": {
       "verdict": "never-fired",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 0
     },
     "POSITION_002": {
       "verdict": "never-fired",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 0
     },
     "SET17_001": {
       "verdict": "never-fired",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 0
     },
     "SET17_002": {
       "verdict": "never-fired",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 0
     },
     "SET17_003": {
       "verdict": "never-fired",
       "placementDelta": null,
-      "matches": 72,
+      "matches": 74,
       "matchesFired": 0
     }
   }

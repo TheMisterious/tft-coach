@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>coachv — uninstall</title>
+  <style>
+    /* Overwolf runs the uninstall window in the background: it must never
+       paint UI. Keep the document blank and non-interactive. */
+    html, body { width: 0; height: 0; margin: 0; padding: 0; overflow: hidden; background: transparent; }
+  </style>
+</head>
+<body>
+<script>
+  // Uninstall survey. Overwolf loads this file when the user removes the app
+  // and keeps it alive for `uninstall_window.required_runtime` ms (10s, set in
+  // manifest.json). The only job here is to open a prefilled feedback mail in
+  // the user's default browser — no UI, no blocking work.
+
+  var FEEDBACK_EMAIL = 'nothingmore0101@gmail.com';
+
+  // Gmail's web compose is the primary target: it renders in any browser and
+  // needs no configured desktop mail client. MAILTO_FALLBACK is used only if
+  // the Gmail URL cannot be opened at all.
+  function gmailComposeUrl(subject, body) {
+    return 'https://mail.google.com/mail/?view=cm&fs=1'
+      + '&to=' + encodeURIComponent(FEEDBACK_EMAIL)
+      + '&su=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(body);
+  }
+
+  function mailtoUrl(subject, body) {
+    return 'mailto:' + encodeURIComponent(FEEDBACK_EMAIL)
+      + '?subject=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(body);
+  }
+
+  function buildBody(version) {
+    // Overwolf appends its own query string (extension id, and on some
+    // versions an uninstall source/reason). Forward it verbatim so a support
+    // reply can be tied back to the install without asking the user.
+    var context = (window.location.search || '').replace(/^\?/, '') || '(none)';
+
+    return [
+      'Thanks for trying coachv. Telling us why you uninstalled takes 30 seconds',
+      'and is the only feedback channel we have — nothing is collected from the app.',
+      '',
+      '1) Why did you uninstall coachv?',
+      '   ',
+      '',
+      '2) What did you expect it to do that it did not do?',
+      '   ',
+      '',
+      '3) Anything broken (wrong advice, missing match, crash)?',
+      '   ',
+      '',
+      '--- please leave the lines below, they help us debug ---',
+      'app version: ' + version,
+      'overwolf context: ' + context,
+      'uninstalled at: ' + new Date().toISOString()
+    ].join('\n');
+  }
+
+  var opened = false;
+
+  function openFeedback(version) {
+    if (opened) return;
+    opened = true;
+
+    var subject = 'coachv uninstall feedback (v' + version + ')';
+    var body    = buildBody(version);
+    var url     = gmailComposeUrl(subject, body);
+
+    try {
+      if (typeof overwolf !== 'undefined' && overwolf.utils && overwolf.utils.openUrlInDefaultBrowser) {
+        overwolf.utils.openUrlInDefaultBrowser(url);
+        return;
+      }
+    } catch (e) { /* fall through to the plain-window path below */ }
+
+    try {
+      window.open(url, '_blank');
+    } catch (e) {
+      window.location.href = mailtoUrl(subject, body);
+    }
+  }
+
+  // getManifest only supplies the version string for the mail body. If it is
+  // slow or unavailable, open anyway rather than burning the 10s runtime.
+  var guard = setTimeout(function () { openFeedback('unknown'); }, 1500);
+
+  try {
+    overwolf.extensions.current.getManifest(function (manifest) {
+      clearTimeout(guard);
+      openFeedback((manifest && manifest.meta && manifest.meta.version) || 'unknown');
+    });
+  } catch (e) {
+    clearTimeout(guard);
+    openFeedback('unknown');
+  }
+</script>
+</body>
+</html>

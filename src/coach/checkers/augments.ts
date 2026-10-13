@@ -30,6 +30,46 @@ import { isComponent, unitItems } from './items';
 
 const HP_CRISIS_THRESHOLD = 45;
 
+// ─── Augment classification ──────────────────────────────────────────────────
+// Two sources, checked in this order:
+//
+//   1. augments.json's hand-curated category buckets. Authoritative wherever
+//      they exist — a human judged the augment's PRIMARY purpose, which is a
+//      judgment call no text analysis can reproduce (measured: a keyword
+//      classifier forced to pick one bucket agrees with curation only 75% of
+//      the time, because real augments are genuinely multi-category).
+//   2. augment-effects.json's derived flags, as a fallback for anything not
+//      curated. These answer narrower, factual questions about Data Dragon's
+//      real description text — does it grant gold/XP, does it grant an item —
+//      each stored with the phrase that justified it. Measured against the
+//      hand-curated buckets: economy 46/46, items 143/146, with 6/87 and 2/87
+//      firing inside the combat bucket (all of them real).
+//
+// Curation only covers what someone got around to: 10 of the 22 augment ids
+// picked across tests/goldens/ had no bucket at all, so AUGMENT_001 and
+// AUGMENT_004 silently never evaluated them. See
+// scripts/derive-augment-effects.js.
+
+// Set 17's Realm of the Gods blessings arrive on the same picked_augment feed
+// but are not augments in the sense these rules mean — they are the alignment
+// reward, already judged by checkers/set17.ts from the match_info god_* fields.
+// Skipped outright rather than counted as uncategorised.
+function isGodAugment(aug: string, meta: MetaData): boolean {
+  return meta.augmentEffects?.[aug]?.godAugment === true;
+}
+
+function isEconomyAugment(aug: string, meta: MetaData): boolean {
+  if (isGodAugment(aug, meta)) return false;
+  if (meta.augments?.economy?.includes(aug)) return true;
+  return !!meta.augmentEffects?.[aug]?.economy;
+}
+
+function isItemAugment(aug: string, meta: MetaData): boolean {
+  if (isGodAugment(aug, meta)) return false;
+  if (meta.augments?.items?.includes(aug)) return true;
+  return !!meta.augmentEffects?.[aug]?.items;
+}
+
 export function checkAugments(
   match: MatchSnapshot,
   meta: MetaData = {} as MetaData,
@@ -37,7 +77,7 @@ export function checkAugments(
 ): DecisionPoint[] {
   return [
     ...checkEconAugmentOnCrisis(match, meta, context),
-    ...checkMissingAugmentData(match),
+    ...checkMissingAugmentData(match, meta),
     ...checkCarryAugmentUnrealised(match, meta),
     ...checkItemAugmentWithoutBuiltCarry(match, meta),
   ];
@@ -50,7 +90,6 @@ export function checkAugments(
 // the game actually played out, not just generically risky.
 function checkEconAugmentOnCrisis(match: MatchSnapshot, meta: MetaData, context: MatchContext): DecisionPoint[] {
   const points: DecisionPoint[] = [];
-  const economyAugments = new Set(meta.augments?.economy ?? []);
 
   for (let i = 0; i < match.rounds.length; i++) {
     const round = match.rounds[i];
@@ -60,7 +99,7 @@ function checkEconAugmentOnCrisis(match: MatchSnapshot, meta: MetaData, context:
     const newAugs  = round.augmentsPicked.filter(a => !prevSet.has(a));
 
     for (const aug of newAugs) {
-      if (!economyAugments.has(aug)) continue;
+      if (!isEconomyAugment(aug, meta)) continue;
       if (round.health >= HP_CRISIS_THRESHOLD) continue;
 
       const shortName = getAugmentName(aug, meta);
@@ -88,8 +127,12 @@ function checkEconAugmentOnCrisis(match: MatchSnapshot, meta: MetaData, context:
 }
 
 // AUGMENT_002 — no augment data recorded in a bottom-4 finish
-function checkMissingAugmentData(match: MatchSnapshot): DecisionPoint[] {
-  if (match.augments.length > 0) return [];
+function checkMissingAugmentData(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
+  // God blessings don't count as augment data. They ride the same feed, so a
+  // match that captured three blessings and zero real augments would otherwise
+  // look fully covered while every augment rule had nothing to judge.
+  const realAugments = match.augments.filter(a => !isGodAugment(a, meta));
+  if (realAugments.length > 0) return [];
   if (match.finalPlacement <= 4) return []; // top-4 finish is fine even without data
 
   return [{
@@ -191,8 +234,7 @@ function checkCarryAugmentUnrealised(match: MatchSnapshot, meta: MetaData): Deci
 // category — Crests/Crowns/Circlets and similar) but no unit on the final
 // board ended with 2+ completed items to actually receive that payoff.
 function checkItemAugmentWithoutBuiltCarry(match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
-  const itemAugments = new Set(meta.augments?.items ?? []);
-  const picked = match.augments.find(a => itemAugments.has(a));
+  const picked = match.augments.find(a => isItemAugment(a, meta));
   if (!picked) return [];
 
   const cells = Object.values(match.finalBoard).filter(c => c?.name && c.name !== '0');

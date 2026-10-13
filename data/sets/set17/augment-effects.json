@@ -1,0 +1,1503 @@
+{
+  "_comment": "Auto-derived from Riot Data Dragon augment description text by scripts/derive-augment-effects.js. Each flag records the phrase that justified it. These are FACTS ABOUT THE TEXT (does it grant gold/XP, does it grant an item), not a category judgment — augments.json's hand-curated buckets remain authoritative and are checked first by src/coach/checkers/augments.ts. Do not hand-edit: regenerate.",
+  "_generated": {
+    "dataDragonVersion": "16.17.1",
+    "augmentsScanned": 762
+  },
+  "TFT16_Augment_TheAxiomata": {
+    "economy": "gold",
+    "items": "grant you items"
+  },
+  "TFT16_Augment_UltraRapidFire": {
+    "items": "Gain a Spatula"
+  },
+  "TFT16_Augment_BandleBountyPlus": {
+    "economy": "gold"
+  },
+  "TFT16_Augment_Void_EvolveAndOvercome": {
+    "economy": "XP"
+  },
+  "TFT16_Augment_Shurima_SecretsOfTheSands": {
+    "economy": "gold",
+    "items": "gain an ideal item"
+  },
+  "TFT16_Augment_Piltover_HexgateTravel": {
+    "economy": "gold"
+  },
+  "TFT16_Augment_Targon_CosmicCalling": {
+    "items": "Gain a Spear of Shojin"
+  },
+  "TFT16_Augment_TheWorldRunes": {
+    "economy": "XP",
+    "items": "Gain 2 Emblems"
+  },
+  "TFT6_Augment_PortableForge": {
+    "items": "Choose 1 of 4 Artifacts"
+  },
+  "TFT6_Augment_Recombobulator": {
+    "economy": "rerolls",
+    "items": "Gain 2 Magnetic Removers"
+  },
+  "TFT7_Augment_LivingForge": {
+    "items": "Gain an Artifact anvil"
+  },
+  "TFT6_Augment_GachaAddict": {
+    "economy": "reroll"
+  },
+  "TFT9_Augment_LongTimeCrafting": {
+    "items": "gain an Artifact anvil"
+  },
+  "TFT9_Augment_SilverSpoon": {
+    "economy": "XP"
+  },
+  "TFT9_Augment_CustomerIsAlwaysRight": {
+    "items": "get a component, gain a component anvil"
+  },
+  "TFT9_Augment_IronAssets": {
+    "economy": "gold",
+    "items": "Gain a component anvil"
+  },
+  "TFT9_Augment_RollTheDice": {
+    "items": "Gain a Rascal's Gloves item"
+  },
+  "TFT9_Augment_BuildingACollectionPlusPlus": {
+    "items": "Gain a random item component"
+  },
+  "TFT6_Augment_PandorasItems": {
+    "items": "Gain 1 random component"
+  },
+  "TFT9_Augment_PandorasRadiantBox": {
+    "items": "Gain 1 random Radiant item"
+  },
+  "TFT9_Augment_PandorasItems2": {
+    "items": "Gain 2 random components"
+  },
+  "TFT9_Augment_RiskyMoves": {
+    "economy": "gold"
+  },
+  "TFT6_Augment_OneTwoFive": {
+    "economy": "gold",
+    "items": "Gain 1 random component"
+  },
+  "TFT6_Augment_TradeSector2": {
+    "economy": "rerolls"
+  },
+  "TFT6_Augment_MaxLevel10": {
+    "economy": "XP"
+  },
+  "TFT9_Augment_LearningFromExperience2": {
+    "economy": "XP"
+  },
+  "TFT6_Augment_RadiantRelics": {
+    "items": "Choose 1 of 5 Radiant items"
+  },
+  "TFT6_Augment_ItemGrabBag1": {
+    "items": "Gain 1 random completed item"
+  },
+  "TFT7_Augment_LategameSpecialist": {
+    "economy": "gold"
+  },
+  "TFT10_Augment_HeroicGrabBag": {
+    "economy": "gold"
+  },
+  "TFT6_Augment_ClearMind": {
+    "economy": "XP"
+  },
+  "TFT7_Augment_ClutteredMind": {
+    "economy": "XP"
+  },
+  "TFT10_Augment_GoingLong": {
+    "economy": "interest"
+  },
+  "TFT10_Augment_GoodForSomethingSilver": {
+    "economy": "gold"
+  },
+  "TFT7_Augment_LuckyGloves": {
+    "economy": "gold",
+    "items": "Gain 2 Sparring Gloves"
+  },
+  "TFT7_Augment_LuckyGlovesPlus": {
+    "items": "Gain 2 Sparring Gloves"
+  },
+  "TFT9_Augment_Commander_TeamingUp1": {
+    "items": "Gain 1 random component"
+  },
+  "TFT9_Augment_BigGrabBag": {
+    "economy": "gold",
+    "items": "Gain 3 random components"
+  },
+  "TFT7_Augment_BandOfThieves1": {
+    "items": "Gain 1 Thief's Gloves"
+  },
+  "TFT_Augment_BranchingOut": {
+    "items": "Gain a random Emblem"
+  },
+  "TFT11_Augment_RainingGold": {
+    "economy": "gold"
+  },
+  "TFT11_Augment_Prizefighter": {
+    "items": "Gain 2 item components"
+  },
+  "TFT11_Augment_Slammin": {
+    "economy": "gold"
+  },
+  "TFT11_Augment_Slammin_Plus": {
+    "economy": "gold"
+  },
+  "TFT11_Augment_BloodBank": {
+    "economy": "gold"
+  },
+  "TFT11_Augment_Epoch": {
+    "economy": "XP"
+  },
+  "TFT11_Augment_EpochPlus": {
+    "economy": "XP"
+  },
+  "TFT11_Augment_Reinfourcement": {
+    "economy": "gold"
+  },
+  "TFT_Augment_CalledShot": {
+    "economy": "gold"
+  },
+  "TFT_Augment_Flexible": {
+    "items": "Gain 1 random Emblem"
+  },
+  "TFT_Augment_ThornPlatedArmor": {
+    "items": "Gain a Bramble Vest"
+  },
+  "TFT_Augment_Placebo": {
+    "economy": "gold"
+  },
+  "TFT_Augment_UpwardMobility": {
+    "economy": "XP"
+  },
+  "TFT_Augment_PatienceIsAVirtue": {
+    "economy": "rerolls"
+  },
+  "TFT_Augment_ShimmerscaleEssence": {
+    "economy": "gold",
+    "items": "Gain a Mogul's Mail"
+  },
+  "TFT_Augment_HighVoltage": {
+    "items": "Gain an Ionic Spark"
+  },
+  "TFT_Augment_HardCommit": {
+    "economy": "gold",
+    "items": "Gain a random Emblem"
+  },
+  "TFT_Augment_Replication": {
+    "items": "Choose 1 of 3 components"
+  },
+  "TFT_Augment_PlaceboPlus": {
+    "economy": "gold"
+  },
+  "TFT_Augment_DuoQueue": {
+    "items": "Gain 2 random 5-cost champions and 2 copies of a random component"
+  },
+  "TFT_Augment_Dummify": {
+    "items": "Gain a Training Dummy"
+  },
+  "TFT_Augment_Survivor": {
+    "economy": "gold"
+  },
+  "TFT_Augment_TacticiansKitchen": {
+    "items": "Gain a random Emblem"
+  },
+  "TFT_Augment_CraftedCrafting": {
+    "economy": "rerolls",
+    "items": "craft a completed item"
+  },
+  "TFT_Augment_MirroredMonetization": {
+    "economy": "gold"
+  },
+  "TFT_Augment_Coronation": {
+    "items": "Gain a Tactician's Crown"
+  },
+  "TFT_Augment_OneBuffTwoBuff": {
+    "items": "Gain a Red Buff, a Blue Buff"
+  },
+  "TFT_Augment_Pyromaniac": {
+    "items": "Gain a Red Buff"
+  },
+  "TFT_Augment_BeltOverflow": {
+    "items": "Gain 4 Giant's Belt"
+  },
+  "TFT_Augment_WandOverflow": {
+    "items": "Gain 4 Needlessly Large Rod"
+  },
+  "TFT_Augment_SwordOverflow": {
+    "items": "Gain 4 B.F. Sword"
+  },
+  "TFT_Augment_TableScraps": {
+    "economy": "gold",
+    "items": "gain one champion that was not taken and its item"
+  },
+  "TFT_Augment_CrownguardSpirit": {
+    "items": "Gain a Needlessly Large Rod"
+  },
+  "TFT_Augment_ShojinSpirit": {
+    "items": "Gain a B.F. Sword"
+  },
+  "TFT_Augment_GuardbreakerSpirit": {
+    "items": "Gain a Sparring Gloves"
+  },
+  "TFT_Augment_TwoMuchValue": {
+    "economy": "reroll"
+  },
+  "TFT_Augment_FiresalePlus": {
+    "economy": "gold"
+  },
+  "TFT_Augment_Warpath": {
+    "items": "gain a chest of high cost champions and items"
+  },
+  "TFT_Augment_EyeForAnEye": {
+    "items": "gain a random component"
+  },
+  "TFT_Augment_EyeForAnEyePlus": {
+    "items": "Gain a random component"
+  },
+  "TFT9_Augment_Commander_RollingForDays": {
+    "economy": "rerolls"
+  },
+  "TFT6_Augment_SalvageBin": {
+    "items": "Gain 1 random completed item now, and 1 component"
+  },
+  "TFT8_Augment_SalvageBinPlus": {
+    "items": "Gain 1 random completed item now, and 1 component"
+  },
+  "TFT_Augment_HeroicGrabBagPlus": {
+    "economy": "gold"
+  },
+  "TFT_Augment_HeroicGrabBagPlusPlus": {
+    "economy": "gold"
+  },
+  "TFT_Augment_CookingPot": {
+    "items": "Gain a Frying Pan"
+  },
+  "TFT7_Augment_BigFriend": {
+    "items": "Gain a Giant's Belt"
+  },
+  "TFT6_Augment_HyperRoll": {
+    "economy": "interest"
+  },
+  "TFT6_Augment_CalculatedLoss": {
+    "economy": "gold"
+  },
+  "TFT_Augment_ExclusiveCustomization": {
+    "economy": "gold",
+    "items": "Gain a Lucky Item Chest, a Magnetic Remover"
+  },
+  "TFT9_Augment_StarterKit": {
+    "economy": "gold"
+  },
+  "TFT_Augment_HardBargain": {
+    "economy": "Gold"
+  },
+  "TFT9_Augment_StarsAreBorn": {
+    "economy": "gold"
+  },
+  "TFT_Augment_ExplosiveGrowth": {
+    "economy": "XP"
+  },
+  "TFT_Augment_ExplosiveGrowthPlus": {
+    "economy": "XP"
+  },
+  "TFT_Augment_AdvancedLoan": {
+    "economy": "Gold"
+  },
+  "TFT_Augment_AdvancedLoanPlus": {
+    "economy": "Gold"
+  },
+  "TFT_Augment_TheDarkinBlade": {
+    "items": "Gain a Bloodthirster"
+  },
+  "TFT_Augment_Indecision1": {
+    "economy": "gold"
+  },
+  "TFT_Augment_Indecision2": {
+    "economy": "gold"
+  },
+  "TFT_Augment_ConstructACompanion": {
+    "economy": "gold"
+  },
+  "TFT_Augment_FeedTheFlames": {
+    "items": "Gain a Sunfire Cape"
+  },
+  "TFT_Augment_Waverider": {
+    "economy": "rerolls"
+  },
+  "TFT_Augment_ForwardThinking": {
+    "economy": "gold"
+  },
+  "TFT_Augment_LegionOfThrees": {
+    "items": "Gain a random Emblem"
+  },
+  "TFT_Augment_ForgedInStrength": {
+    "items": "Gain 1 random Artifact"
+  },
+  "TFT_Augment_LateGameScaling": {
+    "economy": "XP"
+  },
+  "TFT_Augment_SweetTreats": {
+    "items": "Gain an Artifact anvil"
+  },
+  "TFT_Augment_SpeedyDoubleKill": {
+    "economy": "gold",
+    "items": "Gain a Guinsoo's Rageblade"
+  },
+  "TFT_Augment_TheGoldenDragon": {
+    "economy": "gold",
+    "items": "Gain a Mogul's Mail"
+  },
+  "TFT_Augment_BirthdayReunion": {
+    "economy": "gold",
+    "items": "gain a Thief's Gloves"
+  },
+  "TFT_Augment_EpicRolldown": {
+    "economy": "rerolls"
+  },
+  "TFT_Augment_ComponentQuestBelt": {
+    "items": "Gain a Giant's Belt"
+  },
+  "TFT_Augment_ComponentQuestBow": {
+    "items": "Gain a Recurve Bow"
+  },
+  "TFT_Augment_InfinityProtection": {
+    "economy": "gold",
+    "items": "gain an Infinity Force"
+  },
+  "TFT_Augment_ComponentQuestSword": {
+    "items": "Gain a B.F. Sword"
+  },
+  "TFT_Augment_ItemGargoyleStoneplate": {
+    "items": "Gain a Gargoyle Stoneplate"
+  },
+  "TFT_Augment_ComponentQuestRod": {
+    "items": "Gain a Needlessly Large Rod"
+  },
+  "TFT_Augment_TraitTree": {
+    "economy": "gold",
+    "items": "Gain 3 random Emblems"
+  },
+  "TFT_Augment_ComponentQuestTear": {
+    "items": "Gain a Tear of the Goddess"
+  },
+  "TFT_Augment_ItemSpiritVisage": {
+    "items": "Gain a Spirit Visage"
+  },
+  "TFT_Augment_SpreadingRoots": {
+    "economy": "gold",
+    "items": "Gain 2 random Emblems"
+  },
+  "TFT_Augment_WeStickTogether": {
+    "items": "Gain a random Emblem and a completed item anvil"
+  },
+  "TFT_Augment_SavingsAccount": {
+    "economy": "gold"
+  },
+  "TFT_Augment_SoloLeveling": {
+    "economy": "XP",
+    "items": "gain 2 item components"
+  },
+  "TFT_Augment_HomeCooking": {
+    "economy": "gold"
+  },
+  "TFT_Augment_HeavyIsTheCrown": {
+    "items": "Gain a Crown of Demacia"
+  },
+  "TFT_Augment_BranchingOutPlus": {
+    "items": "Gain a random Emblem"
+  },
+  "TFT_Augment_CryMeARiver": {
+    "items": "Gain a Tear of the Goddess"
+  },
+  "TFT_Augment_DeadlierCaps": {
+    "items": "Gain a Rabadon's Deathcap"
+  },
+  "TFT_Augment_EfficientShopper": {
+    "economy": "gold"
+  },
+  "TFT_Augment_GoldDestiny": {
+    "economy": "Gold"
+  },
+  "TFT_Augment_GoldDestinyPlus": {
+    "economy": "Gold"
+  },
+  "TFT_Augment_HeftyRolls": {
+    "economy": "gold"
+  },
+  "TFT_Augment_PrismaticDestiny": {
+    "economy": "gold",
+    "items": "Gain a random Prismatic Augment"
+  },
+  "TFT_Augment_SilverDestiny": {
+    "economy": "gold",
+    "items": "Gain a random Silver Augment"
+  },
+  "TFT_Augment_SilverDestinyPlus": {
+    "economy": "gold",
+    "items": "Gain a random Silver Augment"
+  },
+  "TFT_Augment_TragicalBlade": {
+    "items": "Gain a Deathblade"
+  },
+  "TFT_Augment_TreasureHunt": {
+    "economy": "gold"
+  },
+  "TFT7_Augment_BirthdayPresents": {
+    "economy": "gold"
+  },
+  "TFT_Augment_WarmogsBuckle": {
+    "items": "Gain a Steadfast Heart"
+  },
+  "TFT_Augment_TheVidalion": {
+    "items": "Gain a random item component"
+  },
+  "TFT_Augment_ThreeThrees": {
+    "economy": "gold"
+  },
+  "TFT_Augment_WinOut": {
+    "economy": "rerolls"
+  },
+  "TFT_Augment_MuseumHeist": {
+    "items": "gain 1 of every item component"
+  },
+  "TFT_Augment_JustSlayer": {
+    "items": "Gain a Giant Slayer"
+  },
+  "TFT_Augment_JustHit": {
+    "economy": "rerolls"
+  },
+  "TFT_Augment_SmallGrabBag": {
+    "items": "Gain 2 random item components"
+  },
+  "TFT_Augment_ForgeRod": {
+    "items": "Gain 2 random completed items"
+  },
+  "TFT_Augment_ForgeSword": {
+    "items": "Gain 2 random completed items"
+  },
+  "TFT_Augment_UrfsGambit": {
+    "economy": "gold",
+    "items": "Gain a component anvil"
+  },
+  "TFT6_Augment_BinaryAirdrop": {
+    "items": "gain a random 3rd completed item"
+  },
+  "TFT6_Augment_BandOfThieves2": {
+    "items": "Gain 2 Thief's Gloves"
+  },
+  "TFT_Augment_MoneyMonsoon": {
+    "economy": "gold"
+  },
+  "TFT_Augment_LuxurySubscription": {
+    "economy": "gold"
+  },
+  "TFT_Augment_GrowthMindset": {
+    "economy": "XP"
+  },
+  "TFT6_Augment_BandOfThieves2Plus": {
+    "items": "Gain 2 Thief's Gloves"
+  },
+  "TFT6_Augment_BandOfThieves2PlusPlus": {
+    "items": "Gain 2 Thief's Gloves"
+  },
+  "TFT_Augment_PrismaticDestinyPlus": {
+    "economy": "gold",
+    "items": "Gain a random Prismatic Augment"
+  },
+  "TFT6_Augment_TradeSector": {
+    "economy": "reroll"
+  },
+  "TFT9_Augment_Legend_HighEndSector": {
+    "economy": "gold"
+  },
+  "TFT_Augment_GainGold": {
+    "economy": "gold"
+  },
+  "TFT_Augment_SeraphimsStaff": {
+    "items": "Gain an Archangel's Staff"
+  },
+  "TFT_Augment_TraitTreePlus": {
+    "economy": "gold",
+    "items": "Gain 3 random Emblems"
+  },
+  "TFT_Augment_SpreadingRootsPlus": {
+    "economy": "gold",
+    "items": "Gain 2 random Emblems"
+  },
+  "TFTEventCT_Augment_Artifactory": {
+    "items": "Gain 1 Artifact Anvil"
+  },
+  "TFT9_Augment_TiniestTitanPlus": {
+    "economy": "gold"
+  },
+  "TFT_Augment_InvestedPlus": {
+    "economy": "gold"
+  },
+  "TFT_Augment_InvestedPlusPlus": {
+    "economy": "gold"
+  },
+  "TFT9_Augment_HedgeFund": {
+    "economy": "gold"
+  },
+  "TFT6_Augment_CyberneticImplants2": {
+    "items": "Gain a B.F. Sword"
+  },
+  "TFT6_Augment_CyberneticUplink2": {
+    "items": "Gain a Tear of the Goddess"
+  },
+  "TFT_Augment_SubscriptionService": {
+    "economy": "gold"
+  },
+  "TFT_Augment_MinMaxer": {
+    "items": "Gain a Golden Item Remover and 4 random components"
+  },
+  "TFT_Augment_Pilfer": {
+    "economy": "gold",
+    "items": "gain a Thief's Gloves"
+  },
+  "TFT9_Augment_HedgeFundPlus": {
+    "economy": "gold"
+  },
+  "TFT11_Augment_Buildabud": {
+    "economy": "gold"
+  },
+  "TFT_Augment_CognitiveTax": {
+    "economy": "gold"
+  },
+  "TFT_Augment_ForgeAFriend": {
+    "economy": "gold"
+  },
+  "TFT_Augment_KickStart": {
+    "economy": "gold"
+  },
+  "TFT_Augment_MoneyHungry": {
+    "economy": "gold"
+  },
+  "TFT_Augment_SizeMatters": {
+    "items": "gain a Warmog's Armor"
+  },
+  "TFT_Augment_FeelingLucky": {
+    "economy": "gold"
+  },
+  "TFT_Augment_TheTower": {
+    "items": "Gain a giant Training Dummy"
+  },
+  "TFT_Augment_Expedition": {
+    "economy": "gold"
+  },
+  "TFT_Augment_BacklineBlueprint": {
+    "items": "Gain a 3-cost non-Tank champion and an Emblem"
+  },
+  "TFT_Augment_FrontlineFoundation": {
+    "items": "Gain a 2-star 1-cost Tank champion and an Emblem"
+  },
+  "TFT_Augment_TheBaronsLair": {
+    "items": "Gain a random Tank item"
+  },
+  "TFT_Augment_BoosterPack": {
+    "economy": "gold"
+  },
+  "TFT_Augment_BoosterPackPlus": {
+    "economy": "gold"
+  },
+  "TFT_Augment_CognitiveOverload": {
+    "economy": "gold"
+  },
+  "TFT_Augment_CognitiveTaxPlus": {
+    "economy": "gold"
+  },
+  "TFT11_Augment_AtWhatCost": {
+    "economy": "XP"
+  },
+  "TFT7_Augment_AFK": {
+    "economy": "gold"
+  },
+  "TFT6_Augment_ThriftShop": {
+    "economy": "XP"
+  },
+  "TFT_Augment_GoldenGamble": {
+    "economy": "gold",
+    "items": "gain a Radiant Lucky Item"
+  },
+  "TFT_Augment_CosmicRestart": {
+    "economy": "rerolls",
+    "items": "Gain 2 random Emblems"
+  },
+  "TFT_Augment_GoldenGamblePlus": {
+    "economy": "gold",
+    "items": "gain a Radiant Lucky Item"
+  },
+  "TFT_Augment_GoldenGamblePlusPlus": {
+    "economy": "gold",
+    "items": "gain a Radiant Lucky Item"
+  },
+  "TFT_Augment_ExclusiveCustomization2": {
+    "economy": "gold",
+    "items": "Gain 2 Lucky Item Chests, a Magnetic Remover"
+  },
+  "TFT7_Augment_UrfsGrabBag2": {
+    "economy": "gold",
+    "items": "Gain 1 Spatula, 3 random components"
+  },
+  "TFT9_Augment_YouHaveMyBow": {
+    "items": "Gain a Recurve Bow"
+  },
+  "TFT17_Augment_PykeCarry": {
+    "economy": "gold"
+  },
+  "TFT17_Augment_KayleGodAugment": {
+    "godAugment": true
+  },
+  "TFT17_Augment_AhriGodAugment": {
+    "godAugment": true
+  },
+  "TFT17_Augment_AurelionSolGodAugment": {
+    "godAugment": true
+  },
+  "TFT17_Augment_SorakaGodAugment": {
+    "godAugment": true
+  },
+  "TFT17_Augment_KayleGodAugment_Scrapper": {
+    "godAugment": true
+  },
+  "TFT17_Augment_YasuoGodAugment_PaintedPower": {
+    "godAugment": true
+  },
+  "TFT17_Augment_YasuoGodAugment_MoreHexes": {
+    "godAugment": true
+  },
+  "TFT17_Augment_AurelionSolGodAugment_BoonOfResurrection": {
+    "godAugment": true
+  },
+  "TFT17_Augment_EvelynnGodAugment_BloodPrice": {
+    "godAugment": true
+  },
+  "TFT17_Augment_VarusGodAugment_BoonOfStars": {
+    "godAugment": true
+  },
+  "TFT17_Augment_YasuoGodAugment_GoldenHex": {
+    "godAugment": true
+  },
+  "TFT17_Augment_EkkoGodAugment": {
+    "godAugment": true
+  },
+  "TFT17_Augment_ThreshGodAugment": {
+    "godAugment": true
+  },
+  "TFT17_Augment_EvelynnGodAugment": {
+    "godAugment": true
+  },
+  "TFT17_Augment_ApotheoticForge": {
+    "items": "Choose 1 of 4 Divine Artifacts"
+  },
+  "TFT17_Augment_Timebreaker_Timestream": {
+    "economy": "reroll"
+  },
+  "TFT15_Augment_BattleAcademiaCrest": {
+    "items": "Gain a Battle Academia Emblem"
+  },
+  "TFT15_Augment_CrystalRoseCrest": {
+    "items": "Gain a Crystal Gambit Emblem"
+  },
+  "TFT15_Augment_ChallengerCrest": {
+    "items": "Gain a Duelist Emblem"
+  },
+  "TFT15_Augment_DestroyerCrest": {
+    "items": "Gain an Executioner Emblem"
+  },
+  "TFT15_Augment_EdgelordCrest": {
+    "items": "Gain an Edgelord Emblem"
+  },
+  "TFT15_Augment_EmpyreanCrest": {
+    "items": "Gain a Wraith Emblem"
+  },
+  "TFT15_Augment_RingKingCrest": {
+    "items": "Gain a Luchador Emblem"
+  },
+  "TFT15_Augment_SpellslingerCrest": {
+    "items": "Gain an Sorcerer Emblem"
+  },
+  "TFT15_Augment_ProdigyCrest": {
+    "items": "Gain a Prodigy Emblem"
+  },
+  "TFT15_Augment_ProtectorCrest": {
+    "items": "Gain a Protector Emblem"
+  },
+  "TFT15_Augment_SoulFighterCrest": {
+    "items": "Gain a Soul Fighter Emblem"
+  },
+  "TFT15_Augment_StarGuardianCrest": {
+    "items": "Gain a Star Guardian Emblem"
+  },
+  "TFT15_Augment_SupremeCellsCrest": {
+    "items": "Gain a Supreme Cells Emblem"
+  },
+  "TFT15_Augment_BastionCirclet": {
+    "items": "Gain a Bastion Emblem"
+  },
+  "TFT15_Augment_BattleAcademiaCirclet": {
+    "items": "Gain a Battle Academia Emblem"
+  },
+  "TFT15_Augment_BattleAcademiaCrown": {
+    "items": "Gain a Battle Academia Emblem"
+  },
+  "TFT15_Augment_CrystalRoseCirclet": {
+    "items": "Gain a Crystal Gambit Emblem"
+  },
+  "TFT15_Augment_CrystalRoseCrown": {
+    "items": "Gain a Crystal Gambit Emblem"
+  },
+  "TFT15_Augment_ChallengerCirclet": {
+    "items": "Gain a Duelist Emblem"
+  },
+  "TFT15_Augment_ChallengerCrown": {
+    "items": "Gain a Duelist Emblem"
+  },
+  "TFT15_Augment_DestroyerCirclet": {
+    "items": "Gain an Executioner Emblem"
+  },
+  "TFT15_Augment_DestroyerCrown": {
+    "items": "Gain a Executioner Emblem"
+  },
+  "TFT15_Augment_EdgelordCrown": {
+    "items": "Gain an Edgelord Emblem"
+  },
+  "TFT15_Augment_EdgelordCirclet": {
+    "items": "Gain an Edgelord Emblem"
+  },
+  "TFT15_Augment_EmpyreanCirclet": {
+    "items": "Gain a Wraith Emblem"
+  },
+  "TFT15_Augment_EmpyreanCrown": {
+    "items": "Gain a Wraith Emblem"
+  },
+  "TFT15_Augment_HeavyweightCirclet": {
+    "items": "Gain a Heavyweight Emblem"
+  },
+  "TFT15_Augment_RingKingCirclet": {
+    "items": "Gain a Luchador Emblem"
+  },
+  "TFT15_Augment_RingKingCrown": {
+    "items": "Gain a Luchador Emblem"
+  },
+  "TFT15_Augment_SpellslingerCirclet": {
+    "items": "Gain an Sorcerer Emblem"
+  },
+  "TFT15_Augment_SpellslingerCrown": {
+    "items": "Gain a Sorcerer Emblem"
+  },
+  "TFT15_Augment_ProdigyCirclet": {
+    "items": "Gain a Prodigy Emblem"
+  },
+  "TFT15_Augment_ProdigyCrown": {
+    "items": "Gain a Prodigy Emblem"
+  },
+  "TFT15_Augment_ProtectorCirclet": {
+    "items": "Gain a Protector Emblem"
+  },
+  "TFT15_Augment_ProtectorCrown": {
+    "items": "Gain a Protector Emblem"
+  },
+  "TFT15_Augment_JuggernautCirclet": {
+    "items": "Gain a Juggernaut Emblem"
+  },
+  "TFT15_Augment_SoulFighterCirclet": {
+    "items": "Gain a Soul Fighter Emblem"
+  },
+  "TFT15_Augment_SoulFighterCrown": {
+    "items": "Gain a Soul Fighter Emblem"
+  },
+  "TFT15_Augment_StarGuardianCrown": {
+    "items": "Gain a Star Guardian Emblem"
+  },
+  "TFT15_Augment_StarGuardianCirclet": {
+    "items": "Gain a Star Guardian Emblem"
+  },
+  "TFT15_Augment_SupremeCellsCirclet": {
+    "items": "Gain a Supreme Cells Emblem"
+  },
+  "TFT15_Augment_SupremeCellsCrown": {
+    "items": "Gain a Supreme Cells Emblem"
+  },
+  "TFT15_Augment_TheCrew_EscapeVelocity": {
+    "economy": "reroll"
+  },
+  "TFT15_Augment_SniperCrown": {
+    "items": "Gain a Sniper Emblem"
+  },
+  "TFT15_Augment_SniperCirclet": {
+    "items": "Gain a Sniper Emblem"
+  },
+  "TFT_Augment_AimForTheTop": {
+    "economy": "XP",
+    "items": "gain a component"
+  },
+  "TFT15_Augment_MightyMech_PowerUpload": {
+    "items": "Gain an Aatrox, a Senna, and a Power Remover"
+  },
+  "TFT15_Augment_ViCarry": {
+    "items": "gains Attack Damage for item components"
+  },
+  "TFT15_Augment_StrategistCirclet": {
+    "items": "Gain a Strategist Emblem"
+  },
+  "TFT15_Augment_SniperCrest": {
+    "items": "Gain a Sniper Emblem"
+  },
+  "TFT7_Augment_PandorasBench": {
+    "economy": "gold"
+  },
+  "TFT9_Augment_YoungAndWildAndFree": {
+    "economy": "gold"
+  },
+  "TFT9_Augment_HighEndSector": {
+    "economy": "gold"
+  },
+  "TFT9_Augment_BardPlaybook2": {
+    "items": "Gain a component anvil"
+  },
+  "TFT9_Augment_BardPlaybook3": {
+    "items": "gain more powerful items"
+  },
+  "TFT10_Augment_Scapegoat": {
+    "economy": "gold",
+    "items": "Gain a Training Dummy"
+  },
+  "TFT11_Augment_RainingGoldPlus": {
+    "economy": "gold"
+  },
+  "TFT11_Augment_RadiantRefactor": {
+    "items": "Gain a Masterwork Upgrade and 1 component anvil"
+  },
+  "TFT11_Augment_OverEncumbered": {
+    "items": "get 2 item components"
+  },
+  "TFT9_Augment_AllThatShimmers": {
+    "economy": "gold",
+    "items": "Choose a gold-generating Artifact item"
+  },
+  "TFT_Augment_AllThatShimmersPlus": {
+    "economy": "gold",
+    "items": "Choose a gold-generating Artifact"
+  },
+  "TFT_Augment_QualityOverQuantity": {
+    "items": "Gain 2 Magnetic Removers"
+  },
+  "TFT_Augment_TombRaider1": {
+    "items": "choose one of their completed items"
+  },
+  "TFT_Augment_RiggedShopPlus": {
+    "economy": "rerolls"
+  },
+  "TFT_Augment_GoldForDummies": {
+    "economy": "gold",
+    "items": "Gain a Training Dummy"
+  },
+  "TFT_Augment_InvestmentStrategy1": {
+    "economy": "interest"
+  },
+  "TFT_Augment_InvestmentStrategy2": {
+    "economy": "interest"
+  },
+  "TFT_Augment_TombRaider2": {
+    "items": "Gain 1 completed item anvil"
+  },
+  "TFT6_Augment_SalvageBinHR": {
+    "items": "Gain 1 random completed item now, and 1 component"
+  },
+  "TFT7_Augment_BigFriend2": {
+    "items": "Gain a Giant's Belt"
+  },
+  "TFT6_Augment_CyberneticUplink3": {
+    "items": "Gain a Tear of the Goddess"
+  },
+  "TFT_Augment_TimeSkip": {
+    "economy": "XP"
+  },
+  "TFT_Augment_SilverDestinyPlusPlus": {
+    "economy": "gold",
+    "items": "Gain a random Silver Augment"
+  },
+  "TFT_Augment_UnlimitedPower": {
+    "items": "Gain a Nashor's Tooth, a Jeweled Gauntlet, a Needlessly Large Rod"
+  },
+  "TFT_Augment_AnotherOne": {
+    "economy": "gold",
+    "items": "completed item"
+  },
+  "TFT_Augment_AnotherOnePlus": {
+    "items": "Gain 1 component anvil"
+  },
+  "TFT_Augment_PsychicForge": {
+    "items": "Gain a random completed item"
+  },
+  "TFT_Augment_PocketRecombobulator": {
+    "items": "receive 2 Reforger"
+  },
+  "TFT_Augment_RerollTransfer": {
+    "economy": "Reroll"
+  },
+  "TFT10_Augment_FullyAdapted": {
+    "items": "Gain an Adaptive Helm"
+  },
+  "TFT_Augment_QuietQuitting": {
+    "economy": "gold",
+    "items": "gain 24 gold and a Completed Item Anvil"
+  },
+  "TFT_Augment_GoldenQuest": {
+    "economy": "gold",
+    "items": "gain a 2-star 5-cost champion and 2 items"
+  },
+  "TFT_Augment_MaxBuild": {
+    "economy": "gold"
+  },
+  "DA_AdvancedLoan": {
+    "economy": "Gold"
+  },
+  "DA_AdvancedLoanPlus": {
+    "economy": "Gold"
+  },
+  "DA_BacklineBlueprint": {
+    "items": "Gain a 3-cost non-Tank champion and an Emblem"
+  },
+  "DA_BackupBows": {
+    "items": "Gain a Recurve Bow"
+  },
+  "DA_BandOfThieves": {
+    "items": "Gain 1 Thief's Gloves"
+  },
+  "DA_BandOfThievesII": {
+    "items": "Gain 2 Thief's Gloves"
+  },
+  "DA_BandOfThievesIIPlus": {
+    "items": "Gain 2 Thief's Gloves"
+  },
+  "DA_BandOfThievesIIPlusPlus": {
+    "items": "Gain 2 Thief's Gloves"
+  },
+  "DA_BaronsLair": {
+    "items": "Gain a random Tank item"
+  },
+  "DA_BeltOverflow": {
+    "items": "Gain 4 Giant's Belt"
+  },
+  "DA_18_BigGrabBag": {
+    "economy": "gold",
+    "items": "Gain 3 random components"
+  },
+  "DA_BirthdayPresent": {
+    "economy": "gold"
+  },
+  "DA_BirthdayReunion": {
+    "items": "gain a random item component"
+  },
+  "DA_BlackthornTraitAugment": {
+    "items": "gain a copy of a random component"
+  },
+  "DA_BonusGift": {
+    "items": "gain a gray loot orb"
+  },
+  "DA_BonusGiftPlus": {
+    "items": "gain a gray loot orb"
+  },
+  "DA_BoosterPack": {
+    "economy": "gold"
+  },
+  "DA_BoosterPackPlus": {
+    "economy": "gold"
+  },
+  "DA_BoosterPackPlusPlus": {
+    "economy": "gold"
+  },
+  "DA_18_BranchingOut": {
+    "items": "Gain a random Emblem"
+  },
+  "DA_18_BranchingOutPlus": {
+    "items": "Gain a random Emblem"
+  },
+  "DA_BuriedTreasuresIII": {
+    "items": "Gain a random item component"
+  },
+  "DA_CalculatedLoss": {
+    "economy": "gold"
+  },
+  "DA_CalledShot": {
+    "economy": "gold"
+  },
+  "DA_CapitalGainsI": {
+    "economy": "gold"
+  },
+  "DA_CapitalGainsII": {
+    "economy": "gold"
+  },
+  "DA_CaretakersFavor": {
+    "items": "Gain a component anvil"
+  },
+  "DA_CarveAPath": {
+    "items": "Gain a B.F. Sword"
+  },
+  "DA_ClearMind": {
+    "economy": "XP"
+  },
+  "DA_ClutteredMind": {
+    "economy": "XP"
+  },
+  "DA_CognitiveOverload": {
+    "economy": "gold"
+  },
+  "DA_CognitiveTax": {
+    "economy": "gold"
+  },
+  "DA_CognitiveTaxPlus": {
+    "economy": "gold"
+  },
+  "DA_CommerceCore": {
+    "economy": "rerolls"
+  },
+  "DA_ComponentBuffet": {
+    "items": "get a component, gain a component anvil"
+  },
+  "DA_ComponentQuest": {
+    "economy": "gold",
+    "items": "Gain a random component"
+  },
+  "DA_CookingPot": {
+    "items": "Gain a Frying Pan"
+  },
+  "DA_Coronation": {
+    "items": "Gain a Tactician's Crown"
+  },
+  "DA_CraftedCrafting": {
+    "economy": "rerolls",
+    "items": "craft a completed item"
+  },
+  "DA_CryMeARiver": {
+    "items": "Gain a Tear of the Goddess"
+  },
+  "DA_DeadlierBlades": {
+    "items": "Gain a Deathblade"
+  },
+  "DA_Dummify": {
+    "items": "Gain a Training Dummy"
+  },
+  "DA_18_DuoQueue": {
+    "items": "Gain 2 random 5-cost champions and 2 copies of a random component"
+  },
+  "DA_EpicRolldown": {
+    "economy": "rerolls"
+  },
+  "DA_Epoch": {
+    "economy": "XP"
+  },
+  "DA_EpochPlus": {
+    "economy": "XP"
+  },
+  "DA_ExclusiveCustomization": {
+    "economy": "gold",
+    "items": "Gain a Lucky Item Chest, a Magnetic Remover"
+  },
+  "DA_Expedition": {
+    "economy": "gold"
+  },
+  "DA_ExplosiveGrowth": {
+    "economy": "XP"
+  },
+  "DA_ExplosiveGrowthPlus": {
+    "economy": "XP"
+  },
+  "DA_ExtraBuckles": {
+    "items": "Gain a Giant's Belt"
+  },
+  "DA_FeelingLucky": {
+    "economy": "gold"
+  },
+  "DA_Flexible": {
+    "items": "Gain 1 random Emblem"
+  },
+  "DA_18_FloraFatalisAugment": {
+    "economy": "gold",
+    "items": "Gain a Flora Fatalis emblem"
+  },
+  "DA_18_FloraFatalisAugmentPlus": {
+    "economy": "gold",
+    "items": "Gain a Flora Fatalis emblem"
+  },
+  "DA_FlowingTears": {
+    "items": "Gain a Tear of the Goddess"
+  },
+  "DA_ForgedInStrength": {
+    "items": "Gain 1 random Artifact"
+  },
+  "DA_FrontlineFoundation": {
+    "items": "Gain a 2-star 1-cost Tank champion and an Emblem"
+  },
+  "DA_FutureFocused": {
+    "economy": "gold"
+  },
+  "DA_GainGold": {
+    "economy": "gold"
+  },
+  "DA_GoingLong": {
+    "economy": "interest"
+  },
+  "DA_GoldenGamble": {
+    "economy": "gold",
+    "items": "gain a Radiant Lucky Item"
+  },
+  "DA_GoldenGamblePlus": {
+    "economy": "gold",
+    "items": "gain a Radiant Lucky Item"
+  },
+  "DA_GoldenGamblePlusPlus": {
+    "economy": "gold",
+    "items": "gain a Radiant Lucky Item"
+  },
+  "DA_18_GoodForSomethingI": {
+    "economy": "gold"
+  },
+  "DA_HardBargain": {
+    "economy": "gold"
+  },
+  "DA_HardCommit": {
+    "economy": "gold",
+    "items": "Gain a random emblem"
+  },
+  "DA_HeartOfSteel": {
+    "items": "Gain a Steadfast Heart"
+  },
+  "DA_HedgeFund": {
+    "economy": "gold"
+  },
+  "DA_HeroicGrabBag": {
+    "economy": "gold"
+  },
+  "DA_HeroicGrabBagPlus": {
+    "economy": "gold"
+  },
+  "DA_HeroicGrabBagPlusPlus": {
+    "economy": "gold"
+  },
+  "DA_Hustler": {
+    "economy": "interest"
+  },
+  "DA_InfinityProtection": {
+    "economy": "gold",
+    "items": "gain an Infinity Force"
+  },
+  "DA_InvestedPlus": {
+    "economy": "gold"
+  },
+  "DA_InvestedPlusPlus": {
+    "economy": "gold"
+  },
+  "DA_InvestmentStrategy": {
+    "economy": "interest"
+  },
+  "DA_InvestmentStrategyI": {
+    "economy": "interest"
+  },
+  "DA_IronAssets": {
+    "economy": "gold",
+    "items": "Gain a component anvil"
+  },
+  "DA_ItemGrabBag": {
+    "items": "Gain 1 random completed item"
+  },
+  "DA_KickStart": {
+    "economy": "gold"
+  },
+  "DA_Kingslayer": {
+    "economy": "gold"
+  },
+  "DA_LateGameScaling": {
+    "economy": "XP"
+  },
+  "DA_LateGameSpecialist": {
+    "economy": "gold"
+  },
+  "DA_LatentForge": {
+    "items": "gain an Artifact anvil"
+  },
+  "DA_LegionOfThrees": {
+    "items": "Gain a random Emblem"
+  },
+  "DA_LevelUp": {
+    "economy": "XP"
+  },
+  "DA_LivingForge": {
+    "items": "Gain an Artifact Anvil"
+  },
+  "DA_LoadedDice": {
+    "economy": "gold"
+  },
+  "DA_LuckyGloves": {
+    "economy": "gold",
+    "items": "Gain 2 Sparring Gloves"
+  },
+  "DA_LuckyGlovesPlus": {
+    "items": "Gain 2 Sparring Gloves"
+  },
+  "DA_LuxurySubscription": {
+    "economy": "gold"
+  },
+  "DA_MaliciousMonetization": {
+    "economy": "gold"
+  },
+  "DA_MaxBuild": {
+    "economy": "rerolls"
+  },
+  "DA_MoneyHungry_NotBroken": {
+    "economy": "gold"
+  },
+  "DA_MoneyHungryPlus": {
+    "economy": "gold"
+  },
+  "DA_MoneyMonsoon": {
+    "economy": "gold"
+  },
+  "DA_NestingAnvils": {
+    "economy": "gold",
+    "items": "Gain an Artifact Anvil"
+  },
+  "DA_NestingAnvilsPlus": {
+    "economy": "gold",
+    "items": "Gain an Artifact Anvil"
+  },
+  "DA_OneBuffTwoBuff": {
+    "items": "Gain a Red Buff, a Blue Buff"
+  },
+  "DA_18_OneTwoFive": {
+    "economy": "gold",
+    "items": "Gain 1 random component"
+  },
+  "DA_PandorasItemsI": {
+    "items": "Gain 1 random component"
+  },
+  "DA_PandorasItemsII": {
+    "items": "Gain 2 random components"
+  },
+  "DA_PandorasItemsIII": {
+    "items": "Gain 1 Radiant item"
+  },
+  "DA_PatienceIsAVirtue": {
+    "economy": "rerolls"
+  },
+  "DA_PatientStudy": {
+    "economy": "XP"
+  },
+  "DA_Pilfer": {
+    "economy": "gold",
+    "items": "gain a Thief's Gloves"
+  },
+  "DA_PortableForge": {
+    "items": "Choose 1 of 4 Artifacts"
+  },
+  "DA_PrismaticTicket": {
+    "economy": "reroll"
+  },
+  "DA_PromisedProtection": {
+    "items": "Gain a Protector's Vow"
+  },
+  "DA_QuickStreaks": {
+    "economy": "gold"
+  },
+  "DA_RadiantRascal": {
+    "items": "Gain a Radiant Thief's Gloves item"
+  },
+  "DA_RadiantRelic": {
+    "items": "Choose 1 of 5 Radiant Items"
+  },
+  "DA_Recombobulator": {
+    "economy": "rerolls",
+    "items": "Gain 2 Magnetic Removers"
+  },
+  "DA_Replication": {
+    "items": "Choose 1 of 3 components"
+  },
+  "DA_RollingForDays": {
+    "economy": "rerolls"
+  },
+  "DA_SalvageBin": {
+    "items": "Gain 1 random completed item now, and 1 component"
+  },
+  "DA_SalvageBinPlus": {
+    "items": "Gain 1 random completed item now, and 1 component"
+  },
+  "DA_SeraphimsStaff": {
+    "items": "Gain an Archangel's Staff"
+  },
+  "DA_ShimmerscaleEssence": {
+    "items": "Gain a Mogul's Mail"
+  },
+  "DA_ShoppingSpree": {
+    "economy": "gold"
+  },
+  "DA_SilverSpoon": {
+    "economy": "XP"
+  },
+  "DA_Slammin": {
+    "economy": "gold"
+  },
+  "DA_SlamminPlus": {
+    "economy": "gold"
+  },
+  "DA_SmallGrabBag": {
+    "items": "Gain 2 random item components"
+  },
+  "DA_SoloLeveling": {
+    "economy": "XP",
+    "items": "gain 2 item components"
+  },
+  "DA_SoloPlate": {
+    "items": "Gain a Gargoyle Stoneplate"
+  },
+  "DA_SpeedyDoubleKill": {
+    "economy": "gold",
+    "items": "Gain a Guinsoo's Rageblade"
+  },
+  "DA_SpiritOfRedemption": {
+    "items": "Gain a Spirit Visage"
+  },
+  "DA_SpreadingRoots": {
+    "economy": "gold",
+    "items": "Gain 2 random Emblems"
+  },
+  "DA_SpreadingRootsPlus": {
+    "economy": "gold",
+    "items": "Gain 2 random Emblems"
+  },
+  "DA_Staffsmith": {
+    "items": "Gain 2 random completed items"
+  },
+  "DA_SweetTreats": {
+    "items": "Gain an Artifact anvil"
+  },
+  "DA_Swordsmith": {
+    "items": "Gain 2 random completed items"
+  },
+  "DA_TacticiansKitchen": {
+    "items": "Gain a random Emblem"
+  },
+  "DA_TheGoldenDragon": {
+    "economy": "gold",
+    "items": "Gain a Mogul's Mail"
+  },
+  "DA_TheTower": {
+    "items": "Gain a giant Training Dummy"
+  },
+  "DA_TheTraitTree": {
+    "economy": "gold",
+    "items": "Gain 3 random Emblems"
+  },
+  "DA_TheTraitTreePlus": {
+    "economy": "gold",
+    "items": "Gain 3 random Emblems"
+  },
+  "DA_TimeSkip": {
+    "economy": "XP"
+  },
+  "DA_TradeSector": {
+    "economy": "reroll"
+  },
+  "DA_TradeSectorPlus": {
+    "economy": "reroll"
+  },
+  "DA_TraitLadder": {
+    "items": "Gain a random emblem"
+  },
+  "DA_UpwardMobility": {
+    "economy": "XP"
+  },
+  "DA_URF": {
+    "items": "Gain a Spatula"
+  },
+  "DA_UrfsGrabBag": {
+    "economy": "gold",
+    "items": "Gain 1 Spatula, 3 random components"
+  },
+  "DA_WandOverflow": {
+    "items": "Gain 4 Needlessly Large Rod"
+  },
+  "DA_Warpath": {
+    "items": "gain a chest of high cost champions and items"
+  },
+  "DA_WeStickTogether": {
+    "items": "Gain a random Emblem and a completed item anvil"
+  },
+  "DA_18_WispRebatePlus": {
+    "economy": "gold"
+  },
+  "DA_18_WispRebatePlusPlus": {
+    "economy": "gold"
+  },
+  "DA_WovenMagic": {
+    "items": "Gain a random item component"
+  },
+  "DA_YoungAndWildAndFree": {
+    "economy": "gold"
+  },
+  "DA_CyberneticImplants_Gold": {
+    "items": "Gain a B.F. Sword"
+  },
+  "DA_CyberneticUplink_Gold": {
+    "items": "Gain a Tear of the Goddess"
+  },
+  "DA_NestingDollsPlus": {
+    "economy": "rerolls"
+  },
+  "DA_NestingDollsPlusPlus": {
+    "economy": "rerolls"
+  },
+  "DA_ItsMeBaby": {
+    "economy": "gold"
+  },
+  "DA_PandorasBench": {
+    "economy": "gold"
+  },
+  "DA_DeadlierCaps": {
+    "items": "Gain a Rabadon's Deathcap"
+  },
+  "DA_18_LuxAugmentII": {
+    "items": "Gain a Lux with that trait and a Spear of Shojin"
+  },
+  "DA_GoldDestiny": {
+    "economy": "Gold"
+  },
+  "DA_GoldDestinyPlus": {
+    "economy": "Gold"
+  },
+  "DA_Min_Max": {
+    "items": "Gain a Golden Item Remover and 4 random components"
+  },
+  "DA_PrismaticDestiny": {
+    "economy": "gold",
+    "items": "Gain a random Prismatic Augment"
+  },
+  "DA_PrismaticDestinyPlus": {
+    "economy": "gold",
+    "items": "Gain a random Prismatic Augment"
+  },
+  "DA_SilverDestiny": {
+    "economy": "gold",
+    "items": "Gain a random Silver Augment"
+  },
+  "DA_SilverDestinyPlus": {
+    "economy": "gold",
+    "items": "Gain a random Silver Augment"
+  },
+  "DA_SilverDestinyPlusPlus": {
+    "economy": "gold",
+    "items": "Gain a random Silver Augment"
+  },
+  "DA_ConstructACompanion": {
+    "economy": "gold"
+  },
+  "DA_ForgeAFriend": {
+    "economy": "gold"
+  },
+  "DA_BuildABud": {
+    "economy": "gold"
+  }
+}

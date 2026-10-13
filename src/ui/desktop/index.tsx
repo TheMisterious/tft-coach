@@ -7,6 +7,7 @@ import { CoachingReportView } from './CoachingReportView';
 import { PlayerTrendsView } from './PlayerTrendsView';
 import { StatusBar } from './StatusBar';
 import { AdBanner } from './AdBanner';
+import { TitleBar } from './TitleBar';
 import { useAppStore } from '../store';
 import { listRecentMatches, loadMatch, loadPlayerProfile } from '../../persistence/db';
 import type { CoachingReport, AppStatus, PlayerProfile } from '../../shared/types';
@@ -99,6 +100,7 @@ function DesktopApp() {
       display: 'flex', flexDirection: 'column', height: '100vh',
       background: '#11111b', fontFamily: 'Segoe UI, system-ui, sans-serif',
     }}>
+      <TitleBar />
       <StatusBar status={appStatus} />
       <div style={{ display: 'flex', gap: 4, padding: '8px 12px 0', flexShrink: 0 }}>
         <button

@@ -187,6 +187,28 @@
       "severity": "medium",
       "confidence": "high",
       "patch_sensitivity": "low"
+    },
+    {
+      "unique_id": "LOBBY_001",
+      "human_readable_name": "Level Behind the Lobby at a Stage Checkpoint",
+      "category": "board_strength",
+      "subcategory": "lobby_tempo",
+      "short_summary": "A strict majority of living opponents were a higher level than the player at a stage-entry checkpoint (3-1/4-1/5-1), measured from GEP roster data rather than a fixed benchmark.",
+      "source_tier": "measured",
+      "severity": "medium",
+      "confidence": "high",
+      "patch_sensitivity": "low"
+    },
+    {
+      "unique_id": "LOBBY_002",
+      "human_readable_name": "Health Behind the Lobby in the Early Game",
+      "category": "board_strength",
+      "subcategory": "lobby_tempo",
+      "short_summary": "Player was in the bottom two on HP and 20+ below the living-opponent median at a stage 2 or 3 entry checkpoint, before any absolute HP rule evaluates.",
+      "source_tier": "measured",
+      "severity": "medium",
+      "confidence": "high",
+      "patch_sensitivity": "low"
     }
   ]
 }

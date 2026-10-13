@@ -74,8 +74,14 @@ function checkEvelynnHpRisk(match: MatchSnapshot): DecisionPoint[] {
 
 // SET17_003 — warning fired after 3-4 if still not aligned (4-4 is last chance)
 function checkAlignmentLockedOut(match: MatchSnapshot): DecisionPoint[] {
-  // Only fire if we have both 2-4 and 3-4 picks but not yet 4-4.
-  const after34 = match.godPicks.filter(p => p.round === '2-4' || p.round === '3-4');
+  // Fire once 2+ god rounds have been captured but 4-4 (the last chance) has
+  // not. Was previously gated on having BOTH 2-4 and 3-4 specifically, which
+  // meant a single missed capture disabled the rule outright — real case in
+  // tests/goldens/2026-07-07-rank-7.jsonl, where GEP recorded only the 3-4 and
+  // 4-4 picks and neither SET17_001 (needs all three) nor this rule could run.
+  // Any two distinct pre-4-4 god rounds are enough to say "you haven't doubled
+  // up yet"; which two they were doesn't change the advice.
+  const after34 = match.godPicks.filter(p => GOD_ROUNDS.has(p.round) && p.round !== '4-4');
   const has44   = match.godPicks.some(p => p.round === '4-4');
   if (after34.length < 2 || has44) return []; // not in the warning window
 

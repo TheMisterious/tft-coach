@@ -92,7 +92,7 @@ describe('linkCompoundingPatterns — HP_002/HP_003 <- ITEM_003/BOARD_001', () =
       makePoint({ ruleId: 'HP_002', round: '4-1', category: 'hp', coaching_text: 'HP text.' }),
     ];
     const result = linkCompoundingPatterns(points);
-    expect(result.find(p => p.ruleId === 'HP_002')!.coaching_text).toContain('board-cost deficit flagged at 3-1 (15 below benchmark)');
+    expect(result.find(p => p.ruleId === 'HP_002')!.coaching_text).toContain('board-cost deficit at 3-1 (15 below benchmark)');
   });
 
   it('links HP_003 (5-1) to a BOARD_001 note at 4-1 but not one at 3-1', () => {

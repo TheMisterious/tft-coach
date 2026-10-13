@@ -1,7 +1,11 @@
 declare const overwolf: any;
 
 export const HOTKEY_NAME = 'tft_coach_toggle';
-export const GAME_ID = 21570;
+// Teamfight Tactics' Overwolf class ID, and the key Overwolf files our hotkey
+// binding under in settings.hotkeys.get(). Must stay in sync with
+// data.game_targeting.game_ids in manifest.json, or the per-game lookup below
+// misses and we silently fall back to the globals list.
+export const GAME_ID = 28164;
 
 // Plain (non-hook) read of the user's actual current binding for our one
 // hotkey — never hardcode "Ctrl+F"/"Ctrl+Shift+T" anywhere, since the user

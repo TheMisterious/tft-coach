@@ -3,7 +3,7 @@
 // KNOWN BUG: Stage 5-7 sometimes skips match_info events (Overwolf open issue).
 // Fallback: count round_start events since the last Realm of the Gods round to derive the label.
 
-import type { LedgerEntry, RoundSnapshot, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats } from '../shared/types';
+import type { LedgerEntry, RoundSnapshot, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats, LobbyPlayerState } from '../shared/types';
 import { safeParseGep } from '../capture/safe-parse';
 import { normalizeBoardSnapshot, boardChampionIds } from './merge';
 
@@ -82,6 +82,19 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   let xpBoughtThisRound  = false;
   let lastRoundOutcome: 'win' | 'loss' | undefined;
   let lastBattleStats: BattleStats | undefined;
+  // Fallback own-side damage, accumulated from match_info.local_player_damage.
+  // See the local_player_damage handler below for why this exists at all.
+  let bestLocalDamage: CombatUnitStats[] | undefined;
+  let bestLocalDamageTotal = 0;
+  // Whether this match's GEP ever sent the authoritative bench.item_bench
+  // feature. When it never does, bench_pieces item slots are used instead —
+  // see the bench_pieces handler below.
+  let sawItemBench = false;
+  // Latest lobby standings from roster.player_status. Persisted across rounds
+  // rather than reset per-round: GEP only pushes this when a value changes, so
+  // a quiet round would otherwise report an empty lobby.
+  let lastLobby: LobbyPlayerState[] | undefined;
+  let benchItemsFromPieces: string[] = [];
   let lastOpponentName: string | undefined;
 
   let streakCount = 0;
@@ -145,6 +158,15 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   // we detect the next round_start already reflects "as of the end of the
   // round that never closed," so we can synthesize an accurate close using
   // the label/type captured when that round itself started.
+  // Own-side-only BattleStats synthesized from local_player_damage, used when
+  // this match's GEP never sent a real battle_stats payload. Returns undefined
+  // rather than an empty shell when no damage was recorded, so consumers'
+  // existing `!round.battleStats?.own?.length` guards behave exactly as before.
+  function localDamageAsBattleStats(): BattleStats | undefined {
+    if (!bestLocalDamage?.length) return undefined;
+    return { own: bestLocalDamage, opponent: [] };
+  }
+
   function pushRoundSnapshot(label: string, type: typeof roundType) {
     const interest = Math.min(5, Math.floor(gold / 10));
     rounds.push({
@@ -176,12 +198,15 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       streakType,
       godChosen:          currentGodChosen,
       godOfferingHpCost:  currentGodHpCost,
-      battleStats:        lastBattleStats,
+      battleStats:        lastBattleStats ?? localDamageAsBattleStats(),
       opponentName:       lastOpponentName,
+      lobby:              lastLobby ? [...lastLobby] : undefined,
     });
     lastRoundOutcome = undefined;
     lastBattleStats  = undefined;
     lastOpponentName = undefined;
+    bestLocalDamage      = undefined;
+    bestLocalDamageTotal = 0;
   }
 
   for (let i = 0; i < entries.length; i++) {
@@ -263,6 +288,42 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         // attached to whichever round closes next.
         if (key === 'battle_stats') {
           lastBattleStats = splitBattleStatsBySide(value, board);
+        }
+
+        // Real per-unit damage for the local player's own board. This is the
+        // feed Set 17's GEP actually sends — battle_stats above does NOT fire
+        // for the local player in any of tests/goldens/ (0 occurrences across
+        // all six real matches, vs. 17,423 local_player_damage entries), which
+        // left RoundSnapshot.battleStats permanently undefined and COMBAT_001
+        // unable to fire at all.
+        //
+        // Shape is { unit_0: { name, damage, level }, ... }, and the values are
+        // CUMULATIVE WITHIN ONE FIGHT: verified against real ledgers, every
+        // unit resets to 0 when a fight starts and climbs until it ends. So the
+        // meaningful figure for a round is the highest-total snapshot seen
+        // since the last round closed — taking the merely-latest one would
+        // read back 0s from the next fight's reset.
+        //
+        // Own side only: unlike battle_stats there is no opponent half here, so
+        // `opponent` stays empty. positioning.ts reads battleStats.opponent and
+        // already handles it being absent — this is strictly more data than
+        // before, never less.
+        if (key === 'local_player_damage') {
+          const raw = safeParseGep(value, {}) as Record<string, { name?: string; damage?: number }>;
+          const units: CombatUnitStats[] = Object.values(raw)
+            .filter(u => u?.name)
+            .map(u => ({
+              name:         String(u.name),
+              totalDamage:  Number(u.damage ?? 0),
+              totalBlocked: 0,
+              healed:       0,
+              shielded:     0,
+            }));
+          const total = units.reduce((sum, u) => sum + u.totalDamage, 0);
+          if (units.length > 0 && total > bestLocalDamageTotal) {
+            bestLocalDamage      = units;
+            bestLocalDamageTotal = total;
+          }
         }
 
         // The real display name of this round's opponent — who board/
@@ -366,6 +427,17 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
 
       if (feature === 'bench' && key === 'bench_pieces') {
         bench = normalizeBoardSnapshot(safeParseGep(value, {}) as Record<string, any>);
+        // Components already equipped onto bench units. Strictly narrower than
+        // item_bench (it cannot see components sitting loose in the item tray),
+        // but item_bench fires 0 times across every match in tests/goldens/,
+        // which left benchItems permanently empty and ITEM_001/ITEM_004/ITEM_005
+        // unable to fire. Recorded separately and only used when item_bench
+        // never arrives, so a match that does have the real feature is
+        // unaffected.
+        benchItemsFromPieces = Object.values(bench)
+          .flatMap(cell => [cell?.item_1, cell?.item_2, cell?.item_3])
+          .filter((id): id is string => !!id && id !== '0' && !id.includes('_Consumable_'));
+        if (!sawItemBench) benchItems = [...benchItemsFromPieces];
       }
 
       // item_bench is a SEPARATE feature from bench_pieces — an array keyed by
@@ -378,11 +450,34 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       // Filters out consumable tokens (ItemRemover/ItemReroller charges,
       // TFT_Consumable_*) which aren't real components or completed items.
       if (feature === 'bench' && key === 'item_bench') {
+        sawItemBench = true;
         const players = safeParseGep(value, []) as Array<{ summoner?: string; bench_items?: string[] }>;
         const mine = localPlayerName
           ? players.find(p => p.summoner?.startsWith(localPlayerName!))
           : undefined;
         benchItems = (mine?.bench_items ?? []).filter(id => !id.includes('_Consumable_'));
+      }
+
+      // Public state of all eight players. The only lobby-wide feed this GEP
+      // version actually sends (match_stats.board_players, the richer one this
+      // file also looks for below, fires 0 times across every match in
+      // tests/goldens/). Keyed by display name; opponents show their
+      // little-legend skin rather than a Riot ID, so `localplayer` is the only
+      // reliable way to find ourselves.
+      //
+      // `xp` is the player's LEVEL, not experience — verified round-for-round
+      // against me.xp.level across all six goldens. Stored as `level`.
+      if (feature === 'roster' && key === 'player_status') {
+        const roster = safeParseGep(value, {}) as Record<string, { health?: number; xp?: number; localplayer?: boolean }>;
+        const players: LobbyPlayerState[] = Object.entries(roster)
+          .filter(([name]) => !!name)
+          .map(([name, p]) => ({
+            name,
+            health:  Number(p?.health ?? 0),
+            level:   Number(p?.xp ?? 0),
+            isLocal: p?.localplayer === true,
+          }));
+        if (players.length > 0) lastLobby = players;
       }
 
       if (feature === 'match_stats' && key === 'board_players') {

@@ -7,6 +7,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     /* Transparent window — no background, no border. */
     body { background: transparent; overflow: hidden; }
+    /* Overwolf QA: overlay text must not be selectable. No inputs here. */
+    body { -webkit-user-select: none; user-select: none; cursor: default; }
+    img { -webkit-user-drag: none; user-drag: none; }
   </style>
 </head>
 <body>

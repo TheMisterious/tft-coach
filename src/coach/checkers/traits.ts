@@ -32,6 +32,20 @@ export function checkTraitBreakpoints(match: MatchSnapshot, meta: MetaData): Dec
         continue;
       }
 
+      // The trait must already be ACTIVE on this board — i.e. we're telling the
+      // player to extend a trait they're actually running, not to activate some
+      // unrelated one they happen to hold a single unit of.
+      //
+      // Without this the rule fired 130 times across the six matches in
+      // tests/goldens/ (~22 per match). Sitting one unit short of SOME trait's
+      // next tier is the default state of a TFT board, not a mistake: with 8-10
+      // traits represented, several are always at n/(n+1). Every one of those
+      // produced a full coaching note competing for the same 20 report slots.
+      if (count < tiers[0]) {
+        consecutiveMap[trait] = 0;
+        continue;
+      }
+
       oneAwayThisRound.add(trait);
       consecutiveMap[trait] = (consecutiveMap[trait] ?? 0) + 1;
 

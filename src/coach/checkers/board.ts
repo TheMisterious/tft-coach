@@ -8,6 +8,15 @@ import { boardChampionIds } from '../../ledger/merge';
 // Star multiplier: 1-star = 1×cost, 2-star = 3×cost, 3-star = 9×cost.
 const COST_BENCHMARKS: Record<number, number> = { 2: 12, 3: 20, 4: 30, 5: 45 };
 
+// Minimum deficit, as a fraction of the benchmark, before a shortfall is worth
+// telling the player about. boardCostSum is an explicitly rough proxy (star
+// multipliers, a flat cost-2 guess for uncatalogued champions), so a deficit
+// inside its own margin of error is noise dressed up as a finding. Real case
+// from tests/goldens/2026-07-04-rank-6: "board cost sum at stage 5: ~44
+// (benchmark >=45)" — one point under, on an estimate that cannot resolve one
+// point, and it consumed a slot in the 20-note report.
+const MIN_RELATIVE_DEFICIT = 0.1;
+
 // 2 is a safe average fallback for champions not yet catalogued in champions.json.
 function estimateCost(champId: string, meta: MetaData): number {
   return meta.champions?.[champId]?.tier ?? 2;
@@ -46,6 +55,7 @@ function checkBoardCostSum(match: MatchSnapshot, meta: MetaData): DecisionPoint[
     const costSum = boardCostSum(round, meta);
     const deficit = benchmark - costSum;
     if (deficit <= 0) continue;
+    if (deficit < benchmark * MIN_RELATIVE_DEFICIT) continue; // inside the proxy's own error bar
 
     // Real HP delta across this stage (this round's health -> next stage's
     // X-1 checkpoint), the same "stage-start to stage-start" window hp.ts's

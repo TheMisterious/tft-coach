@@ -8,6 +8,12 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body, #root { height: 100%; width: 100%; }
     body { background: #11111b; overflow: hidden; }
+    /* Overwolf QA: text in a native desktop app must not be selectable —
+       drag-highlighting makes the app read like a web page. Real text inputs
+       are opted back in below so the settings fields still work. */
+    body { -webkit-user-select: none; user-select: none; cursor: default; }
+    input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; cursor: text; }
+    img { -webkit-user-drag: none; user-drag: none; }
   </style>
 </head>
 <body>

@@ -31,6 +31,7 @@ import { getCurrentMatchId,
 import { reconstructSnapshots }   from '../ledger/rounds';
 import { detectSet, loadMeta }    from '../enrichment/meta-lookup';
 import { extractDecisionPoints }  from '../coach/rule-engine';
+import type { MatchHistoryEntry } from '../coach/history-context';
 import { buildBrief }             from '../coach/brief-builder';
 import { generateCoachingReport } from '../coach/report-generator';
 import { buildMatchContext }      from '../coach/match-context';
@@ -126,7 +127,7 @@ async function onGameLaunched(): Promise<void> {
   state.pipelineRanThisSession = false;
   state.appStatus   = computeStatus();
   pushStatusToDesktop();
-  // Pre-seed TFT mode immediately. The manifest targets only game 21570 (TFT),
+  // Pre-seed TFT mode immediately. The manifest targets only game 28164 (TFT),
   // so any game reaching this handler is TFT. Without this, events are silently
   // dropped while we wait for match_info.game_mode to arrive from GEP.
   handleGameModeUpdate('tft');
@@ -192,13 +193,14 @@ function onGameClosed(): void {
 // onGameInfoUpdated fires for ANY running game (e.g. LoL client = 5426).
 // Without this guard, detecting LoL first sets gameRunning=true and the
 // subsequent TFT launch is silently ignored.
-const TFT_CLASS_ID = 21570;
+const TFT_CLASS_ID = 28164;
 const LOL_CLASS_ID  = 5426; // TFT runs inside the League client — Overwolf reports classId 5426 for both
 
 function isTftGame(gameInfo: any): boolean {
   const cid = gameInfo?.classId;
-  // TFT always appears as classId 5426 (League executable) in onGameInfoUpdated.
-  // classId 21570 is kept for standalone TFT builds and older Overwolf versions.
+  // TFT frequently appears as classId 5426 (League executable) in onGameInfoUpdated,
+  // since TFT is launched from inside the League client. classId 28164 is TFT's own
+  // entry in Overwolf's game list and is what the manifest targets.
   // setRequiredFeatures will fail if only LoL is running, so false positives are safe.
   return !cid || cid === TFT_CLASS_ID || cid === LOL_CLASS_ID;
 }
@@ -269,6 +271,29 @@ function computeTrendData(
 // featureVector/matchLabels — the "retrain" step. Cheap at this project's
 // realistic scale (n<=200 matches, ~29 features), so it's just a function
 // call after every save rather than a separate training pipeline.
+// Prior matches' behavioural feature vectors, oldest first, for the rule
+// engine's self-relative clauses (see src/coach/history-context.ts). Loaded
+// here rather than inside the coach layer because architectural invariant 5
+// keeps persistence out of the coaching logic — the engine takes history as an
+// argument and stays a pure function of its inputs.
+//
+// loadAllFeatureRecords() returns the index order, which db.ts writes
+// newest-first; history-context.ts wants a newest-LAST window, hence the
+// reverse. `excludeMatchId` drops the match currently being reported on, so a
+// regenerated report can never count this game toward its own "happened in N of
+// your last 10" claim.
+function priorFeatureHistory(excludeMatchId?: string): MatchHistoryEntry[] {
+  try {
+    const { records } = loadAllFeatureRecords();
+    return records
+      .filter(r => r.matchId !== excludeMatchId)
+      .reverse();
+  } catch (e) {
+    console.warn('[bg] could not load match history for self-relative context —', e);
+    return [];
+  }
+}
+
 function retrainPlayerProfile(): void {
   const { records, skippedStaleSchemaCount } = loadAllFeatureRecords();
   const profile = buildPlayerProfile(records, skippedStaleSchemaCount);
@@ -381,7 +406,7 @@ async function runCoachingPipeline(): Promise<void> {
     console.log('[bg] pipeline step 3b: meta loaded — champions:', Object.keys(meta.champions ?? {}).length);
 
     // 4. Run rule engine.
-    const points   = extractDecisionPoints(snapshot, meta);
+    const points   = extractDecisionPoints(snapshot, meta, priorFeatureHistory());
     console.log('[bg] pipeline step 4: rule engine done — decision points:', points.length);
 
     // 5. Build the compact report brief.
@@ -758,7 +783,7 @@ console.log('[bg] background controller started');
   const snapshot   = reconstructSnapshots(ledger);
   const setId      = detectSet(ledger);
   const meta       = await loadMeta(setId);
-  const points     = extractDecisionPoints(snapshot, meta);
+  const points     = extractDecisionPoints(snapshot, meta, priorFeatureHistory(id));
   const brief      = buildBrief(snapshot, points, meta);
   const report     = await generateCoachingReport(brief);
   const lastRound  = snapshot.rounds.at(-1)?.label ?? 'unknown';
@@ -801,7 +826,7 @@ console.log('[bg] background controller started');
   const snapshot  = reconstructSnapshots(ledger);
   const setId     = detectSet(ledger);
   const meta      = await loadMeta(setId);
-  const points    = extractDecisionPoints(snapshot, meta);
+  const points    = extractDecisionPoints(snapshot, meta, priorFeatureHistory(matchId));
   const brief     = buildBrief(snapshot, points, meta);
   const report    = await generateCoachingReport(brief);
   const lastRound = snapshot.rounds.at(-1)?.label ?? 'unknown';
@@ -857,6 +882,10 @@ console.log('[bg] background controller started');
 
     const setId = detectSet(ledger);
     const meta  = await loadMeta(setId);
+    // No history passed deliberately: this loop backfills featureVector/
+    // matchLabels for old matches and throws the points away. A history clause
+    // here would be computed and discarded, and worse, each backfilled match
+    // would see a different slice of history depending on loop order.
     const points = extractDecisionPoints(snapshot, meta);
     const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
 

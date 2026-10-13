@@ -1,4 +1,6 @@
-// TFT and LoL share gameID 21570. Without this gate, your coach runs on LoL matches.
+// TFT (classId 28164) launches from inside the League client, so Overwolf often
+// reports LoL's classId 5426 for a TFT session. Without this gate, your coach runs
+// on LoL matches.
 // Every GEP handler in listeners.ts must call `if (!isInTft()) return;` at the top.
 
 let currentMode: 'tft' | 'lol' | null = null;

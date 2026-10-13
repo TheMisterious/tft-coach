@@ -15,10 +15,14 @@ import { checkTraitBreakpoints } from './checkers/traits';
 import { checkAugments }         from './checkers/augments';
 import { checkPositioning }      from './checkers/positioning';
 import { checkCombat }           from './checkers/combat';
+import { checkLobby }            from './checkers/lobby';
 import { getRuleTier, getRuleMeta, getMvpRules } from './rules-loader';
 import { buildMatchContext }     from './match-context';
 import { buildMatchPlan }        from './plan-builder';
 import { linkCompoundingPatterns } from './decision-links';
+import { lobbyClause }           from './lobby-context';
+import { attachHistoryContext }  from './history-context';
+import type { MatchHistoryEntry } from './history-context';
 
 const SEVERITY_ORDER: Record<Severity, number> = {
   critical: 0,
@@ -42,7 +46,14 @@ const MVP_RANK: Map<string, number> = new Map(getMvpRules().map((id, i) => [id, 
 
 export function extractDecisionPoints(
   match: MatchSnapshot,
-  meta: MetaData
+  meta: MetaData,
+  // Prior matches' behavioural feature vectors, newest last. Optional because
+  // the rule engine must stay a pure function of the match in front of it —
+  // the caller that owns storage (src/background/main.ts) passes these in
+  // rather than this module reaching into src/persistence, per architectural
+  // invariant 5. Omitted by tests/replay-harness.ts and by the first few
+  // matches of a fresh install, in which case no history clause is added.
+  history: MatchHistoryEntry[] = []
 ): DecisionPoint[] {
   console.log('[rule-engine] running checkers on', match.rounds.length, 'rounds');
 
@@ -69,6 +80,7 @@ export function extractDecisionPoints(
     ['augments',   checkAugments(match, meta, context)],
     ['positioning',checkPositioning(match, meta)],
     ['combat',     checkCombat(match, meta)],
+    ['lobby',      checkLobby(match)],
   ];
 
   const summary = checkerResults.map(([name, pts]) => `${name}:${pts.length}`).join(' ');
@@ -81,6 +93,8 @@ export function extractDecisionPoints(
   points = suppressHoldGoldAdviceDuringHpCrisis(points, context);
   points = mergeEconShortfallsAtSameRound(points);
   points = linkCompoundingPatterns(points);
+  points = attachLobbyContext(points, match);
+  points = attachHistoryContext(points, history);
 
   console.log('[rule-engine] total decision points:', points.length);
 
@@ -159,6 +173,51 @@ function mergeEconShortfallsAtSameRound(points: DecisionPoint[]): DecisionPoint[
   return points
     .filter(p => !(merged.has(p.round) && (p.ruleId === 'ECON_001' || p.ruleId === 'ECON_004')))
     .concat([...merged.values()]);
+}
+
+// Rules that compare the player to a fixed constant get one sentence of real
+// lobby context appended — where the player actually stood among the people
+// taking their HP. A benchmark says "level 8 by 4-2"; it cannot say "and five
+// of the seven players still alive were already past you", which is the fact
+// that decides the game.
+//
+// Runs here rather than inside each checker for the same reason
+// linkCompoundingPatterns does: it needs no checker-private state, and doing it
+// in one place keeps the annotated set explicit instead of scattered across
+// thirteen files. Only `coaching_text` is touched — severity, ruleId and
+// reasonMetrics are left alone, so scoring and the rule-coverage tests are
+// unaffected.
+//
+// LOBBY_001 is deliberately absent: it IS the lobby comparison, and appending
+// a lobby sentence to it would just say the same thing twice.
+const LOBBY_ANNOTATED: Record<string, 'level' | 'hp'> = {
+  LEVEL_001: 'level',
+  LEVEL_002: 'level',
+  LEVEL_003: 'level',
+  LEVEL_004: 'level',
+  LEVEL_005: 'level',
+  LEVEL_006: 'level',
+  HP_001:    'hp',
+  HP_002:    'hp',
+  HP_003:    'hp',
+  BOARD_001: 'hp',
+};
+
+function attachLobbyContext(points: DecisionPoint[], match: MatchSnapshot): DecisionPoint[] {
+  const roundByLabel = new Map(match.rounds.map(r => [r.label, r]));
+
+  return points.map(p => {
+    const metric = p.ruleId ? LOBBY_ANNOTATED[p.ruleId] : undefined;
+    if (!metric || !p.coaching_text) return p;
+
+    const round = roundByLabel.get(p.round);
+    if (!round) return p;
+
+    const clause = lobbyClause(round, metric);
+    if (!clause || p.coaching_text.includes(clause)) return p;
+
+    return { ...p, coaching_text: p.coaching_text + clause };
+  });
 }
 
 // Rules the registry marks "confidence: medium" get a short caveat appended

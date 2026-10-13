@@ -166,3 +166,89 @@ describe('AUGMENT_004 — item-shaping augment without a built carry', () => {
     expect(points.find(p => p.ruleId === 'AUGMENT_004')).toBeUndefined();
   });
 });
+
+// ─── Derived augment effects (Phase 4, 2026-08-26) ───────────────────────────
+// augments.json's hand-curated buckets only cover what someone got around to:
+// 10 of the 22 augment ids picked across tests/goldens/ had no bucket at all,
+// so AUGMENT_001 and AUGMENT_004 silently skipped them. augment-effects.json
+// (scripts/derive-augment-effects.js) fills that in from real Data Dragon
+// description text. These tests prove the fallback actually changes rule
+// behaviour, rather than just sitting in MetaData.
+
+describe('augment classification falls back to derived effects', () => {
+  const crisisMatch = makeMatch({
+    augments: ['TFT_Augment_ExplosiveGrowth'],
+    rounds: [
+      makeRound({ label: '3-1', health: 80, augmentsPicked: [] }),
+      makeRound({ label: '3-2', health: 30, augmentsPicked: ['TFT_Augment_ExplosiveGrowth'] }),
+    ],
+  });
+
+  it('AUGMENT_001 stays silent when nothing classifies the augment', () => {
+    // The pre-Phase-4 state: uncurated, no derived data, rule can't evaluate it.
+    const points = checkAugments(crisisMatch, makeMeta());
+    expect(points.filter(p => p.ruleId === 'AUGMENT_001')).toEqual([]);
+  });
+
+  it('AUGMENT_001 fires on a derived economy augment that no bucket covers', () => {
+    const meta = makeMeta({
+      augmentEffects: { TFT_Augment_ExplosiveGrowth: { economy: 'XP' } },
+    });
+    const points = checkAugments(crisisMatch, meta);
+    expect(points.filter(p => p.ruleId === 'AUGMENT_001').length).toBe(1);
+  });
+
+  it('hand curation still wins — a curated bucket alone is enough', () => {
+    const meta = makeMeta({
+      augments: { economy: ['TFT_Augment_ExplosiveGrowth'], combat: [], items: [], units: [] },
+    });
+    expect(checkAugments(crisisMatch, meta).filter(p => p.ruleId === 'AUGMENT_001').length).toBe(1);
+  });
+
+  it('AUGMENT_004 fires on a derived item augment that no bucket covers', () => {
+    const match = makeMatch({
+      augments: ['TFT9_Augment_BigGrabBag'],
+      finalBoard: { cell_1: { name: 'TFT17_Jinx', level: 2, item_1: 'TFT_Item_BFSword', item_2: '0', item_3: '0' } } as unknown as BoardState,
+    });
+    const meta = makeMeta({
+      augmentEffects: { TFT9_Augment_BigGrabBag: { economy: 'gold', items: 'Gain 3 random components' } },
+    });
+    expect(checkAugments(match, meta).filter(p => p.ruleId === 'AUGMENT_004').length).toBe(1);
+  });
+
+  it('never treats a Realm of the Gods blessing as a regular augment', () => {
+    // God blessings ride the same picked_augment feed but are judged by
+    // checkers/set17.ts from the match_info god_* fields. Feeding one to the
+    // augment rules would produce advice about a pick the player never made in
+    // the augment sense.
+    const godMatch = makeMatch({
+      augments: ['TFT17_Augment_SorakaGodAugment'],
+      rounds: [
+        makeRound({ label: '3-1', health: 80, augmentsPicked: [] }),
+        makeRound({ label: '3-2', health: 30, augmentsPicked: ['TFT17_Augment_SorakaGodAugment'] }),
+      ],
+    });
+    const meta = makeMeta({
+      augmentEffects: { TFT17_Augment_SorakaGodAugment: { godAugment: true } },
+    });
+    const points = checkAugments(godMatch, meta);
+    expect(points.filter(p => p.ruleId === 'AUGMENT_001')).toEqual([]);
+    expect(points.filter(p => p.ruleId === 'AUGMENT_004')).toEqual([]);
+  });
+
+  it('AUGMENT_002 still reports a data gap when only blessings were captured', () => {
+    // A match that recorded three god blessings and zero real augments has no
+    // augment data at all, however full match.augments looks.
+    const match = makeMatch({
+      finalPlacement: 7,
+      augments: ['TFT17_Augment_SorakaGodAugment', 'TFT17_Augment_ThreshGodAugment'],
+    });
+    const meta = makeMeta({
+      augmentEffects: {
+        TFT17_Augment_SorakaGodAugment: { godAugment: true },
+        TFT17_Augment_ThreshGodAugment: { godAugment: true },
+      },
+    });
+    expect(checkAugments(match, meta).filter(p => p.ruleId === 'AUGMENT_002').length).toBe(1);
+  });
+});

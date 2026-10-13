@@ -26,6 +26,11 @@ const INTEREST_TIERS = [10, 20, 30, 40, 50];
 // undo itself.
 const OVERCAP_ACTIONABLE_SURPLUS = 4;
 
+// Stage number from a "3-2"-style round label; 0 for "match"/unparseable.
+function stageOf(label: string): number {
+  return Number(label.split('-')[0]) || 0;
+}
+
 export function checkEcon(
   match: MatchSnapshot,
   meta: MetaData = {} as MetaData,
@@ -102,7 +107,19 @@ function checkMissedInterest(
           ruleId:   'ECON_001',
           round:    round.label,
           category: 'econ',
-          severity: gap === 1 ? 'critical' : 'moderate',
+          // Severity is impact, not proximity. This used to be
+          // `gap === 1 ? 'critical' : 'moderate'` — being ONE gold short
+          // outranked being three short, and since rule-engine.ts sorts by
+          // severity first, the most trivial econ miss in the match took slot
+          // #1 of the report. Real output from tests/goldens/2026-07-04-rank-6:
+          // "1g below the 30g interest tier" (critical) ranked above "carry had
+          // 0 completed items at stage 4" (also critical, but genuinely so).
+          // A missed bracket is worth +1g per remaining round, so the earlier
+          // it happens the more it compounds — that, not closeness, is the
+          // real severity axis. Never critical: no single interest bracket is
+          // a match-losing mistake. MVP_RANK (data/rules.mvp.json) already
+          // carries this rule's teaching priority as a tiebreaker.
+          severity: stageOf(round.label) <= 3 ? 'moderate' : 'minor',
           observed: `Ended ${round.label} at ${gold}g — ${gap}g below the ${tier}g interest tier`,
           recommended: `Hold ${gap}g more${sellHint} to cross the ${tier}g bracket and earn +1 interest`,
           reasonMetrics: { goldEnd: gold, tier, gap },

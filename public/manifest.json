@@ -4,7 +4,7 @@
   "meta": {
     "name": "coachv — coach for TFT",
     "author": "TheMisterious",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "minimum-overwolf-version": "0.224.0",
     "minimum-gep-version": "302.0",
     "description": "Round-by-round post-match TFT coaching with offline reports",
@@ -14,18 +14,23 @@
     "launcher_icon": "icons/desktop-icon.ico",
     "window_icon": "icons/IconMouseOver.png"
   },
-  "permissions": ["Hotkeys", "GameInfo", "Tray", "FileSystem", "Ads"],
+  "permissions": ["Hotkeys", "GameInfo", "DesktopStreaming", "FileSystem"],
   "data": {
     "start_window": "desktop",
-    "game_targeting": { "type": "dedicated", "game_ids": [21570] },
-    "game_events": [21570, 5426],
+    "force_browser": "user",
+    "game_targeting": { "type": "dedicated", "game_ids": [28164] },
+    "game_events": [28164, 5426],
     "launch_events": [
       {
         "event": "GameLaunch",
-        "event_data": { "game_ids": [21570] },
+        "event_data": { "game_ids": [28164] },
         "start_minimized": true
       }
     ],
+    "uninstall_window": {
+      "file": "uninstall/uninstall.html",
+      "required_runtime": 10000
+    },
     "hotkeys": {
       "tft_coach_toggle": {
         "title": "Toggle coachv",
@@ -44,11 +49,11 @@
       },
       "desktop": {
         "file": "desktop/desktop.html",
+        "desktop_only": true,
+        "native_window": true,
         "transparent": false,
         "resizable": true,
-        "native_window": true,
         "show_in_taskbar": true,
-        "show_maximize": true,
         "size": { "width": 1280, "height": 800 },
         "min_size": { "width": 1024, "height": 600 },
         "block_top_window_navigation": true
@@ -62,9 +67,6 @@
         "size": { "width": 320, "height": 80 },
         "block_top_window_navigation": true
       }
-    },
-    "developer": {
-      "enable_auto_refresh": true
     }
   }
 }

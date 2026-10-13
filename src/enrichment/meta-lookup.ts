@@ -2,7 +2,7 @@
 // All strategic knowledge lives in those JSON files — swapping sets requires
 // only creating a new folder, never changing TypeScript code.
 
-import type { LedgerEntry, MetaData, CarryBisEntry, TraitBreakpoint, EconBenchmark, ChampionMeta, AugmentModifiers, AugmentItemOverride, AugmentFrontlineExemption, CompArchetype, ItemData } from '../shared/types';
+import type { AugmentEffect, LedgerEntry, MetaData, CarryBisEntry, TraitBreakpoint, EconBenchmark, ChampionMeta, AugmentModifiers, AugmentItemOverride, AugmentFrontlineExemption, CompArchetype, ItemData } from '../shared/types';
 import { loadAggregateMetaTable } from '../persistence/meta-cache';
 
 const EMPTY_AUGMENT_MODIFIERS: AugmentModifiers = {
@@ -30,7 +30,7 @@ export function detectSet(entries: LedgerEntry[]): string {
 export async function loadMeta(setId: string): Promise<MetaData> {
   const base = `/data/sets/${setId}`;
   console.log('[meta] loading set data from:', base);
-  const [carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiersRaw, comps, augmentUnitGrants] = await Promise.all([
+  const [carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiersRaw, comps, augmentUnitGrants, augmentEffects] = await Promise.all([
     fetchJson<Record<string, CarryBisEntry>>(`${base}/carry-bis.json`, {}),
     fetchJson<TraitBreakpoint[]>(`${base}/trait-breakpoints.json`, []),
     fetchJson<EconBenchmark[]>(`${base}/econ-benchmarks.json`, []),
@@ -43,6 +43,7 @@ export async function loadMeta(setId: string): Promise<MetaData> {
     fetchJson<Partial<AugmentModifiers>>(`${base}/augment-modifiers.json`, {}),
     fetchJson<CompArchetype[]>(`${base}/comps.json`, []),
     fetchJson<Record<string, string>>(`${base}/augment-unit-grants.json`, {}),
+    fetchJson<Record<string, AugmentEffect>>(`${base}/augment-effects.json`, {}),
   ]);
   // Merge over defaults — a set without an augment-modifiers.json file (or a
   // file missing a bucket) falls back to "no overrides" for that bucket rather
@@ -54,8 +55,8 @@ export async function loadMeta(setId: string): Promise<MetaData> {
   // synchronously/defensively (loadAggregateMetaTable already try/catches a
   // missing localStorage global, same as every other persistence accessor).
   const metaTierTable = loadAggregateMetaTable();
-  console.log(`[meta] loaded — champions:${Object.keys(champions ?? {}).length} carryBis:${Object.keys(carryBis ?? {}).length} traits:${(traitBreakpoints as unknown[])?.length ?? 0} econBenchmarks:${(econBenchmarks as unknown[])?.length ?? 0} items:${Object.keys(items ?? {}).length} itemData:${Object.keys(itemData ?? {}).length} augments:${Object.keys(augments ?? {}).length} augmentNames:${Object.keys(augmentNames ?? {}).length} augmentModifiers:${Object.keys(augmentModifiers.itemBisOverrides).length} comps:${comps?.length ?? 0} augmentUnitGrants:${Object.keys(augmentUnitGrants ?? {}).length} metaTierTable:${metaTierTable ? metaTierTable.matchSampleCount : 'none'}`);
-  return { carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiers, comps, augmentUnitGrants, metaTierTable };
+  console.log(`[meta] loaded — champions:${Object.keys(champions ?? {}).length} carryBis:${Object.keys(carryBis ?? {}).length} traits:${(traitBreakpoints as unknown[])?.length ?? 0} econBenchmarks:${(econBenchmarks as unknown[])?.length ?? 0} items:${Object.keys(items ?? {}).length} itemData:${Object.keys(itemData ?? {}).length} augments:${Object.keys(augments ?? {}).length} augmentNames:${Object.keys(augmentNames ?? {}).length} augmentModifiers:${Object.keys(augmentModifiers.itemBisOverrides).length} comps:${comps?.length ?? 0} augmentUnitGrants:${Object.keys(augmentUnitGrants ?? {}).length} augmentEffects:${Object.keys(augmentEffects ?? {}).length} metaTierTable:${metaTierTable ? metaTierTable.matchSampleCount : 'none'}`);
+  return { carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiers, comps, augmentUnitGrants, augmentEffects, metaTierTable };
 }
 
 // Friendly display name for a champion id (e.g. "TFT17_AurelionSol" -> "Aurelion Sol").

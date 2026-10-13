@@ -44,6 +44,18 @@
 .badge-augments   { background: #eba0ac; color: #1e1e2e; }
 .badge-positioning { background: #89dceb; color: #1e1e2e; }
 
+.evidence {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #a6e3a1;
+  color: #a6e3a1;
+  cursor: help;
+}
+
 .tier {
   font-size: 10px;
   font-weight: 600;

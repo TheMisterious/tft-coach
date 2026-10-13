@@ -36,6 +36,13 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
     [report, severityFilter]
   );
 
+  // Absent on reports generated before the rule audit, which keep every note
+  // in `notes`.
+  const filteredOther = useMemo(
+    () => report?.other_notes?.filter(n => severityFilter.has(n.severity)) ?? [],
+    [report, severityFilter]
+  );
+
   // Group by stage (first character before the hyphen in round_label).
   const byStage = useMemo(() => {
     const map = new Map<string, CoachingNote[]>();
@@ -148,7 +155,9 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
             {/* Stage sections */}
             {byStage.size === 0 && (
               <p style={{ color: '#6c7086', fontStyle: 'italic' }}>
-                No notes match the current filter.
+                {report.other_notes && report.notes.length === 0
+                  ? 'No rule with a measured link to placement fired this game.'
+                  : 'No notes match the current filter.'}
               </p>
             )}
             {[...byStage.entries()].sort(([a], [b]) => Number(a) - Number(b)).map(([stage, notes]) => (
@@ -159,6 +168,22 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
                 ))}
               </section>
             ))}
+
+            {/* Unproven observations — collapsed by default */}
+            {filteredOther.length > 0 && (
+              <details className={styles.otherNotes}>
+                <summary className={styles.otherNotesSummary}>
+                  Other observations ({filteredOther.length})
+                </summary>
+                <p className={styles.otherNotesHint}>
+                  These rules have not shown a measurable link to placement in the audited
+                  matches. They may still be right — there is not enough evidence yet to say.
+                </p>
+                {filteredOther.map((note, i) => (
+                  <CoachingCard key={i} note={note} />
+                ))}
+              </details>
+            )}
 
             {/* Strengths */}
             {report.strengths.length > 0 && (

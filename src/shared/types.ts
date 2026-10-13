@@ -204,11 +204,34 @@ export interface DecisionPoint {
 
 // ─── Coaching report ────────────────────────────────────────────────────────
 
+// What scripts/rule-audit.ts measured about a rule against real placements
+// (data/core/rule-evidence.json). Only 'predictive' rules have shown a
+// measurable link to a worse finish; every other verdict says why the rule
+// is unproven — not that it is wrong.
+export type RuleVerdict =
+  | 'predictive'   // fired -> measurably worse placement (BH q < 0.1)
+  | 'inverted'     // fired -> measurably BETTER placement (BH q < 0.1)
+  | 'unproven'     // tested, no measurable effect at the audit's sample size
+  | 'always-on'    // fires in nearly every match, so it cannot separate good games from bad
+  | 'rare'         // fired too rarely to test
+  | 'whole-match'  // a whole-match judgment with no round to window on
+  | 'never-fired'  // registered, never fired in any audited match
+  | 'unaudited';   // not in the evidence file (new rule, or a note with no ruleId)
+
+export interface NoteEvidence {
+  verdict: RuleVerdict;
+  placementDelta?: number;  // mean placement fired minus not fired; positive = worse finish
+  matches?: number;         // audited matches behind the verdict
+}
+
 export interface CoachingNote {
   round_label: string;
   category: DecisionCategory;
   severity: Severity;
   tier?: 'core' | 'season';
+  // Absent on reports generated before the rule audit existed; the report
+  // view treats a report with no evidence on any note as unpartitioned.
+  evidence?: NoteEvidence;
   what_happened: string;
   what_should_have_happened: string;
   why: string;
@@ -325,7 +348,12 @@ export interface CoachingReport {
   category_grades: Record<DecisionCategory, Grade>;
   tldr: string;
   priority_fix?: PriorityFix;
+  // Notes from rules with a measured link to placement (see NoteEvidence).
+  // On a report generated before the rule audit, every note.
   notes: CoachingNote[];
+  // Everything else the rule engine flagged — shown collapsed, never feeds
+  // the priority fix or the tldr. Absent on pre-audit reports.
+  other_notes?: CoachingNote[];
   strengths: string[];
   round_trajectory?: RoundTrajectoryPoint[];
   plan: MatchPlan;

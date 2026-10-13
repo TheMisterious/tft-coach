@@ -9,6 +9,7 @@ import type { MatchSnapshot, DecisionPoint, MatchBrief, CoachingNote, MetaData, 
 import { getChampionName, getItemName } from '../enrichment/meta-lookup';
 import { overallGrade, categoryGrades, capRepeats } from './scoring';
 import { buildMatchPlan } from './plan-builder';
+import { getRuleEvidence } from './rules-loader';
 
 // Maximum decision points (resolved + pending combined) before truncating.
 const MAX_POINTS = 20;
@@ -26,7 +27,13 @@ export function buildBrief(
   // see capRepeats() there for why that matters too.
   const diversified = diversifyRepeatedNotes(capRepeats(points));
 
-  const topPoints = diversified.slice(0, MAX_POINTS); // already severity-sorted
+  // Rules with a measured link to placement go first (stable, so severity
+  // order holds within each half): the MAX_POINTS cut must never drop one of
+  // them to make room for a rule that fires in every match.
+  const measured = (p: DecisionPoint) => getRuleEvidence(p.ruleId).verdict === 'predictive';
+  const ordered = [...diversified.filter(measured), ...diversified.filter(p => !measured(p))];
+
+  const topPoints = ordered.slice(0, MAX_POINTS);
   if (points.length > MAX_POINTS) {
     console.log(`[brief] truncated ${points.length} → ${MAX_POINTS} decision points (${points.length - diversified.length} dropped by per-rule cap)`);
   }
@@ -108,6 +115,7 @@ function toCoachingNote(dp: DecisionPoint): CoachingNote {
     category:                  dp.category,
     severity:                  dp.severity,
     tier:                      dp.tier,
+    evidence:                  getRuleEvidence(dp.ruleId),
     what_happened:             dp.observed,
     what_should_have_happened: dp.recommended,
     why:                       dp.coaching_text!,

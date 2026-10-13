@@ -4,22 +4,37 @@
 
 import type { MatchBrief, CoachingReport, CoachingNote, DecisionPoint, DecisionCategory, PriorityFix, Grade, Severity } from '../shared/types';
 import { CATEGORY_LABELS } from './scoring';
+import { getRuleEvidence } from './rules-loader';
 
 export async function generateCoachingReport(brief: MatchBrief): Promise<CoachingReport> {
-  const notes = [...brief.resolvedNotes, ...brief.decisionPoints.map(toCoachingNote)]
+  const allNotes = [...brief.resolvedNotes, ...brief.decisionPoints.map(toCoachingNote)]
     .sort((a, b) => roundToNumber(a.round_label) - roundToNumber(b.round_label));
+
+  // Only rules with a measured link to placement (scripts/rule-audit.ts) lead
+  // the report and feed the priority fix; the rest are kept, collapsed. A brief
+  // whose notes carry no evidence at all predates the audit and is left whole.
+  const audited = allNotes.some(n => n.evidence);
+  const notes = audited ? allNotes.filter(isMeasured) : allNotes;
+  const otherNotes = audited ? allNotes.filter(n => !isMeasured(n)) : undefined;
 
   return {
     overall_placement: brief.placement,
     overall_grade: brief.overallGrade,
     category_grades: brief.categoryGrades,
-    tldr: buildTldr(brief, notes),
+    tldr: otherNotes ? buildAuditedTldr(brief, notes, otherNotes) : buildTldr(brief, notes),
     priority_fix: buildPriorityFix(brief, notes),
     notes,
-    strengths: buildStrengths(brief, notes),
+    ...(otherNotes ? { other_notes: otherNotes } : {}),
+    // Every note, measured or not: a category is only credited as clean when
+    // nothing at all was flagged in it.
+    strengths: buildStrengths(brief, allNotes),
     round_trajectory: brief.roundTrajectory,
     plan: brief.plan,
   };
+}
+
+function isMeasured(note: CoachingNote): boolean {
+  return note.evidence?.verdict === 'predictive';
 }
 
 const GRADE_RANK: Record<Grade, number> = { D: 4, C: 3, B: 2, A: 1, S: 0 };
@@ -84,6 +99,7 @@ function toCoachingNote(dp: DecisionPoint): CoachingNote {
     category: dp.category,
     severity: dp.severity,
     tier: dp.tier,
+    evidence: getRuleEvidence(dp.ruleId),
     what_happened: dp.observed,
     what_should_have_happened: dp.recommended,
     why: dp.coaching_text ?? buildWhy(dp.reasonMetrics, dp.recommended),
@@ -116,6 +132,18 @@ function buildTldr(brief: MatchBrief, notes: CoachingNote[]): string {
     ? ` ${criticalCount} of those ${criticalCount === 1 ? 'is' : 'are'} critical — start there.`
     : '';
   return `${placementText} The main pressure points were ${joinList(themes)}.${criticalClause}`;
+}
+
+function buildAuditedTldr(brief: MatchBrief, measured: CoachingNote[], other: CoachingNote[]): string {
+  const placementText = `You finished ${ordinal(brief.placement)}.`;
+  const otherClause = other.length > 0
+    ? ` ${other.length} other observation${other.length === 1 ? '' : 's'} ${other.length === 1 ? 'is' : 'are'} listed below, from rules with no measured link to placement yet.`
+    : '';
+  if (measured.length === 0) {
+    return `${placementText} None of the rules with a measured link to placement fired this game.${otherClause}`;
+  }
+  const themes = topCategories(measured);
+  return `${placementText} ${measured.length} note${measured.length === 1 ? '' : 's'} from rules with a measured link to worse placement, in ${joinList(themes)} — start there.${otherClause}`;
 }
 
 // Categories with zero notes get credit here — these are actual performance

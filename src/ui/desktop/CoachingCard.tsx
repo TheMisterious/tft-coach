@@ -18,6 +18,14 @@ export function CoachingCard({ note }: Props) {
         <span className={`${styles.badge} ${styles[`card-${note.severity}`]}`}>
           {note.severity}
         </span>
+        {note.evidence?.verdict === 'predictive' && (
+          <span
+            className={styles.evidence}
+            title={`Across ${note.evidence.matches ?? '?'} audited matches, games where this fired finished ${note.evidence.placementDelta?.toFixed(1) ?? '?'} places worse on average.`}
+          >
+            measured
+          </span>
+        )}
         {note.tier && <span className={styles.tier}>{note.tier}</span>}
       </div>
       <h3 className={styles.cardTitle}>{note.what_happened}</h3>

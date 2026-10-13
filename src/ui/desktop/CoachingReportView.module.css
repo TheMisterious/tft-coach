@@ -227,6 +227,27 @@
   border-bottom: 1px solid #1e1e2e;
 }
 
+/* Unproven observations */
+.otherNotes { margin-bottom: 24px; }
+
+.otherNotesSummary {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #6c7086;
+  cursor: pointer;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #1e1e2e;
+  margin-bottom: 10px;
+}
+
+.otherNotesHint {
+  font-size: 12px;
+  color: #6c7086;
+  margin: 0 0 10px;
+}
+
 /* Strengths */
 .strengthsList {
   list-style: none;

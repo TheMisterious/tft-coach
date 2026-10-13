@@ -677,6 +677,10 @@ export interface MetaData {
   // MetaData built without it (older data, or a test literal) should be
   // treated as "no grants known," not a crash.
   augmentUnitGrants?: Record<string, string>;
+  // True when data/sets/<setId>/ does not exist (e.g. set18 before its folder
+  // is curated): every set-specific table above is empty, and the rule engine
+  // runs only its set-agnostic checkers. See meta-lookup.ts's loadMeta.
+  setDataMissing?: boolean;
   // Crowd meta data aggregated across many high-elo players via Riot's
   // official API (src/enrichment/meta-crawler.ts), cached at runtime in
   // localStorage (src/persistence/meta-cache.ts) — NOT a static data/ file,

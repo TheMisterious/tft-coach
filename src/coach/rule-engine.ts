@@ -40,6 +40,17 @@ const HOLD_GOLD_RULES = new Set(['ECON_001', 'ECON_002', 'STREAK_002']);
 // of same-severity but lower-value notes when the report gets truncated.
 const MVP_RANK: Map<string, number> = new Map(getMvpRules().map((id, i) => [id, i]));
 
+// The checkers that still run when there is no data/sets/ folder for the
+// match's set (meta.setDataMissing — see loadMeta). hp, leveling and streak
+// read no meta at all. econ reads two set tables: with no benchmarks its
+// benchmark pass adds nothing, and with no comps it loses only the reroll-comp
+// exemption, as any match on an uncurated comp already does; its
+// interest-tier rule is the same in every set. Every other checker fills a
+// missing table with a default and reports the result as fact (board.ts
+// prices an unknown champion at 2). An allow-list, so a new checker stays off
+// for an uncurated set until someone decides it belongs here.
+const SET_AGNOSTIC_CHECKERS = new Set(['econ', 'hp', 'leveling', 'streak']);
+
 export function extractDecisionPoints(
   match: MatchSnapshot,
   meta: MetaData
@@ -55,21 +66,30 @@ export function extractDecisionPoints(
     console.log(`[rule-engine] detected ${plan.pivots.length} comp pivot(s), last at ${plan.pivots.at(-1)!.round}`);
   }
 
-  const checkerResults: Array<[string, DecisionPoint[]]> = [
-    ['econ',       checkEcon(match, meta, context)],
-    ['hp',         checkHp(match)],
-    ['leveling',   checkLeveling(match)],
-    ['rolling',    checkRolling(match, meta, context)],
-    ['streak',     checkStreak(match)],
-    ['items',      checkItems(match, meta, context)],
-    ['board',      checkBoard(match, meta)],
-    ['comp',       checkComp(match, meta)],
-    ['set17',      checkSet17(match)],
-    ['traits',     checkTraitBreakpoints(match, meta)],
-    ['augments',   checkAugments(match, meta, context)],
-    ['positioning',checkPositioning(match, meta)],
-    ['combat',     checkCombat(match, meta)],
+  const checkers: Array<[string, () => DecisionPoint[]]> = [
+    ['econ',       () => checkEcon(match, meta, context)],
+    ['hp',         () => checkHp(match)],
+    ['leveling',   () => checkLeveling(match)],
+    ['rolling',    () => checkRolling(match, meta, context)],
+    ['streak',     () => checkStreak(match)],
+    ['items',      () => checkItems(match, meta, context)],
+    ['board',      () => checkBoard(match, meta)],
+    ['comp',       () => checkComp(match, meta)],
+    ['set17',      () => checkSet17(match)],
+    ['traits',     () => checkTraitBreakpoints(match, meta)],
+    ['augments',   () => checkAugments(match, meta, context)],
+    ['positioning',() => checkPositioning(match, meta)],
+    ['combat',     () => checkCombat(match, meta)],
   ];
+
+  const runnable = meta.setDataMissing
+    ? checkers.filter(([name]) => SET_AGNOSTIC_CHECKERS.has(name))
+    : checkers;
+  if (runnable.length < checkers.length) {
+    const skipped = checkers.filter(c => !runnable.includes(c)).map(([name]) => name);
+    console.warn(`[rule-engine] no data for ${match.setId} — skipped set-specific checkers: ${skipped.join(' ')}`);
+  }
+  const checkerResults = runnable.map(([name, run]): [string, DecisionPoint[]] => [name, run()]);
 
   const summary = checkerResults.map(([name, pts]) => `${name}:${pts.length}`).join(' ');
   console.log('[rule-engine] checker counts —', summary);

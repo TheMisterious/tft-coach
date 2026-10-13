@@ -4,6 +4,7 @@
 
 import type { LedgerEntry, MetaData, CarryBisEntry, TraitBreakpoint, EconBenchmark, ChampionMeta, AugmentModifiers, AugmentItemOverride, AugmentFrontlineExemption, CompArchetype, ItemData } from '../shared/types';
 import { loadAggregateMetaTable } from '../persistence/meta-cache';
+import { setIdFromChampionId, UNKNOWN_SET_ID } from '../shared/set-id';
 
 const EMPTY_AUGMENT_MODIFIERS: AugmentModifiers = {
   itemBisOverrides: {},
@@ -11,23 +12,64 @@ const EMPTY_AUGMENT_MODIFIERS: AugmentModifiers = {
   frontlineExemptions: {},
 };
 
-// Detect which TFT set is active by reading TFT{N}_ champion name prefixes.
+// Detect which TFT set is active from the champion ids on the board (see
+// shared/set-id.ts for the per-set id schemes). Returns UNKNOWN_SET_ID rather
+// than guessing a set when no id says which one it is: the old 'set17'
+// fallback is how every Set 18 match was silently coached from set 17 data.
 export function detectSet(entries: LedgerEntry[]): string {
   for (const entry of entries) {
     if (entry.kind === 'info' && entry.feature === 'board' && entry.key === 'board_pieces') {
       const board = entry.value as Record<string, { name?: string }>;
-      for (const cell of Object.values(board)) {
-        const m = (cell?.name ?? '').match(/^TFT(\d+)_/);
-        if (m) return `set${m[1]}`;
+      for (const cell of Object.values(board ?? {})) {
+        const setId = setIdFromChampionId(cell?.name);
+        if (setId) return setId;
       }
     }
   }
-  return 'set17'; // fallback
+  console.warn('[meta] no champion id in this ledger names a set — set is unknown');
+  return UNKNOWN_SET_ID;
 }
 
 // Load all meta JSON for a given set, plus core (set-agnostic) data.
-// Files are fetched relative to the app root.
+//
+// A set with no data/sets/<setId>/ folder (set18 today, and every new set until
+// its folder is curated, plus UNKNOWN_SET_ID) gets the core tables only, comes
+// back flagged `setDataMissing`, and says so with a console.error. Decided
+// 2026-10-13, against both alternatives:
+//  - NOT another set's folder. Ids change scheme between sets (TFT17_Akali vs
+//    DA_18_Akali_AD), so set 17's tables match nothing in a Set 18 ledger and
+//    the checkers fill the gaps with defaults. Replaying a real Set 18 match
+//    that way produced "Board cost sum at stage 2: ~10 (benchmark >=12)" from
+//    a guessed cost of 2 per unit, stated as fact.
+//  - NOT a throw. Econ, HP, leveling and streak coaching read no set table and
+//    are as true in Set 18 as in 17, so the player still gets those. The rule
+//    engine runs only those checkers on flagged meta (SET_AGNOSTIC_CHECKERS in
+//    rule-engine.ts), and the report toast says the rest was skipped.
 export async function loadMeta(setId: string): Promise<MetaData> {
+  const setDataMissing = !(await hasSetData(setId));
+  if (setDataMissing) {
+    const why = setId === UNKNOWN_SET_ID
+      ? 'no champion id in the ledger names a set'
+      : `no data/sets/${setId}/ folder — curate one to coach this set fully`;
+    console.error(`[meta] set-specific coaching is OFF for this match (econ/HP/leveling/streak only): ${why}`);
+  }
+  const meta = await loadMetaFiles(setId);
+  return setDataMissing ? { ...meta, setDataMissing } : meta;
+}
+
+// Every set folder carries champions.json (tests/data-sets-schema.test.ts
+// enforces it), so its absence means there is no folder for this set at all.
+async function hasSetData(setId: string): Promise<boolean> {
+  try {
+    return (await fetch(`/data/sets/${setId}/champions.json`)).ok;
+  } catch {
+    return false;
+  }
+}
+
+// Files are fetched relative to the app root. A missing set-specific file
+// falls back to its empty table (see fetchJson).
+async function loadMetaFiles(setId: string): Promise<MetaData> {
   const base = `/data/sets/${setId}`;
   console.log('[meta] loading set data from:', base);
   const [carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiersRaw, comps, augmentUnitGrants] = await Promise.all([
@@ -265,8 +307,20 @@ export async function getActiveTraits(
 // previously this guessed via Array.isArray(undefined), which is always false,
 // so every failed fetch silently returned {} even for array-typed meta files
 // (traitBreakpoints, econBenchmarks, comps) and crashed the first .filter()/.find().
+//
+// A rejected fetch() gets the same fallback as a 404. Node's test polyfill
+// answers a missing file with !ok, but a browser fetch rejects outright on a
+// network-level failure, and nobody has checked which one Overwolf's
+// extension scheme gives for a missing packaged file. Either way it is a
+// missing table, and a missing table must not cost the player the report.
 async function fetchJson<T>(path: string, fallback: T): Promise<T> {
-  const res = await fetch(path);
+  let res: Response;
+  try {
+    res = await fetch(path);
+  } catch (e) {
+    console.warn(`[meta-lookup] could not load ${path}:`, e);
+    return fallback;
+  }
   if (!res.ok) {
     console.warn(`[meta-lookup] could not load ${path}: ${res.status}`);
     return fallback;

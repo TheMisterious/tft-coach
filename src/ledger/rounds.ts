@@ -6,6 +6,37 @@
 import type { LedgerEntry, RoundSnapshot, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats } from '../shared/types';
 import { safeParseGep } from '../capture/safe-parse';
 import { normalizeBoardSnapshot, boardChampionIds } from './merge';
+import { setIdFromChampionId, UNKNOWN_SET_ID } from '../shared/set-id';
+
+// One bench_items element -> one id string per physical item held. Set 17
+// sends bare id strings, repeating an id once per copy held. Set 18 sends one
+// object per stack instead — { name: "DA_Component_BFSword", count: 2 },
+// confirmed across two real Set 18 ledgers (every element of every snapshot;
+// components reach count 3, consumable charges 9) — and calling string
+// methods on those objects is what crashed every Set 18 report. Expanded by
+// count into Set 17's shape because every consumer counts entries (e.g.
+// checkers/items.ts's held-components total).
+export function benchItemIds(raw: unknown): string[] {
+  if (typeof raw === 'string') return raw ? [raw] : [];
+  const { name, count } = (raw ?? {}) as { name?: unknown; count?: unknown };
+  if (typeof name !== 'string' || !name) return [];
+  const copies = count === undefined ? 1 : Math.floor(Number(count));
+  return Number.isFinite(copies) && copies > 0 ? Array(copies).fill(name) : [];
+}
+
+// Whether a me.picked_augment slot holds a real augment. slot_1..slot_3 are
+// the three augment picks in every set, and that is the marker that survives
+// a set change: Set <= 17 ids also say so themselves (TFT_Augment_*,
+// TFT9_Augment_*) but Set 18's do not (DA_Kingslayer, DA_BonusGift,
+// DA_18_RiftbeastTraitAugment), so the old `_Augment_` test dropped every
+// Set 18 augment. slot_4 holds the set-mechanic reward instead
+// (TFT17_ChampionItem_Chosen_Kindred, TFT17_GravesTrait_...), and is "" in
+// both recorded Set 18 ledgers. An `_Augment_` id is still accepted in any
+// slot, so nothing the old filter kept is lost.
+function isAugmentPick(slot: string, id: unknown): id is string {
+  if (typeof id !== 'string' || !id) return false;
+  return /^slot_[1-3]$/.test(slot) || id.includes('_Augment_');
+}
 
 // battle_stats groups units by an internal numeric "team" id, not by
 // "me"/"opponent" — and the opponent's id changes every round (a new
@@ -64,7 +95,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   console.log('[rounds] reconstructing from', entries.length, 'ledger entries');
   // Running state — mutated as we walk the ledger.
   let pseudoMatchId = '';
-  let setId = 'set17';
+  let setId = UNKNOWN_SET_ID;
   let gameMode: 'tft' | 'lol' | 'unknown' = 'unknown';
 
   let board:         BoardState = {};
@@ -192,7 +223,9 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
 
       if (feature === 'match_info') {
         if (key === 'pseudo_match_id') pseudoMatchId = value as string;
-        if (key === 'game_mode')       gameMode = (value as string) === 'tft' ? 'tft' : 'lol';
+        // Every recorded ledger sends "TFT" in capitals; the old exact
+        // 'tft' match labelled every real match 'lol'.
+        if (key === 'game_mode')       gameMode = String(value).toLowerCase() === 'tft' ? 'tft' : 'lol';
 
         if (key === 'round_type') {
           const rt = value as { stage?: string; type?: string; native_name?: string };
@@ -348,10 +381,10 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         if (Object.keys(next).length > 0 || Object.keys(board).length === 0) {
           board = next;
         }
-        // Detect set from TFT{N}_ prefix.
+        // Detect set from the champion id scheme (see shared/set-id.ts).
         for (const cell of Object.values(update)) {
-          const m = (cell?.name as string | undefined)?.match(/^TFT(\d+)_/);
-          if (m) setId = `set${m[1]}`;
+          const detected = setIdFromChampionId(cell?.name);
+          if (detected) setId = detected;
         }
       }
 
@@ -377,12 +410,14 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       // (itself resolved from roster.player_status), not by exact key lookup.
       // Filters out consumable tokens (ItemRemover/ItemReroller charges,
       // TFT_Consumable_*) which aren't real components or completed items.
+      // Set 18 changed the element shape (see benchItemIds above).
       if (feature === 'bench' && key === 'item_bench') {
-        const players = safeParseGep(value, []) as Array<{ summoner?: string; bench_items?: string[] }>;
+        const players = safeParseGep(value, []) as Array<{ summoner?: string; bench_items?: unknown }>;
         const mine = localPlayerName
           ? players.find(p => p.summoner?.startsWith(localPlayerName!))
           : undefined;
-        benchItems = (mine?.bench_items ?? []).filter(id => !id.includes('_Consumable_'));
+        const held = Array.isArray(mine?.bench_items) ? mine.bench_items : [];
+        benchItems = held.flatMap(benchItemIds).filter(id => !id.includes('_Consumable_'));
       }
 
       if (feature === 'match_stats' && key === 'board_players') {
@@ -422,7 +457,8 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       // me.picked_augment (a cumulative snapshot object keyed by slot, e.g.
       // { slot_1: {name: "TFT_Augment_..."} , slot_4: {name: "TFT17_ChampionItem_Chosen_Kindred"} }),
       // NOT augments.me as an array. slot_4+ can hold a Set-specific "Chosen"
-      // reward rather than a real augment — filter to ids containing "_Augment_".
+      // reward rather than a real augment — see isAugmentPick above for how
+      // the two are told apart.
       //
       // Confirmed across 22 real ledgers: this event fires only ONCE (rarely
       // twice) for the entire match, and lands AFTER the final round_end —
@@ -433,14 +469,14 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       // the slot-based backfill after the main loop below, which is what
       // actually populates it correctly.
       if (feature === 'me' && key === 'picked_augment') {
-        const slots  = safeParseGep(value, {}) as Record<string, { name?: string } | undefined>;
-        const picked = Object.values(slots)
-          .map(s => s?.name)
-          .filter((id): id is string => !!id && id.includes('_Augment_'));
+        const slots  = safeParseGep(value, {}) as Record<string, { name?: unknown } | undefined>;
+        const picked = Object.entries(slots)
+          .filter(([slot, cell]) => isAugmentPick(slot, cell?.name))
+          .map(([, cell]) => cell!.name as string);
         augments = [...new Set([...augments, ...picked])];
 
         for (const [slot, cell] of Object.entries(slots)) {
-          if (cell?.name && cell.name.includes('_Augment_')) augmentSlots[slot] = cell.name;
+          if (isAugmentPick(slot, cell?.name)) augmentSlots[slot] = cell!.name as string;
         }
       }
     }

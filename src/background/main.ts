@@ -451,7 +451,10 @@ async function runCoachingPipeline(): Promise<void> {
     state.latestReport = report;
     readHotkeyBinding((binding) => {
       const historyWarning = persisted ? '' : ' (history save failed — storage may be full)';
-      showInGameToast(`Coaching report ready${historyWarning} — press ${binding ?? '(hotkey not set)'} to view`);
+      // A set with no data/ folder only gets set-agnostic coaching (see
+      // loadMeta) — say so, or the thinner report reads as the whole story.
+      const setWarning = meta.setDataMissing ? ' (no data for this set yet — econ, HP, leveling and streak notes only)' : '';
+      showInGameToast(`Coaching report ready${setWarning}${historyWarning} — press ${binding ?? '(hotkey not set)'} to view`);
     });
     console.log('[bg] pipeline step 8: opening desktop window');
     openDesktopWindow(report);
@@ -934,7 +937,7 @@ async function runMetaCrawlTickSafely(): Promise<void> {
   if (!hasLinkedAccount(settings)) return; // reuses the existing Riot-linked gate
 
   try {
-    const setId = 'set17'; // background crawl has no in-progress match to detectSet() from — same fallback loadMeta/detectSet already use
+    const setId = 'set17'; // background crawl has no in-progress match to detectSet() from, so the set is named here
     const meta = await loadMeta(setId);
     const state = loadMetaCrawlState();
     const result = await runMetaCrawlTick(state, settings, meta);

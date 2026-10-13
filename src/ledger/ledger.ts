@@ -98,6 +98,39 @@ export function flushSync(): void {
   }));
 }
 
+// Appends entries to an ALREADY-SAVED match's ledger, after the match — used
+// for facts that only exist once it is over (Riot's official placement, see
+// src/ledger/placement.ts). Same read-then-write as flushSync(), chained on
+// the same promise so it can never interleave with a live flush.
+export function appendToSavedLedger(matchId: string, entries: LedgerEntry[]): Promise<void> {
+  const path = `${getLedgerDir()}/${matchId}.jsonl`;
+  const chunk = entries.map(e => JSON.stringify(e)).join('\n') + '\n';
+  pendingFlush = pendingFlush.then(() => new Promise<void>(resolve => {
+    overwolf.io.readFileContents(
+      path,
+      overwolf.io.enums.eEncoding.UTF8,
+      (readResult: { success: boolean; content?: string }) => {
+        if (!readResult.success) {
+          console.error('[ledger] append skipped — could not read saved ledger:', path);
+          resolve();
+          return;
+        }
+        overwolf.io.writeFileContents(
+          path,
+          (readResult.content ?? '') + chunk,
+          overwolf.io.enums.eEncoding.UTF8,
+          true,
+          (result: { success: boolean; error?: string }) => {
+            if (!result.success) console.error('[ledger] append failed:', result.error, '| path:', path);
+            resolve();
+          }
+        );
+      }
+    );
+  }));
+  return pendingFlush;
+}
+
 // Resolves once all in-flight writeFileContents calls have completed.
 // Await this before readLedger to avoid Windows file-lock races.
 export function waitForFlush(): Promise<void> {

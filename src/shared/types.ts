@@ -116,12 +116,19 @@ export interface LobbyPlayerState {
   isLocal: boolean;
 }
 
+// Where finalPlacement came from — see src/ledger/placement.ts. 'none' means
+// finalPlacement is a placeholder 8, not a result.
+export type PlacementSource = 'gep' | 'riot' | 'rank' | 'none';
+
 export interface MatchSnapshot {
   pseudoMatchId: string;
   setId: string;                      // "set17"
   gameMode: 'tft' | 'lol' | 'unknown';
   rounds: RoundSnapshot[];
   finalPlacement: number;             // 1-8
+  // Always set by reconstructSnapshots(); optional so hand-built test
+  // snapshots need not spell it out (absent reads as a known placement).
+  placementSource?: PlacementSource;
   finalBoard: BoardState;
   augments: string[];                 // all picked augments
   // Set 17 — collected god picks across all three god rounds (2-4, 3-4, 4-4)
@@ -480,12 +487,15 @@ export interface MatchRecord {
   datePlayed: number;
   setId: string;
   placement: number;
+  // Absent on records saved before provenance was tracked.
+  placementSource?: PlacementSource;
   lastRound: string;
   brief?: MatchBrief;
   coachingReport?: CoachingReport;
   // Best-effort ground-truth check against Riot's match-v1, when a Riot
-  // account is linked in settings. Diagnostic only — never overwrites
-  // `placement`, which stays sourced from GEP. See src/enrichment/riot-api.ts.
+  // account is linked in settings. Never overrides a GEP placement; when GEP
+  // sent none at all, Riot's placement is appended to the ledger and the
+  // record rebuilt from it (placementSource 'riot'). See src/background/main.ts.
   riotCrossCheck?: RiotCrossCheck;
   // Set-invariant behavioral stats + set-specific vocabulary for this match —
   // see the "Player Trends" section above. Additive/optional so this stays

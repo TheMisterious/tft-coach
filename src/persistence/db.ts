@@ -155,6 +155,9 @@ export function loadAllFeatureRecords(): { records: FeatureVectorRecord[]; skipp
   for (const s of readIndex()) {
     const record = loadMatch(s.pseudo_match_id);
     if (!record?.featureVector || !record?.matchLabels) continue;
+    // A placeholder 8th, not a result (src/ledger/placement.ts) — training on
+    // it would teach the trend model that this match's behaviour finishes last.
+    if (record.placementSource === 'none') continue;
     if (record.featureVector.schemaVersion !== FEATURE_SCHEMA_VERSION) {
       skippedStaleSchemaCount++;
       continue;

@@ -3,9 +3,10 @@
 // KNOWN BUG: Stage 5-7 sometimes skips match_info events (Overwolf open issue).
 // Fallback: count round_start events since the last Realm of the Gods round to derive the label.
 
-import type { LedgerEntry, RoundSnapshot, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats, LobbyPlayerState } from '../shared/types';
+import type { LedgerEntry, RoundSnapshot, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats, LobbyPlayerState, PlacementSource } from '../shared/types';
 import { safeParseGep } from '../capture/safe-parse';
 import { normalizeBoardSnapshot, boardChampionIds } from './merge';
+import { findFinalPlacement } from './placement';
 
 // battle_stats groups units by an internal numeric "team" id, not by
 // "me"/"opponent" — and the opponent's id changes every round (a new
@@ -623,8 +624,8 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     console.warn('[rounds] no round snapshots built — round_start/round_end events may be missing from ledger');
   }
 
-  const finalPlacement = extractFinalPlacement(entries);
-  console.log(`[rounds] finalPlacement=${finalPlacement} augments=${augments.length} godPicks=${godPicks.length}`);
+  const { placement: finalPlacement, source: placementSource } = extractFinalPlacement(entries);
+  console.log(`[rounds] finalPlacement=${finalPlacement} (${placementSource}) augments=${augments.length} godPicks=${godPicks.length}`);
 
   // finalBoard fallback: board_pieces is a live diff stream, and its last
   // update before the ledger ends can predate the player's final item slams
@@ -679,40 +680,23 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     gameMode,
     rounds,
     finalPlacement,
+    placementSource,
     finalBoard,
     augments,
     godPicks,
   };
 }
 
-function extractFinalPlacement(entries: LedgerEntry[]): number {
-  // Walk backwards; me.placement is the signal GEP sends at match end (see
-  // capture/listeners.ts — it's treated as the match-end signal in two places).
-  for (let i = entries.length - 1; i >= 0; i--) {
-    const e = entries[i];
-    if (e.kind === 'info' && e.feature === 'me' && e.key === 'placement') {
-      const parsed = Number(e.value);
-      if (parsed >= 1 && parsed <= 8) return parsed;
-    }
+function extractFinalPlacement(entries: LedgerEntry[]): { placement: number; source: PlacementSource } {
+  // Source order, and why each is trusted: src/ledger/placement.ts.
+  const found = findFinalPlacement(entries);
+  if (found?.source === 'rank') {
+    console.warn(`[rounds] me.placement missing from ledger — using last live me.rank (${found.placement}) as best-effort final placement`);
   }
+  if (found) return found;
 
-  // GEP is known to sometimes never fire the match_end / me.placement signal
-  // (see file header + capture/listeners.ts). Rather than silently guessing
-  // 8th place, fall back to the last live me.rank value recorded in the
-  // ledger — rank tracks standing among remaining players and only changes
-  // when someone is eliminated, so the last value seen before the ledger
-  // ends is normally the player's actual final placement, not a blind guess.
-  for (let i = entries.length - 1; i >= 0; i--) {
-    const e = entries[i];
-    if (e.kind === 'info' && e.feature === 'me' && e.key === 'rank') {
-      const parsed = Number(e.value);
-      if (parsed >= 1 && parsed <= 8) {
-        console.warn(`[rounds] me.placement missing from ledger — using last live me.rank (${parsed}) as best-effort final placement`);
-        return parsed;
-      }
-    }
-  }
-
-  console.warn('[rounds] no me.placement or me.rank found in ledger — defaulting to 8th as a last resort; this match had no usable placement signal at all');
-  return 8;
+  // A placeholder for display, not a result: anything that learns from
+  // placements must skip source 'none'.
+  console.warn('[rounds] no placement signal in ledger (me.placement, Riot, or me.rank) — placeholder 8th, source none');
+  return { placement: 8, source: 'none' };
 }

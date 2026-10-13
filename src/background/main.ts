@@ -27,8 +27,10 @@ import { getCurrentMatchId,
          appendEvent,
          flushSync,
          waitForFlush,
-         forceMatchId }           from '../ledger/ledger';
+         forceMatchId,
+         appendToSavedLedger }    from '../ledger/ledger';
 import { reconstructSnapshots }   from '../ledger/rounds';
+import { RIOT_LEDGER_FEATURE }    from '../ledger/placement';
 import { detectSet, loadMeta }    from '../enrichment/meta-lookup';
 import { extractDecisionPoints }  from '../coach/rule-engine';
 import type { MatchHistoryEntry } from '../coach/history-context';
@@ -427,6 +429,7 @@ async function runCoachingPipeline(): Promise<void> {
       datePlayed,
       setId,
       placement:      snapshot.finalPlacement,
+      placementSource: snapshot.placementSource,
       lastRound,
       brief,
       coachingReport: report,
@@ -468,6 +471,39 @@ async function runCoachingPipeline(): Promise<void> {
     resetLedger();
     resetMatchEndFlag();
   }
+}
+
+// Rebuilds a saved match's record from its ledger on disk with the parsing and
+// rules live now, keeping what the ledger cannot reproduce (datePlayed, the
+// Riot cross-check). Never opens a window — callers decide that. Shared by
+// the Riot placement recovery and the two debug entry points.
+async function rebuildMatchFromLedger(matchId: string, datePlayed: number) {
+  const ledger = await readLedger(matchId);
+  if (ledger.length === 0) return null;
+
+  const snapshot = reconstructSnapshots(ledger);
+  const setId    = detectSet(ledger);
+  const meta     = await loadMeta(setId);
+  const points   = extractDecisionPoints(snapshot, meta, priorFeatureHistory(matchId));
+  const brief    = buildBrief(snapshot, points, meta);
+  const report   = await generateCoachingReport(brief);
+
+  const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
+  const persisted = saveMatch({
+    ...(loadMatch(matchId) ?? {}),
+    pseudoMatchId:   matchId,
+    datePlayed,
+    setId,
+    placement:       snapshot.finalPlacement,
+    placementSource: snapshot.placementSource,
+    lastRound:       snapshot.rounds.at(-1)?.label ?? 'unknown',
+    brief,
+    coachingReport:  report,
+    featureVector,
+    matchLabels,
+  });
+  if (persisted) retrainPlayerProfile();
+  return { snapshot, report, persisted };
 }
 
 // ─── Window helpers ───────────────────────────────────────────────────────────
@@ -558,6 +594,8 @@ function showInGameToast(message: string): void {
 // never affect the core local pipeline above, which already fully succeeded
 // by the time this runs.
 
+const RIOT_PLACEMENT_RETRY_DELAYS_MS = [0, 60_000, 180_000];
+
 async function runRiotEnrichment(matchId: string, finalPlacement: number, datePlayed: number): Promise<void> {
   const settings = loadSettings();
   if (!hasLinkedAccount(settings)) return;
@@ -582,34 +620,56 @@ async function runRiotEnrichment(matchId: string, finalPlacement: number, datePl
     }
   }
 
-  // Step 10: placement cross-check against tft-match-v1 (final result only,
-  // no round-by-round data — see enrichment/riot-api.ts). Diagnostic only,
-  // never overwrites the GEP-derived finalPlacement.
+  // Step 10: Riot's official placement (tft-match-v1 — final result only, no
+  // round-by-round data, see enrichment/riot-api.ts). Always appended to the
+  // ledger, so every later replay and scripts/rule-audit.ts sees it. When GEP
+  // sent no placement at all — the client closed straight after elimination —
+  // the saved record is rebuilt from that ledger so history and Player Trends
+  // get the real result instead of a placeholder 8th. A GEP placement is never
+  // overridden: a disagreement is recorded in riotCrossCheck only.
   try {
-    const matchIds = await getMatchIdsByPuuid(puuid!, riotApiKey, matchContinent, 1);
-    const riotMatchId = matchIds[0];
-    if (!riotMatchId) return;
-    const match = await getMatchById(riotMatchId, riotApiKey, matchContinent);
+    const record = loadMatch(matchId);
+    if (!record) return;
+    const gepHadNone = record.placementSource === 'none';
 
-    // Skip if this is clearly a different (later) match than the one we just
-    // processed — e.g. the user already queued into a new game before this
-    // async call resolved.
-    const driftMs = Math.abs(match.info.game_datetime - datePlayed);
-    if (driftMs > 5 * 60 * 1000) {
-      console.log('[bg] riot step 10: skipped — most recent Riot match is', Math.round(driftMs / 1000), 's away from local match end');
-      return;
+    // Riot publishes a match a minute or two after it ends, and a client closed
+    // on elimination gets here sooner than that — so a match whose placement
+    // depends on this lookup is retried rather than given up after one call.
+    let match: Awaited<ReturnType<typeof getMatchById>> | null = null;
+    for (const delayMs of gepHadNone ? RIOT_PLACEMENT_RETRY_DELAYS_MS : [0]) {
+      if (delayMs) await new Promise(resolve => setTimeout(resolve, delayMs));
+      const riotMatchId = (await getMatchIdsByPuuid(puuid!, riotApiKey, matchContinent, 1))[0];
+      if (!riotMatchId) continue;
+      const candidate = await getMatchById(riotMatchId, riotApiKey, matchContinent);
+      // Skip a clearly different match — the previous one (not yet published
+      // this one), or a later one the user already queued into.
+      const driftMs = Math.abs(candidate.info.game_datetime - datePlayed);
+      if (driftMs > 5 * 60 * 1000) {
+        console.log('[bg] riot step 10: most recent Riot match is', Math.round(driftMs / 1000), 's away from local match end — not this one');
+        continue;
+      }
+      match = candidate;
+      break;
     }
+    if (!match) return;
 
     const participant = match.info.participants.find(p => p.puuid === puuid);
     if (!participant) return;
 
-    const record = loadMatch(matchId);
-    if (!record) return;
+    await appendToSavedLedger(matchId, [{
+      ts: Date.now(), kind: 'info', feature: RIOT_LEDGER_FEATURE, key: 'placement', value: participant.placement,
+    }]);
+    if (gepHadNone) {
+      await rebuildMatchFromLedger(matchId, record.datePlayed);
+      console.log('[bg] riot step 10: GEP sent no placement — record rebuilt with Riot\'s', participant.placement);
+    }
+
+    const current = loadMatch(matchId) ?? record;
     saveMatch({
-      ...record,
+      ...current,
       riotCrossCheck: {
         riotPlacement: participant.placement,
-        matched: participant.placement === finalPlacement,
+        matched: participant.placement === current.placement,
         checkedAt: Date.now(),
       },
     });
@@ -779,30 +839,15 @@ console.log('[bg] background controller started');
     return undefined;
   }
 
-  const ledger     = await readLedger(id);
-  const snapshot   = reconstructSnapshots(ledger);
-  const setId      = detectSet(ledger);
-  const meta       = await loadMeta(setId);
-  const points     = extractDecisionPoints(snapshot, meta, priorFeatureHistory(id));
-  const brief      = buildBrief(snapshot, points, meta);
-  const report     = await generateCoachingReport(brief);
-  const lastRound  = snapshot.rounds.at(-1)?.label ?? 'unknown';
+  const rebuilt = await rebuildMatchFromLedger(id, record.datePlayed);
+  if (!rebuilt) {
+    console.warn('[debug] no ledger found on disk for matchId:', id);
+    return undefined;
+  }
+  const { snapshot, report } = rebuilt;
 
-  console.log(`[debug] reprocessed ${id} — old placement:${record.placement} new placement:${snapshot.finalPlacement}, augments:${JSON.stringify(snapshot.augments)}, godPicks:${JSON.stringify(snapshot.godPicks)}`);
+  console.log(`[debug] reprocessed ${id} — old placement:${record.placement} new placement:${snapshot.finalPlacement} (${snapshot.placementSource}), augments:${JSON.stringify(snapshot.augments)}, godPicks:${JSON.stringify(snapshot.godPicks)}`);
 
-  const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
-  saveMatch({
-    pseudoMatchId:  id,
-    datePlayed:     record.datePlayed,
-    setId,
-    placement:      snapshot.finalPlacement,
-    lastRound,
-    brief,
-    coachingReport: report,
-    featureVector,
-    matchLabels,
-  });
-  retrainPlayerProfile();
   (window as any).appState.latestReport = report;
   openDesktopWindow(report);
   return report;
@@ -817,35 +862,14 @@ console.log('[bg] background controller started');
 //   window.__debugRecoverMatch('<matchId>') — matchId from the failed
 //   "[db] saveMatch failed" log line (e.g. "fallback-1785165189062")
 (window as any).__debugRecoverMatch = async (matchId: string) => {
-  const ledger = await readLedger(matchId);
-  if (ledger.length === 0) {
+  const rebuilt = await rebuildMatchFromLedger(matchId, Date.now());
+  if (!rebuilt) {
     console.warn('[debug] no ledger found on disk for matchId:', matchId);
     return undefined;
   }
-
-  const snapshot  = reconstructSnapshots(ledger);
-  const setId     = detectSet(ledger);
-  const meta      = await loadMeta(setId);
-  const points    = extractDecisionPoints(snapshot, meta, priorFeatureHistory(matchId));
-  const brief     = buildBrief(snapshot, points, meta);
-  const report    = await generateCoachingReport(brief);
-  const lastRound = snapshot.rounds.at(-1)?.label ?? 'unknown';
-
-  const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
-  const persisted = saveMatch({
-    pseudoMatchId:  matchId,
-    datePlayed:     Date.now(),
-    setId,
-    placement:      snapshot.finalPlacement,
-    lastRound,
-    brief,
-    coachingReport: report,
-    featureVector,
-    matchLabels,
-  });
-  console.log(`[debug] recovered ${matchId} — placement:${snapshot.finalPlacement} persisted:${persisted}`);
+  const { snapshot, report, persisted } = rebuilt;
+  console.log(`[debug] recovered ${matchId} — placement:${snapshot.finalPlacement} (${snapshot.placementSource}) persisted:${persisted}`);
   if (persisted) {
-    retrainPlayerProfile();
     (window as any).appState.latestReport = report;
     openDesktopWindow(report);
   }

@@ -1,0 +1,9 @@
+{
+  "_comment": "NOT YET CURATED for Set 18 (created 2026-10-13). Season rules (thresholds tied to a set's balance) are re-derived per set; none are written for Set 18 yet. Note src/coach/rules-loader.ts still imports data/sets/set17/rules.season.json statically for the rule registry, so this file is not read by the app today.",
+  "patch_meta": {
+    "_comment": "Tracks which Data Dragon version these thresholds were last manually verified against. null means never verified.",
+    "verified_ddragon_version": null,
+    "verified_at": null
+  },
+  "rules": []
+}

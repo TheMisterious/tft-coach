@@ -1,0 +1,7 @@
+{
+  "_comment": "NOT YET CURATED for Set 18 (created 2026-10-13). Same buckets as data/sets/set17/augments.json, classified by hand from Data Dragon tft-augments.json text. Empty means no augment is classified, not that none exist: AUGMENT_001 (economy) and augment-unit-grants.json (units) do nothing for Set 18 until this is filled.",
+  "economy": [],
+  "combat": [],
+  "items": [],
+  "units": []
+}

@@ -1,0 +1,6 @@
+{
+  "_comment": "NOT YET CURATED for Set 18 (created 2026-10-13). Hand-curated like data/sets/set17/augment-modifiers.json: augment picks that change what correct play means for another checker. Add entries as false positives are found in real Set 18 matches.",
+  "itemBisOverrides": {},
+  "traitCountBonuses": {},
+  "frontlineExemptions": {}
+}

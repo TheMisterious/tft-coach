@@ -674,7 +674,14 @@
     "name": "Miss Fortune",
     "tier": 3,
     "role": "flex",
-    "traits": []
+    "traits": [
+      "Conduit",
+      "Challenger",
+      "Replicator"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft17_missfortune/hud/tft17_missfortune_square.png"
+    }
   },
   "TFT17_Mordekaiser": {
     "name": "Mordekaiser",

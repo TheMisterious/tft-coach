@@ -1,0 +1,899 @@
+{
+  "DA_Gromp18_AP": {
+    "name": "Gromp",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Riftbeast",
+      "Adaptor"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_gromp/tft18_gromp_square.png"
+    }
+  },
+  "DA_Murkwolf18": {
+    "name": "Murkwolf",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Riftbeast",
+      "Ravager"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_murkwolf/tft18_murkwolf_square.png"
+    }
+  },
+  "DA_18_Sentry": {
+    "name": "Pebbles",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Riftbeast",
+      "Invoker"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_sentry/tft18_sentry_square.png"
+    }
+  },
+  "DA_Cinderling18": {
+    "name": "Cinderling",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Riftbeast",
+      "Hunter"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_cinderling/tft18_cinderling_square.png"
+    }
+  },
+  "DA_Scuttlecrab18": {
+    "name": "Scuttlecrab",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Riftbeast",
+      "Juggernaut"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_scuttlecrab/tft18_scuttlecrab_square.png"
+    }
+  },
+  "DA_Krug18": {
+    "name": "Krug",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Riftbeast",
+      "Brawler"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_krug/tft18_krug_square.png"
+    }
+  },
+  "DA_Sentinel18": {
+    "name": "Sentinel",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Riftbeast",
+      "Vanguard",
+      "Invoker"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_sentinel/tft18_sentinel_square.png"
+    }
+  },
+  "DA_Brambleback18": {
+    "name": "Brambleback",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Riftbeast",
+      "Ravager"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_brambleback/tft18_brambleback_square.png"
+    }
+  },
+  "DA_18_Xayah": {
+    "name": "Xayah",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Elderwood",
+      "Fae",
+      "Rapidfire"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_xayah/tft18_xayah_square.png"
+    }
+  },
+  "DA_18_Ornn": {
+    "name": "Ornn",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Elderwood",
+      "Defender"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_ornn/tft18_ornn_square.png"
+    }
+  },
+  "DA_Nidalee18_AP": {
+    "name": "Nidalee",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Primal",
+      "Adaptor"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_nidalee/tft18_nidalee_square.png"
+    }
+  },
+  "DA_18_Hecarim": {
+    "name": "Hecarim",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Elderwood",
+      "Vanguard"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_hecarim/tft18_hecarim_square.png"
+    }
+  },
+  "DA_18_Ezreal": {
+    "name": "Ezreal",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Elderwood",
+      "Executioner"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_ezreal/tft18_ezreal_square.png"
+    }
+  },
+  "DA_18_Azir": {
+    "name": "Azir",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Blackthorn",
+      "Executioner",
+      "Summoner"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_azir/tft18_azir_square.png"
+    }
+  },
+  "DA_18_RekSai": {
+    "name": "Rek'Sai",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Blackthorn",
+      "Brawler"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_reksai/tft18_reksai_square.png"
+    }
+  },
+  "DA_18_Veigar": {
+    "name": "Veigar",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Blackthorn",
+      "Sprykin",
+      "Spellweaver"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_veigar/tft18_veigar_square.png"
+    }
+  },
+  "DA_18_Maokai": {
+    "name": "Maokai",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Old Growth",
+      "Juggernaut"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_maokai/tft18_maokai_square.png"
+    }
+  },
+  "DA_18_Malphite": {
+    "name": "Malphite",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Blackthorn",
+      "Monolith"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_malphite/tft18_malphite_square.png"
+    }
+  },
+  "DA_18_Yorick": {
+    "name": "Yorick",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Blossom",
+      "Juggernaut",
+      "Summoner"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_yorick/tft18_yorick_square.png"
+    }
+  },
+  "DA_18_Yunara": {
+    "name": "Yunara",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Blossom",
+      "Executioner"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_yunara/tft18_yunara_square.png"
+    }
+  },
+  "DA_18_Sett": {
+    "name": "Sett",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Blossom",
+      "Brawler"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_sett/tft18_sett_square.png"
+    }
+  },
+  "DA_18_Ahri": {
+    "name": "Ahri",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Blossom",
+      "Spellweaver"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_ahri/tft18_ahri_square.png"
+    }
+  },
+  "DA_18_Ashe": {
+    "name": "Ashe",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Blossom",
+      "Hunter"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_ashe/tft18_ashe_square.png"
+    }
+  },
+  "DA_18_Elise": {
+    "name": "Elise",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Coven",
+      "Vanguard"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_elise/tft18_elise_square.png"
+    }
+  },
+  "DA_18_Caitlyn": {
+    "name": "Caitlyn",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Coven",
+      "Hunter"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_caitlyn/tft18_caitlyn_square.png"
+    }
+  },
+  "DA_18_Cassiopeia": {
+    "name": "Cassiopeia",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Coven",
+      "Spellweaver"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_cassiopeia/tft18_cassiopeia_square.png"
+    }
+  },
+  "DA_18_Morgana": {
+    "name": "Morgana",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Coven",
+      "Invoker"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_morgana/tft18_morgana_square.png"
+    }
+  },
+  "DA_18_Rakan": {
+    "name": "Rakan",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Fae",
+      "Juggernaut",
+      "Vanguard"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_rakan/tft18_rakan_square.png"
+    }
+  },
+  "DA_18_Lillia": {
+    "name": "Lillia",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Fae",
+      "Defender"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lillia/tft18_lillia_square.png"
+    }
+  },
+  "DA_18_Kobuko": {
+    "name": "Kobuko",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Sprykin",
+      "Brawler"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_kobuko/tft18_kobuko_square.png"
+    }
+  },
+  "DA_18_Teemo": {
+    "name": "Teemo",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Sprykin",
+      "Invoker"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_teemo/tft18_teemo_square.png"
+    }
+  },
+  "DA_18_Rammus": {
+    "name": "Rammus",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Sprykin",
+      "Defender"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_rammus/tft18_rammus_square.png"
+    }
+  },
+  "DA_18_GnarSmall": {
+    "name": "Gnar",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Elderwood",
+      "Sprykin",
+      "Brawler"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_gnar/tft18_gnar_square.png"
+    }
+  },
+  "DA_18_Tristana": {
+    "name": "Tristana",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Fae",
+      "Sprykin",
+      "Hunter"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_tristana/tft18_tristana_square.png"
+    }
+  },
+  "DA_18_Sivir": {
+    "name": "Sivir",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Primal",
+      "Hunter"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_sivir/tft18_sivir_square.png"
+    }
+  },
+  "DA_Vi18": {
+    "name": "Vi",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Primal",
+      "Juggernaut"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_vi/tft18_vi_square.png"
+    }
+  },
+  "DA_18_Akali_AD": {
+    "name": "Akali",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Inferno",
+      "Adaptor",
+      "Ravager"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_akali/tft18_akali_square.png"
+    }
+  },
+  "DA_18_Varus": {
+    "name": "Varus",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Inferno",
+      "Rapidfire"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_varus/tft18_varus_square.png"
+    }
+  },
+  "DA_Amumu18": {
+    "name": "Amumu",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Inferno",
+      "Juggernaut"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_amumu/tft18_amumu_square.png"
+    }
+  },
+  "DA_18_Kennen": {
+    "name": "Kennen",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Inferno",
+      "Executioner"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_kennen/tft18_kennen_square.png"
+    }
+  },
+  "DA_18_Aphelios": {
+    "name": "Aphelios",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Lunar",
+      "Rapidfire"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_aphelios/tft18_aphelios_square.png"
+    }
+  },
+  "DA_18_Diana": {
+    "name": "Diana",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Lunar",
+      "Ravager",
+      "Vanguard"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_diana/tft18_diana_square.png"
+    }
+  },
+  "DA_18_Alune": {
+    "name": "Alune",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Attuned",
+      "Lunar",
+      "Spellweaver"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_alune/hud/tft18_alune_square.png"
+    }
+  },
+  "DA_18_Leona": {
+    "name": "Leona",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Solar",
+      "Defender"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_leona/tft18_leona_square.png"
+    }
+  },
+  "DA_18_Kayle": {
+    "name": "Kayle",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Solar",
+      "Rapidfire"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_kayle/tft18_kayle_square.png"
+    }
+  },
+  "DA_18_Sejuani": {
+    "name": "Sejuani",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Solar",
+      "Juggernaut"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_sejuani/tft18_sejuani_square.png"
+    }
+  },
+  "DA_18_KhaZix": {
+    "name": "Kha'Zix",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Rival"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_khazix/tft18_khazix_square.png"
+    }
+  },
+  "DA_18_Rengar": {
+    "name": "Rengar",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Rival"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_rengar/tft18_rengar_square.png"
+    }
+  },
+  "DA_KogMaw18_AD": {
+    "name": "Kog'Maw",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Caustic",
+      "Adaptor",
+      "Invoker"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_kogmaw/tft18_kogmaw_square.png"
+    }
+  },
+  "DA_18_Zyra": {
+    "name": "Zyra",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Thornmaiden",
+      "Summoner"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_zyra/tft18_zyra_square.png"
+    }
+  },
+  "DA_Fiddlesticks18": {
+    "name": "Fiddlesticks",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Flora Fatalis",
+      "Defender",
+      "Spellweaver"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_fiddlesticks/tft18_fiddlesticks_square.png"
+    }
+  },
+  "DA_18_Soraka": {
+    "name": "Soraka",
+    "tier": 4,
+    "role": "flex",
+    "traits": [
+      "Flora Fatalis",
+      "Executioner"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_soraka/tft18_soraka_square.png"
+    }
+  },
+  "DA_Taric18": {
+    "name": "Taric",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Emerald Aspect",
+      "Vanguard"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_taric/tft18_taric_square.png"
+    }
+  },
+  "DA_18_Ivern": {
+    "name": "Ivern",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Greenfather"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_ivern/hud/tft18_ivern_square.png"
+    }
+  },
+  "DA_Lux18_Base": {
+    "name": "Lux",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_square.png"
+    }
+  },
+  "DA_18_Alistar": {
+    "name": "Alistar",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Elderwood",
+      "Brawler"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_alistar/tft18_alistar_square.png"
+    }
+  },
+  "DA_Draven18": {
+    "name": "Draven",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Bounty Seeker"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_draven/tft18_draven_square.png"
+    }
+  },
+  "DA_18_ElderDragon": {
+    "name": "Elder Dragon",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Apex Predator",
+      "Riftbeast"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_elderdragon/hud/tft18_elderdragon_square.png"
+    }
+  },
+  "DA_Karma18": {
+    "name": "Karma",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Blossom",
+      "Spellweaver"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_karma/tft18_karma_square.png"
+    }
+  },
+  "DA_18_LeBlanc": {
+    "name": "LeBlanc",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Elderwood",
+      "Spellweaver"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_leblanc/tft18_leblanc_square.png"
+    }
+  },
+  "DA_18_MasterYi_AD": {
+    "name": "Master Yi",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Blossom",
+      "Adaptor"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_masteryi/tft18_masteryi_square.png"
+    }
+  },
+  "DA_18_Shen": {
+    "name": "Shen",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Inferno",
+      "Defender"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_shen/tft18_shen_square.png"
+    }
+  },
+  "DA_18_Warwick": {
+    "name": "Warwick",
+    "tier": 2,
+    "role": "flex",
+    "traits": [
+      "Blackthorn",
+      "Ravager"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_warwick/tft18_warwick_square.png"
+    }
+  },
+  "DA_18_Camille": {
+    "name": "Camille",
+    "tier": 1,
+    "role": "flex",
+    "traits": [
+      "Coven",
+      "Ravager"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_camille/tft18_camille_square.png"
+    }
+  },
+  "DA_Lux18_Blackthorn": {
+    "name": "Lux (Blackthorn)",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Blackthorn",
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_blackthorn_square.png"
+    }
+  },
+  "DA_Lux18_Blossom": {
+    "name": "Lux (Blossom)",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Blossom",
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_blossom_square.png"
+    }
+  },
+  "DA_18_Lux_Coven": {
+    "name": "Lux (Coven)",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Coven",
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_coven_square.png"
+    }
+  },
+  "DA_18_Lux_Elderwood": {
+    "name": "Lux (Elderwood)",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Elderwood",
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_elderwood_square.png"
+    }
+  },
+  "DA_18_Lux_Fae": {
+    "name": "Lux (Fae)",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Fae",
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_fae_square.png"
+    }
+  },
+  "DA_18_Lux_Inferno": {
+    "name": "Lux (Inferno)",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Inferno",
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_inferno_square.png"
+    }
+  },
+  "DA_18_Lux_Moonbeam": {
+    "name": "Lux (Lunar)",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Lunar",
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_moonbeam_square.png"
+    }
+  },
+  "DA_18_Lux_Primal": {
+    "name": "Lux (Primal)",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Primal",
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_primal_square.png"
+    }
+  },
+  "DA_18_Lux_Sunbeam": {
+    "name": "Lux (Solar)",
+    "tier": 5,
+    "role": "flex",
+    "traits": [
+      "Solar",
+      "Avatar"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_lux/tft18_lux_sunbeam_square.png"
+    }
+  },
+  "DA_CrimsonRaptor18": {
+    "name": "Mama Beak",
+    "tier": 3,
+    "role": "flex",
+    "traits": [
+      "Riftbeast",
+      "Summoner",
+      "Rapidfire"
+    ],
+    "icon": {
+      "url": "https://raw.communitydragon.org/latest/game/assets/characters/tft18_raptor/tft18_crimsonraptor_teamplanner_splash.png"
+    }
+  }
+}

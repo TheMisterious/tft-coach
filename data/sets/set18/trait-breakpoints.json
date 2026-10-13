@@ -1,0 +1,212 @@
+[
+  {
+    "trait": "Adaptor",
+    "tiers": [
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "trait": "Avatar",
+    "tiers": [
+      1
+    ]
+  },
+  {
+    "trait": "Blackthorn",
+    "tiers": [
+      2,
+      4,
+      6
+    ]
+  },
+  {
+    "trait": "Blossom",
+    "tiers": [
+      3,
+      5,
+      7,
+      9,
+      11
+    ]
+  },
+  {
+    "trait": "Brawler",
+    "tiers": [
+      2,
+      4,
+      6
+    ]
+  },
+  {
+    "trait": "Coven",
+    "tiers": [
+      3,
+      4,
+      5,
+      7
+    ]
+  },
+  {
+    "trait": "Defender",
+    "tiers": [
+      2,
+      4,
+      6
+    ]
+  },
+  {
+    "trait": "Elderwood",
+    "tiers": [
+      3,
+      5,
+      7,
+      9,
+      11
+    ]
+  },
+  {
+    "trait": "Executioner",
+    "tiers": [
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "trait": "Fae",
+    "tiers": [
+      2,
+      4
+    ]
+  },
+  {
+    "trait": "Flora Fatalis",
+    "tiers": [
+      1,
+      2
+    ]
+  },
+  {
+    "trait": "Hunter",
+    "tiers": [
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "trait": "Inferno",
+    "tiers": [
+      2,
+      3,
+      5,
+      7
+    ]
+  },
+  {
+    "trait": "Invoker",
+    "tiers": [
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "trait": "Juggernaut",
+    "tiers": [
+      2,
+      4,
+      6
+    ]
+  },
+  {
+    "trait": "Lunar",
+    "tiers": [
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "trait": "Primal",
+    "tiers": [
+      2,
+      4
+    ]
+  },
+  {
+    "trait": "Rapidfire",
+    "tiers": [
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "trait": "Ravager",
+    "tiers": [
+      2,
+      4,
+      6
+    ]
+  },
+  {
+    "trait": "Riftbeast",
+    "tiers": [
+      3,
+      5,
+      7,
+      10
+    ]
+  },
+  {
+    "trait": "Rival",
+    "tiers": [
+      1,
+      2
+    ]
+  },
+  {
+    "trait": "Solar",
+    "tiers": [
+      3
+    ]
+  },
+  {
+    "trait": "Spellweaver",
+    "tiers": [
+      2,
+      4,
+      6
+    ]
+  },
+  {
+    "trait": "Sprykin",
+    "tiers": [
+      3,
+      5,
+      7
+    ]
+  },
+  {
+    "trait": "Summoner",
+    "tiers": [
+      2,
+      3
+    ]
+  },
+  {
+    "trait": "Vanguard",
+    "tiers": [
+      2,
+      4,
+      6
+    ]
+  }
+]

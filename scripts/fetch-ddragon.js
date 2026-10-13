@@ -96,12 +96,18 @@ function writeJson(filePath, data) {
 // it also includes the upcoming/next set (and tutorial/event ids), all mixed
 // together with no top-level "which set is live" marker. Group champions by
 // their TFT<N>_ prefix so each set's data stays separate.
-function groupChampionsBySet(championData) {
+//
+// Set 18 dropped that prefix (DA_18_Akali_AD, DA_Gromp18_AP, DA_Draven18), so
+// an id without one is placed by membership instead: the set whose Community
+// Dragon `TFTSet<N>` roster lists it — and only when exactly one does, so a
+// shared id (the TFT_ PvE monsters) is still skipped as before.
+function groupChampionsBySet(championData, setIdsByApiName) {
   const bySet = {};
   for (const champ of Object.values(championData)) {
     const m = /^TFT(\d+)_/.exec(champ.id);
-    if (!m) continue; // skip TFTTutorial_/TFTEvent_ ids — not a real set
-    const setId = 'set' + m[1];
+    const memberOf = setIdsByApiName.get(champ.id);
+    const setId = m ? 'set' + m[1] : memberOf?.size === 1 ? [...memberOf][0] : null;
+    if (!setId) continue; // TFTTutorial_/TFTEvent_ ids, or no single set's roster — not a real set
     (bySet[setId] ??= []).push(champ);
   }
   return bySet;
@@ -140,6 +146,7 @@ async function main() {
   // roster/tier data anyway but aren't the canonical source to point at.
   const traitsByChampionApiName = new Map(); // setId -> Map<championApiName, string[]>
   const traitBreakpointsBySet = new Map();   // setId -> Array<{trait, tiers}>
+  const setIdsByChampionApiName = new Map(); // championApiName -> Set<setId>, for groupChampionsBySet
   for (const setEntry of cdragonTft.setData ?? []) {
     const m = /^TFTSet(\d+)$/.exec(setEntry.mutator ?? '');
     if (!m) continue;
@@ -147,7 +154,11 @@ async function main() {
 
     const champTraits = new Map();
     for (const champ of setEntry.champions ?? []) {
-      if (champ.apiName) champTraits.set(champ.apiName, champ.traits ?? []);
+      if (!champ.apiName) continue;
+      champTraits.set(champ.apiName, champ.traits ?? []);
+      const memberOf = setIdsByChampionApiName.get(champ.apiName) ?? new Set();
+      memberOf.add(setId);
+      setIdsByChampionApiName.set(champ.apiName, memberOf);
     }
     traitsByChampionApiName.set(setId, champTraits);
 
@@ -175,13 +186,15 @@ async function main() {
     // the Evelynn HP-cost field unresolved rather than inventing a value.
     const NON_LINEAR_TRAITS = new Set(['Stargazer']);
 
+    // No `TFT<set>_` prefix test: it excluded nothing the champion count above
+    // does not already exclude on Set 17, and excluded every trait on Set 18,
+    // whose ids are DA_18_Elderwood / DA_Juggernaut18 (26 traits, not 0).
     const tiersByTraitName = new Map();
     for (const trait of setEntry.traits ?? []) {
       const apiName = trait.apiName ?? '';
-      const isOfficialPrefix = new RegExp(`^TFT${m[1]}_`).test(apiName);
       const isUndetermined = /Undetermined/.test(apiName);
       const isSingleChampion = (champCountByTraitName.get(trait.name) ?? 0) < 2;
-      if (!isOfficialPrefix || isUndetermined || isSingleChampion || NON_LINEAR_TRAITS.has(trait.name)) continue;
+      if (isUndetermined || isSingleChampion || NON_LINEAR_TRAITS.has(trait.name)) continue;
 
       const tiers = tiersByTraitName.get(trait.name) ?? new Set();
       for (const eff of trait.effects ?? []) {
@@ -313,11 +326,20 @@ async function main() {
   // same to the alias id's tail, and record a match. Only 1:1 matches are kept:
   // if two real items normalise to the same name there is no way to tell which
   // one GEP means, and guessing is how this project got fictional data twice.
+  //
+  // Names are matched within an id FAMILY. Set 18 re-keyed the shared items
+  // (`DA_SpiritVisage`, `DA_InfinityEdge`, ...) under the same display names as
+  // the `TFT_Item_*` ones, so a global name join made every one of them
+  // ambiguous the moment a set18 folder existed and silently dropped Set 17's
+  // aliases (Spirit Visage, Kraken's Fury, ...). A GEP id only ever resolves to
+  // a catalogue id of its own family: TFT_/TFT<N>_ to TFT, DA_ to DA.
   const normaliseName = s => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const idFamily = apiName => (/^DA_/.test(apiName) ? 'DA' : 'TFT');
+  const nameKey = (apiName, name) => `${idFamily(apiName)}:${normaliseName(name)}`;
   const realByName = new Map();
   for (const [apiName, entry] of Object.entries(nextItemData)) {
-    const key = normaliseName(entry.name);
-    if (!key) continue;
+    if (!normaliseName(entry.name)) continue;
+    const key = nameKey(apiName, entry.name);
     if (realByName.has(key)) realByName.set(key, null); // ambiguous — drop it
     else realByName.set(key, apiName);
   }
@@ -328,16 +350,16 @@ async function main() {
   for (const item of cdragonTft.items ?? []) {
     if (!item.apiName || !item.name) continue;
     if (item.apiName in nextItemData) continue; // already resolvable by its own id
-    const real = realByName.get(normaliseName(item.name));
+    const real = realByName.get(nameKey(item.apiName, item.name));
     if (!real || real === item.apiName) continue;
     nextItemAliases[item.apiName] = real;
     aliasCount++;
   }
   // The GEP-side ids that do not exist upstream under ANY id are reachable only
   // from the name direction: turn the id's tail back into a name and look it up.
-  for (const entry of Object.values(nextItemData)) {
-    const key = normaliseName(entry.name);
-    const real = realByName.get(key);
+  for (const [apiName, entry] of Object.entries(nextItemData)) {
+    if (idFamily(apiName) !== 'TFT') continue; // the prefixes below are TFT-family GEP ids
+    const real = realByName.get(nameKey(apiName, entry.name));
     if (!real) continue;
     for (const prefix of ['TFT_Item_', 'TFT17_Item_']) {
       const gepStyle = prefix + String(entry.name).replace(/[^A-Za-z0-9]/g, '');
@@ -366,6 +388,7 @@ async function main() {
     if (!localSetMutators.has(setEntry.mutator)) continue;
     for (const trait of setEntry.traits ?? []) {
       if (!trait.apiName || !trait.name) continue;
+      if (idFamily(trait.apiName) !== 'TFT') continue; // see the emblem loop below
       const tail = trait.apiName.replace(/^TFT\d*_/, '');
       const list = traitApiNamesByDisplayName.get(trait.name) ?? [];
       list.push(tail);
@@ -378,6 +401,9 @@ async function main() {
     aliasCount++;
   };
   for (const [apiName, entry] of Object.entries(nextItemData)) {
+    // Set 18's emblems need no alias: GEP reports DA_18_EmblemBrawler, the same
+    // id upstream uses (checked against both recorded Set 18 ledgers).
+    if (idFamily(apiName) !== 'TFT') continue;
     const named = /^(.+) Emblem$/.exec(entry.name ?? '');
     const keyed = /^TFT(\d*)_Item_(.+)EmblemItem$/.exec(apiName);
     if (!named && !keyed) continue;
@@ -467,7 +493,7 @@ async function main() {
   // Data Dragon bundles multiple sets in one payload (live + upcoming). Only
   // update a set's champions.json if that set's folder already exists locally —
   // never auto-create a new data/sets/set{N}/ folder for a set nobody asked for.
-  const championsBySet = groupChampionsBySet(championsRes.data);
+  const championsBySet = groupChampionsBySet(championsRes.data, setIdsByChampionApiName);
   for (const [setId, champs] of Object.entries(championsBySet)) {
     const setDir = path.join(DATA_ROOT, 'sets', setId);
     if (!fs.existsSync(setDir)) {

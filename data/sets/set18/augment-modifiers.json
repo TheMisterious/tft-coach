@@ -1,6 +1,13 @@
 {
-  "_comment": "NOT YET CURATED for Set 18 (created 2026-10-13). Hand-curated like data/sets/set17/augment-modifiers.json: augment picks that change what correct play means for another checker. Add entries as false positives are found in real Set 18 matches.",
-  "itemBisOverrides": {},
+  "_comment": "Hand-curated like data/sets/set17/augment-modifiers.json: augment picks that change what correct play means for another checker. 2026-10-15: carried over Set 17's one entry, Deadlier Blades (DA_DeadlierBlades, Data Dragon text unchanged in substance: \"Gain a Deathblade. Deathblades permanently gain 1% Attack Damage whenever their holders score a takedown\"). Add entries as false positives are found in real Set 18 matches. Note: no checker reads these buckets today (getAugmentItemOverride in src/enrichment/meta-lookup.ts has no caller).",
+  "itemBisOverrides": {
+    "DA_DeadlierBlades": {
+      "items": [
+        "DA_Deathblade"
+      ],
+      "reason": "Deadlier Blades stacks bonus AD on the holder for every takedown, so Deathblade keeps scaling through the game well past its base stats — it's a legitimate carry item under this augment, not an off-BiS pick"
+    }
+  },
   "traitCountBonuses": {},
   "frontlineExemptions": {}
 }

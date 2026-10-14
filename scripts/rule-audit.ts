@@ -15,7 +15,10 @@
 // Ledger directories default to the recording folders on this machine;
 // override with TFT_LEDGER_DIRS (semicolon-separated). Output lands in
 // results/rule-audit/ (git-ignored): matches.json (per-match firings and
-// per-round state, no player names) and report.md.
+// per-round state, no player names) and report.md. TFT_AUDIT_OUT moves it, so
+// auditing another corpus leaves this player's cache alone; --write is refused
+// then, since rule-evidence.json must describe the player's
+// own games.
 //
 // WHAT THE NUMBERS CAN AND CANNOT SAY. Everything here is an association in one
 // player's games, so every finding is EXPLORATORY unless it survives a
@@ -59,7 +62,9 @@ import {
 } from './audit-stats';
 
 const ROOT = path.resolve(__dirname, '..');
-const OUT_DIR = path.join(ROOT, 'results', 'rule-audit');
+const OUT_DIR = process.env.TFT_AUDIT_OUT
+  ? path.resolve(ROOT, process.env.TFT_AUDIT_OUT)
+  : path.join(ROOT, 'results', 'rule-audit');
 const DEFAULT_DIRS = [
   'F:/1. project/tft_coach/ledgers',
   'C:/Users/Admin/Documents/TFT-Coach/ledgers',
@@ -656,7 +661,10 @@ async function main() {
   const md = report(matches, excluded, analysis, features);
   fs.writeFileSync(path.join(OUT_DIR, 'report.md'), md);
   console.log(md);
-  if (process.argv.includes('--write')) writeEvidence(matches, analysis);
+  if (process.argv.includes('--write')) {
+    if (process.env.TFT_AUDIT_OUT) console.error('[audit] --write ignored: TFT_AUDIT_OUT is set, so this is not the player\'s own corpus');
+    else writeEvidence(matches, analysis);
+  }
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

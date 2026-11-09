@@ -422,6 +422,44 @@ export interface CoachingReport {
   strengths: string[];
   round_trajectory?: RoundTrajectoryPoint[];
   plan: MatchPlan;
+  // How the game went, traced through the rule network
+  // (src/coach/rule-network.ts). Absent when no checkpoint reading fired, and on
+  // reports made before the network existed.
+  game_story?: GameStory;
+}
+
+// ─── Game story (rule network trace) ────────────────────────────────────────
+
+// How far a network node can be trusted: a Riot-published number, arithmetic
+// on Riot numbers, a large-sample ladder statistic, an expert rule of thumb,
+// or a measured link in this player's own games.
+export type StoryBasis = 'riot' | 'sums' | 'benchmark' | 'heuristic' | 'audit';
+
+export interface StoryStep {
+  nodeId: string;
+  // 'decision' = a principle the recorded play went against; 'reading' = a
+  // checkpoint reading of where the game stood.
+  kind: 'decision' | 'reading';
+  name: string;
+  rounds: string[];
+  facts: string[];          // observations from the ledger, never verdicts
+  principle?: string;       // the principle this step breaks, by name
+  advice?: string;          // that principle's usual answer
+  unless?: string;          // when the usual answer does not hold
+  basis: StoryBasis;
+  basisLabel: string;
+  evidence: string;         // the measured link in this player's games, or that there is none yet
+  ledTo: Array<{ nodeId: string; name: string; why: string }>;
+}
+
+export interface GameStory {
+  terminal: string;         // node id of the worst reading the game reached
+  networkVersion: number;
+  // The set layer merged over the core network; absent when the match's set
+  // has none (data/sets/{set}/rule-network.season.json).
+  set?: string;
+  patch?: string;
+  steps: StoryStep[];       // earliest first
 }
 
 // ─── Match brief (compact report input) ─────────────────────────────────────
@@ -444,6 +482,7 @@ export interface MatchBrief {
   // Every category any rule flagged this match, including always-on and
   // still-hidden candidate rules that leave no note. Absent on older briefs.
   flaggedCategories?: DecisionCategory[];
+  gameStory?: GameStory;
   // Grades computed from the full, pre-truncation decision-point list (see
   // rule-engine.ts) — deliberately independent of what made it into
   // resolvedNotes/decisionPoints after the MAX_POINTS/MAX_PER_RULE cuts.

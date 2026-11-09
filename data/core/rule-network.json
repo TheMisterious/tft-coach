@@ -1,0 +1,1259 @@
+{
+  "_comment": "TFT rule network, the part that holds in any set: the game's mechanics in general terms, the strategy principles that follow from them, and the checkpoint readings that show where a game stood, joined by typed edges. Each set adds data/sets/{set}/rule-network.season.json with the numbers (stage damage and the rest), its own mechanics, and wording that quotes them; src/coach/rule-network.ts merges the two. 'basis': riot = a Riot-published number; sums = arithmetic on Riot numbers; benchmark = a large-sample statistic; heuristic = expert rule of thumb; audit = measured in this player's games (data/core/rule-evidence.json). Principles are conditional: 'advice' is the usual answer, 'unless' when it is not.",
+  "version": 2,
+  "researched": "2026-11-09",
+  "edgeTypes": {
+    "rests_on": "The rule follows from this mechanic or principle.",
+    "refines": "A narrower, conditional version of the target.",
+    "enables": "Makes the target possible or cheaper.",
+    "trades_off": "The two pull against each other; neither is right on its own.",
+    "overrides": "When this rule's condition holds, the target's usual answer no longer applies.",
+    "leads_to": "A break or reading here makes the target reading more likely later in the same game. Used to trace a game.",
+    "explains": "The principle a symptom reading breaks."
+  },
+  "sources": {
+    "tftsense-fundamentals": {
+      "title": "TFTSense: TFT Fundamentals (checked at 18.6)",
+      "url": "https://tftsense.gg/study-hall/tft-fundamentals/"
+    },
+    "tftsense-hp": {
+      "title": "TFTSense: HP Management, When to Bleed and When to Stabilize (18.6)",
+      "url": "https://tftsense.gg/study-hall/tft-hp-management/"
+    },
+    "tftsense-rolling": {
+      "title": "TFTSense: When to Roll Down, Slow Roll or Save (18.6)",
+      "url": "https://tftsense.gg/study-hall/tft-rolling-guide/"
+    },
+    "tftsense-streaks": {
+      "title": "TFTSense: Win and Loss Streaks (18.6)",
+      "url": "https://tftsense.gg/study-hall/tft-streaking-guide/"
+    },
+    "tftsense-econ": {
+      "title": "TFTSense: The Econ Loop (18.6)",
+      "url": "https://tftsense.gg/study-hall/tft-economy-guide/"
+    },
+    "tftsense-midgame": {
+      "title": "TFTSense: Mid Game, Stage 3 and Stage 4 Decisions (18.6)",
+      "url": "https://tftsense.gg/study-hall/tft-mid-game-guide/"
+    },
+    "tftsense-patch186": {
+      "title": "TFTSense: Patch 18.6 notes (no change to odds, XP, interest or streak gold)",
+      "url": "https://tftsense.gg/study-hall/tft-patch-18-6-notes/"
+    },
+    "metabot-benchmarks": {
+      "title": "MetaBot: Set 18 rank benchmarks, 4.0M ranked games and 3,181 recorded lobbies",
+      "url": "https://metabot.gg/en/TFT/rank-benchmarks"
+    },
+    "bunnymuffins-heuristics": {
+      "title": "BunnyMuffins: Using 8 Heuristics to Improve at TFT",
+      "url": "https://bunnymuffins.lol/using-8-heuristics-to-improve-at-tft/"
+    },
+    "boosteria-tempo": {
+      "title": "Boosteria: Tempo vs Greed, When to Roll or Level",
+      "url": "https://boosteria.org/guides/teamfight-tactics-tempo-vs-greed-roll-level"
+    },
+    "metabot-scouting": {
+      "title": "MetaBot: Scouting, Flexible vs Forcing",
+      "url": "https://metabot.gg/en/TFT/guides/tft-scouting-flexible-vs-forcing-comps"
+    },
+    "mobalytics-pivot": {
+      "title": "Mobalytics: How to Pivot Your Comp",
+      "url": "https://mobalytics.gg/blog/tft-how-to-pivot-your-comp-and-transition/"
+    },
+    "mobalytics-items": {
+      "title": "Mobalytics: Itemization Guide",
+      "url": "https://mobalytics.gg/blog/tft/tft-itemization-guide-how-to-build-the-best-items/"
+    },
+    "metabot-positioning": {
+      "title": "MetaBot: Positioning, Frontline and Backline",
+      "url": "https://metabot.gg/en/TFT/guides/tft-positioning-guide-frontline-backline"
+    },
+    "bamboo-augments": {
+      "title": "Bamboo Gaming: Augment selection",
+      "url": "https://www.bamboogaming.net/tft/augments"
+    },
+    "apptrigger-tiebreak": {
+      "title": "AppTrigger: TFT 10.14 tiebreaker, same-round eliminations ranked by HP",
+      "url": "https://apptrigger.com/2020/06/28/tft-teamfight-tactics-tiebreaker"
+    },
+    "rules-map-2026-10": {
+      "title": "coachv TFT Rules Map (Oct 2026): mechanics cross-checked against 74 recorded games",
+      "url": "https://claude.ai/artifact/H2xTMvYB2kv6inPuvXWJZn"
+    }
+  },
+  "nodes": [
+    {
+      "id": "M.INCOME",
+      "kind": "mechanic",
+      "domain": "economy",
+      "basis": "riot",
+      "name": "Income",
+      "statement": "Base income each round once the opening rounds are over, 1 gold for a won player round, and 1 gold of interest for every 10 gold held, up to a cap.",
+      "sources": [
+        "tftsense-econ",
+        "tftsense-patch186"
+      ]
+    },
+    {
+      "id": "M.STREAK_GOLD",
+      "kind": "mechanic",
+      "domain": "streak",
+      "basis": "riot",
+      "name": "Streak gold",
+      "statement": "Runs of wins or losses pay extra gold that rises with the length of the run, the same for wins and losses. A won round adds 1 on top.",
+      "sources": [
+        "tftsense-streaks"
+      ]
+    },
+    {
+      "id": "M.PLAYER_DAMAGE",
+      "kind": "mechanic",
+      "domain": "hp",
+      "basis": "riot",
+      "name": "Player damage",
+      "statement": "A lost player round costs the stage's base damage plus 1 for each enemy unit left alive. Base damage rises from stage to stage.",
+      "sources": [
+        "tftsense-hp",
+        "rules-map-2026-10"
+      ]
+    },
+    {
+      "id": "M.XP",
+      "kind": "mechanic",
+      "domain": "leveling",
+      "basis": "riot",
+      "name": "Experience",
+      "statement": "Gold buys XP at a fixed rate and every round gives some free. Each level costs more XP than the one before.",
+      "sources": [
+        "tftsense-midgame",
+        "rules-map-2026-10"
+      ]
+    },
+    {
+      "id": "M.SHOP_ODDS",
+      "kind": "mechanic",
+      "domain": "rolling",
+      "basis": "riot",
+      "name": "Shop odds and roll price",
+      "statement": "A roll has a fixed price. Each level sets the odds of each unit cost, and each cost is most common at one level.",
+      "sources": [
+        "tftsense-rolling"
+      ]
+    },
+    {
+      "id": "M.SHARED_POOL",
+      "kind": "mechanic",
+      "domain": "comp",
+      "basis": "riot",
+      "name": "Shared pool",
+      "statement": "Every player draws from one shared pool, with fewer copies of more expensive units. Three copies make a 2-star, nine a 3-star.",
+      "sources": [
+        "tftsense-rolling",
+        "rules-map-2026-10"
+      ]
+    },
+    {
+      "id": "M.BOARD_SIZE",
+      "kind": "mechanic",
+      "domain": "board",
+      "basis": "riot",
+      "name": "Board size",
+      "statement": "You field as many units as your level.",
+      "sources": [
+        "rules-map-2026-10"
+      ]
+    },
+    {
+      "id": "M.ITEMS",
+      "kind": "mechanic",
+      "domain": "items",
+      "basis": "riot",
+      "name": "Items",
+      "statement": "Two components make one item and a unit holds three. A component in the item bench adds nothing to a fight.",
+      "sources": [
+        "mobalytics-items",
+        "rules-map-2026-10"
+      ]
+    },
+    {
+      "id": "M.ROUNDS",
+      "kind": "mechanic",
+      "domain": "tempo",
+      "basis": "riot",
+      "name": "Round structure",
+      "statement": "From stage 2 each stage has seven rounds with a PvE round at x-7, and augments come on three fixed rounds. Stages 3 and 4 hold most of the game's player rounds.",
+      "sources": [
+        "tftsense-midgame"
+      ]
+    },
+    {
+      "id": "M.PLACEMENT",
+      "kind": "mechanic",
+      "domain": "lobby",
+      "basis": "riot",
+      "name": "Placement",
+      "statement": "You place by how long you last. Players knocked out in the same round are ranked by the least negative HP, then by HP at the start of that round. Gold held when you are knocked out buys nothing.",
+      "sources": [
+        "apptrigger-tiebreak",
+        "tftsense-hp"
+      ]
+    },
+    {
+      "id": "P.HP_IS_A_BUDGET",
+      "kind": "principle",
+      "domain": "hp",
+      "basis": "sums",
+      "name": "HP is a budget that gets dearer",
+      "statement": "A loss saves about the same gold in every stage but costs more HP as base damage rises. Spend HP early for gold; spend gold late to keep HP.",
+      "advice": "Bleed in stage 2 if it buys something; from stage 3 on, treat each loss as expensive.",
+      "unless": "Your gold cannot change the fight, in which case the HP is gone either way.",
+      "sources": [
+        "tftsense-hp",
+        "tftsense-fundamentals"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "P.COUNT_LOSSES_LEFT",
+      "kind": "principle",
+      "domain": "hp",
+      "basis": "sums",
+      "name": "Count the losses you have left",
+      "statement": "Losses left is your HP divided by what a loss costs at this stage, rounded up, minus one. It is the clock every spend decision runs on.",
+      "advice": "Recount at 3-1 and 4-1, and whenever a stage's price is about to rise.",
+      "sources": [
+        "tftsense-hp",
+        "tftsense-rolling"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "P.STABILIZE_FLOOR",
+      "kind": "principle",
+      "domain": "hp",
+      "basis": "heuristic",
+      "name": "Stabilize above the next stage's floor",
+      "statement": "Keep enough HP for two losses at the next stage's prices.",
+      "advice": "Once HP falls under the next stage's floor, stop paying HP for gold and spend.",
+      "unless": "Players below you are about to go out, which buys room your HP number does not show.",
+      "sources": [
+        "tftsense-hp",
+        "tftsense-midgame"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "P.SPEND_WHEN_IT_FLIPS",
+      "kind": "principle",
+      "domain": "economy",
+      "basis": "sums",
+      "name": "Spend when it changes the fight",
+      "statement": "Gold and board strength feed each other. Spending is right when it flips the next fight, and holding is right when you would win or lose anyway.",
+      "advice": "Before spending, ask whether it changes the next fight, not whether you can afford it.",
+      "sources": [
+        "tftsense-econ",
+        "boosteria-tempo"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "P.BANK_TO_TENS",
+      "kind": "principle",
+      "domain": "economy",
+      "basis": "sums",
+      "name": "Bank to the next ten",
+      "statement": "Each 10 gold held pays 1 a round, so end rounds on 10, 20, 30, 40 or 50 while HP is cheap. The roll that crosses a ten also costs a round of interest.",
+      "advice": "Stop rolls and purchases on a ten in stages 2 and 3.",
+      "unless": "HP is under the next stage's floor or the fight decides whether you survive.",
+      "sources": [
+        "tftsense-rolling",
+        "tftsense-econ"
+      ],
+      "engineRules": [
+        "ECON_001",
+        "ECON_004"
+      ]
+    },
+    {
+      "id": "P.SAVE_EARLY_GOLD",
+      "kind": "principle",
+      "domain": "economy",
+      "basis": "heuristic",
+      "name": "Don't roll in stage 2 without a reason",
+      "statement": "Gold is worth most early, so rolling before stage 3 needs a reason: pairs to finish or a streak to protect.",
+      "advice": "Keep early gold for levels and the stage 3 spike.",
+      "sources": [
+        "tftsense-fundamentals",
+        "bunnymuffins-heuristics"
+      ],
+      "engineRules": [
+        "ECON_003"
+      ]
+    },
+    {
+      "id": "P.NO_IDLE_BANK",
+      "kind": "principle",
+      "domain": "economy",
+      "basis": "sums",
+      "name": "Gold above the interest cap earns nothing",
+      "statement": "Interest stops at its cap, so gold held above it while losing buys no income and costs HP.",
+      "advice": "Above the cap while losing, put the excess into levels or rolls.",
+      "unless": "You are saving for a named roll-down round in the next round or two.",
+      "sources": [
+        "tftsense-econ",
+        "rules-map-2026-10"
+      ],
+      "engineRules": [
+        "ECON_002",
+        "ECON_005"
+      ]
+    },
+    {
+      "id": "P.NO_GOLD_AT_ELIMINATION",
+      "kind": "principle",
+      "domain": "economy",
+      "basis": "riot",
+      "name": "A bank can't help once you are out",
+      "statement": "Gold held when you are knocked out buys nothing. On your last losses, interest has only a round or two left to pay.",
+      "advice": "With one or two losses left, spend what the next fight needs; below about 20 HP that is usually everything.",
+      "unless": "Nothing you can buy changes the fight.",
+      "sources": [
+        "tftsense-hp",
+        "bunnymuffins-heuristics",
+        "metabot-benchmarks"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "P.COMMIT_TO_A_STREAK",
+      "kind": "principle",
+      "domain": "streak",
+      "basis": "sums",
+      "name": "Commit to a streak or don't count on one",
+      "statement": "Streak gold rises with the length of the run, so the pay sits at the end of it, and trading wins and losses pays none.",
+      "advice": "In stage 2, play to win every fight or plan the losses; don't drift between them.",
+      "sources": [
+        "tftsense-streaks"
+      ],
+      "engineRules": [
+        "STREAK_002",
+        "STREAK_003"
+      ]
+    },
+    {
+      "id": "P.PROTECT_WIN_STREAK",
+      "kind": "principle",
+      "domain": "streak",
+      "basis": "sums",
+      "name": "A broken win streak costs more than one round",
+      "statement": "Losing one round on a long win streak costs that round's gold, the streak gold of the next rounds, and the HP.",
+      "advice": "On a long win streak, spend to keep it when the spend holds several fights.",
+      "unless": "The spend only delays the loss by one round.",
+      "sources": [
+        "tftsense-streaks"
+      ],
+      "engineRules": [
+        "STREAK_001"
+      ]
+    },
+    {
+      "id": "P.LOSS_STREAK_PLAN",
+      "kind": "principle",
+      "domain": "streak",
+      "basis": "sums",
+      "name": "A loss streak needs a stage 2 start and a named flip round",
+      "statement": "The same losses cost more HP each stage for the same streak gold. Without a planned flip, a loss streak becomes the poverty loop: low HP and a weak board.",
+      "advice": "Lose on purpose only in stage 2, and name the round you flip before the streak starts.",
+      "unless": "A trait or augment pays for losses.",
+      "detector": "lossStreakPastStage2",
+      "sources": [
+        "tftsense-streaks",
+        "tftsense-econ"
+      ],
+      "engineRules": [
+        "ROLL_004"
+      ]
+    },
+    {
+      "id": "P.FLIP_TO_HOLD",
+      "kind": "principle",
+      "domain": "streak",
+      "basis": "sums",
+      "name": "Flip a loss streak with a board that holds",
+      "statement": "Alternating wins and losses after a long loss streak pays little streak gold and still costs fights.",
+      "advice": "Flip when the gold buys a board that wins several in a row.",
+      "sources": [
+        "tftsense-streaks"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "P.ONE_SPIKE_PER_STRETCH",
+      "kind": "principle",
+      "domain": "tempo",
+      "basis": "sums",
+      "name": "Pick one spike in stages 3 and 4 and land it",
+      "statement": "Stages 3 and 4 pay less gold than the levels and upgrades you want cost, so only one plan fits, and a board that keeps losing has to spend early in the stretch.",
+      "advice": "At 3-1 count your losses left, name your spike round, and spend before stage 5, not in it.",
+      "unless": "Your board is winning fights, which pays for a later spike.",
+      "detector": "noSpikeWhileLosing",
+      "sources": [
+        "tftsense-midgame"
+      ],
+      "engineRules": [
+        "ROLL_006"
+      ]
+    },
+    {
+      "id": "P.LEVEL_TO_CARRY_COST",
+      "kind": "principle",
+      "domain": "leveling",
+      "basis": "riot",
+      "name": "Roll at your carry's level",
+      "statement": "Roll at the level where your carry's cost is most common in the shop.",
+      "advice": "Level first when the better odds still leave enough gold to roll.",
+      "sources": [
+        "tftsense-rolling",
+        "tftsense-fundamentals"
+      ],
+      "engineRules": [
+        "ROLL_001"
+      ]
+    },
+    {
+      "id": "P.LEVEL_PLAN",
+      "kind": "principle",
+      "domain": "leveling",
+      "basis": "heuristic",
+      "name": "Level timings are a plan, not a schedule",
+      "statement": "Standard level timings shift with streaks and comp, and players who finish top 4 and bottom 4 differ little in level at any stage.",
+      "advice": "Choose the curve your comp and HP call for; don't chase a round number.",
+      "sources": [
+        "metabot-benchmarks",
+        "tftsense-midgame"
+      ],
+      "engineRules": [
+        "LEVEL_001",
+        "LEVEL_002",
+        "LEVEL_003",
+        "LEVEL_005",
+        "LEVEL_006"
+      ]
+    },
+    {
+      "id": "P.LEVEL_WITH_GOLD_TO_ROLL",
+      "kind": "principle",
+      "domain": "leveling",
+      "basis": "sums",
+      "name": "A level needs gold behind it",
+      "statement": "Better odds only repay a level if gold is left to roll on them; every level is rolls you did not make.",
+      "advice": "Don't buy the level that leaves too little to roll for the units it unlocks.",
+      "sources": [
+        "tftsense-rolling",
+        "tftsense-fundamentals"
+      ],
+      "engineRules": [
+        "LEVEL_004"
+      ]
+    },
+    {
+      "id": "P.ROLL_WHEN_FORCED",
+      "kind": "principle",
+      "domain": "rolling",
+      "basis": "sums",
+      "name": "Roll when HP can't pay for another miss",
+      "statement": "With two losses or fewer left and a fight that looks lost, a bank is worth less than the fight.",
+      "advice": "Roll what the next fight needs.",
+      "unless": "Nothing in the pool can flip the fight.",
+      "detector": "forcedRollSkipped",
+      "sources": [
+        "tftsense-rolling",
+        "tftsense-hp",
+        "bunnymuffins-heuristics"
+      ],
+      "engineRules": [
+        "ROLL_002"
+      ]
+    },
+    {
+      "id": "P.ROLL_WITH_PAIRS",
+      "kind": "principle",
+      "domain": "rolling",
+      "basis": "sums",
+      "name": "Roll when you hold pairs",
+      "statement": "A held pair cuts the gold a 2-star costs by more than half. With four or more pairs a short roll is cheap insurance.",
+      "advice": "Plan the spike around the pairs you hold.",
+      "sources": [
+        "tftsense-rolling",
+        "tftsense-midgame",
+        "bunnymuffins-heuristics"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "P.STOP_AT_A_NUMBER",
+      "kind": "principle",
+      "domain": "rolling",
+      "basis": "sums",
+      "name": "Pick where you stop before you roll",
+      "statement": "Each set of rolls finds less than the last, and rebuilding from 0 to 30 gold takes about six rounds against two from 20.",
+      "advice": "Stop when the fight is won, on a ten, or above the price of what you hunt; roll to 0 only on your last losses.",
+      "sources": [
+        "tftsense-rolling",
+        "bunnymuffins-heuristics"
+      ],
+      "engineRules": [
+        "ROLL_003"
+      ]
+    },
+    {
+      "id": "P.SLOW_ROLL_WHEN_HOLDING",
+      "kind": "principle",
+      "domain": "rolling",
+      "basis": "sums",
+      "name": "Slow roll only once the board holds",
+      "statement": "A 3-star of a cheap unit costs more than one bank, so it is rolled from income above a ten over several rounds.",
+      "advice": "Start slow rolling when the board is winning or holding HP, not before.",
+      "sources": [
+        "tftsense-rolling"
+      ],
+      "engineRules": [
+        "ROLL_005"
+      ]
+    },
+    {
+      "id": "P.STRONGEST_BOARD",
+      "kind": "principle",
+      "domain": "board",
+      "basis": "heuristic",
+      "name": "Play your strongest board",
+      "statement": "Field the strongest board the stage allows without giving up the next spike. Each enemy unit you kill is 1 HP saved even in a loss.",
+      "advice": "Field the best units you hold every round; a narrower loss is cheaper.",
+      "sources": [
+        "tftsense-fundamentals",
+        "tftsense-econ"
+      ],
+      "engineRules": [
+        "BOARD_001"
+      ]
+    },
+    {
+      "id": "P.FILL_THE_BOARD",
+      "kind": "principle",
+      "domain": "board",
+      "basis": "riot",
+      "name": "Fill every slot",
+      "statement": "Board size equals level, so an empty slot is XP paid for nothing.",
+      "advice": "Field a unit in every slot, even a cheap one.",
+      "sources": [
+        "rules-map-2026-10"
+      ],
+      "engineRules": [
+        "BOARD_003"
+      ]
+    },
+    {
+      "id": "P.BOARD_VS_LOBBY",
+      "kind": "principle",
+      "domain": "board",
+      "basis": "audit",
+      "name": "Judge your board against the boards you fight",
+      "statement": "Strength is relative: a board worth less than the boards it meets loses whatever its absolute value.",
+      "advice": "When your board is clearly weaker than the boards you fight, the next spend should go into the board.",
+      "sources": [
+        "rules-map-2026-10"
+      ],
+      "engineRules": [
+        "BOARD_004"
+      ]
+    },
+    {
+      "id": "P.UPGRADES_OVER_TRAITS",
+      "kind": "principle",
+      "domain": "board",
+      "basis": "heuristic",
+      "name": "Upgrades before trait breakpoints",
+      "statement": "A 2-star with weaker traits usually beats a 1-star with the perfect trait.",
+      "advice": "Don't hold a weak unit only to reach a breakpoint when a 2-star can take its slot.",
+      "sources": [
+        "tftsense-fundamentals"
+      ],
+      "engineRules": [
+        "TRAIT_001"
+      ]
+    },
+    {
+      "id": "P.CLEAR_BENCH",
+      "kind": "principle",
+      "domain": "board",
+      "basis": "heuristic",
+      "name": "Keep only units you will play",
+      "statement": "Bench units are gold that is not fighting or earning interest.",
+      "advice": "Sell what you will not field; keep pairs of your line.",
+      "sources": [
+        "bunnymuffins-heuristics"
+      ],
+      "engineRules": [
+        "COMP_002"
+      ]
+    },
+    {
+      "id": "P.SLAM_ITEMS",
+      "kind": "principle",
+      "domain": "items",
+      "basis": "heuristic",
+      "name": "Slam items for tempo",
+      "statement": "A finished item fights; a component does not. Waiting for the perfect item costs HP now.",
+      "advice": "Build an item whenever you hold more than four components, picking items many units can use.",
+      "sources": [
+        "mobalytics-items",
+        "bunnymuffins-heuristics",
+        "tftsense-fundamentals"
+      ],
+      "engineRules": [
+        "ITEM_001",
+        "ITEM_005"
+      ]
+    },
+    {
+      "id": "P.ITEMS_ON_CARRY",
+      "kind": "principle",
+      "domain": "items",
+      "basis": "heuristic",
+      "name": "Concentrate items on the units that use them",
+      "statement": "Damage items belong on the carry that deals the damage, durability items on the tanks.",
+      "advice": "Give the carry its items by stage 4 and don't spread damage items thin.",
+      "sources": [
+        "mobalytics-items",
+        "tftsense-fundamentals"
+      ],
+      "engineRules": [
+        "ITEM_002",
+        "ITEM_003",
+        "ITEM_004",
+        "COMBAT_001"
+      ]
+    },
+    {
+      "id": "P.AUGMENT_FITS_STATE",
+      "kind": "principle",
+      "domain": "augments",
+      "basis": "heuristic",
+      "name": "Pick augments for the game you are in",
+      "statement": "Economy and item augments pay most on the first augment round; later, an augment that stabilizes a losing board beats more gold.",
+      "advice": "Check HP and recent losses before comparing the three offers.",
+      "sources": [
+        "bamboo-augments"
+      ],
+      "engineRules": [
+        "AUGMENT_001",
+        "AUGMENT_003",
+        "AUGMENT_004"
+      ]
+    },
+    {
+      "id": "P.AVOID_CONTEST",
+      "kind": "principle",
+      "domain": "comp",
+      "basis": "riot",
+      "name": "Contested lines cost more to hit",
+      "statement": "Each player on your units draws from the same pool, and the fewer copies a unit has, the more each extra player raises the cost of a 2-star.",
+      "advice": "With two or more others on your carry, look for a line that uses your items.",
+      "sources": [
+        "tftsense-fundamentals",
+        "metabot-scouting"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "P.PIVOT_TOWARD_STRENGTH",
+      "kind": "principle",
+      "domain": "comp",
+      "basis": "heuristic",
+      "name": "Pivot toward what you hold, a stage early",
+      "statement": "A finished 2-star on another line beats a 1-star on a contested one. Pivots are cheapest in stage 3, planned from scouting, with flexible items.",
+      "advice": "Move toward pairs you hold; don't switch plans every round.",
+      "sources": [
+        "mobalytics-pivot",
+        "metabot-scouting",
+        "tftsense-fundamentals"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "P.PROTECT_CARRY",
+      "kind": "principle",
+      "domain": "positioning",
+      "basis": "heuristic",
+      "name": "Tanks die first, the carry dies last",
+      "statement": "Durable units in front, the carry behind them where it hits what matters.",
+      "advice": "Field a frontline every round from stage 4.",
+      "sources": [
+        "metabot-positioning"
+      ],
+      "engineRules": [
+        "POSITION_002"
+      ]
+    },
+    {
+      "id": "P.COUNTER_POSITION",
+      "kind": "principle",
+      "domain": "positioning",
+      "basis": "heuristic",
+      "name": "Position against the board you meet",
+      "statement": "Scout the next opponent's carry, backline access and area damage, and place your units against them.",
+      "advice": "When the same opponent beats you twice, move the carry or the tanks.",
+      "sources": [
+        "metabot-positioning"
+      ],
+      "engineRules": [
+        "POSITION_001"
+      ]
+    },
+    {
+      "id": "P.OUTLAST_THE_LOBBY",
+      "kind": "principle",
+      "domain": "lobby",
+      "basis": "benchmark",
+      "name": "Outlast the players below you",
+      "statement": "Placement is relative: your HP only has to outlast the players below you.",
+      "advice": "Judge HP and level against the living players, and count who can go out before you.",
+      "sources": [
+        "metabot-benchmarks",
+        "tftsense-hp"
+      ],
+      "engineRules": [
+        "LOBBY_001",
+        "LOBBY_002"
+      ]
+    },
+    {
+      "id": "S.STAGE2_BLEED",
+      "kind": "symptom",
+      "domain": "hp",
+      "basis": "audit",
+      "name": "Heavy stage 2 bleed",
+      "statement": "More than about 15 HP lost during stage 2.",
+      "sources": [
+        "rules-map-2026-10"
+      ],
+      "engineRules": [
+        "HP_001"
+      ]
+    },
+    {
+      "id": "S.LOW_HP_STAGE4",
+      "kind": "symptom",
+      "domain": "hp",
+      "basis": "audit",
+      "name": "Low HP entering stage 4",
+      "statement": "Under 60 HP at 4-1.",
+      "sources": [
+        "rules-map-2026-10"
+      ],
+      "engineRules": [
+        "HP_002"
+      ]
+    },
+    {
+      "id": "S.LETHAL_STAGE5",
+      "kind": "symptom",
+      "domain": "hp",
+      "basis": "audit",
+      "name": "Under 25 HP entering stage 5",
+      "statement": "Two losses or fewer from going out as stage 5 raises the price of a loss.",
+      "sources": [
+        "rules-map-2026-10"
+      ],
+      "engineRules": [
+        "HP_003"
+      ]
+    },
+    {
+      "id": "S.BELOW_FLOOR",
+      "kind": "symptom",
+      "domain": "hp",
+      "basis": "sums",
+      "name": "Under the next stage's floor",
+      "statement": "HP fell below two losses at the next stage's prices.",
+      "detector": "belowNextStageFloor",
+      "sources": [
+        "tftsense-hp"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "S.ELIMINATED_WITH_GOLD",
+      "kind": "symptom",
+      "domain": "economy",
+      "basis": "riot",
+      "name": "Knocked out holding gold",
+      "statement": "Gold was still in the bank when the game ended.",
+      "detector": "eliminatedWithGold",
+      "sources": [
+        "metabot-benchmarks",
+        "tftsense-hp",
+        "bunnymuffins-heuristics"
+      ],
+      "engineRules": []
+    }
+  ],
+  "edges": [
+    {
+      "from": "P.HP_IS_A_BUDGET",
+      "to": "M.PLAYER_DAMAGE",
+      "type": "rests_on",
+      "why": "Base damage climbs every stage while the gold a loss saves stays flat."
+    },
+    {
+      "from": "P.HP_IS_A_BUDGET",
+      "to": "M.INCOME",
+      "type": "rests_on",
+      "why": "A held bank earns at most the interest cap each round."
+    },
+    {
+      "from": "P.COUNT_LOSSES_LEFT",
+      "to": "M.PLAYER_DAMAGE",
+      "type": "rests_on",
+      "why": "The cost of one loss is the stage base plus the units left."
+    },
+    {
+      "from": "P.STABILIZE_FLOOR",
+      "to": "P.COUNT_LOSSES_LEFT",
+      "type": "refines",
+      "why": "The floor is losses left, read at the next stage's price."
+    },
+    {
+      "from": "P.STABILIZE_FLOOR",
+      "to": "P.HP_IS_A_BUDGET",
+      "type": "refines",
+      "why": "It names the point where HP stops being worth trading."
+    },
+    {
+      "from": "P.SPEND_WHEN_IT_FLIPS",
+      "to": "M.INCOME",
+      "type": "rests_on",
+      "why": "Spending 10 gold costs 1 gold a round of interest; a flipped fight pays win gold, streak gold and HP."
+    },
+    {
+      "from": "P.SPEND_WHEN_IT_FLIPS",
+      "to": "M.STREAK_GOLD",
+      "type": "rests_on",
+      "why": "A flipped fight keeps a streak paying."
+    },
+    {
+      "from": "P.BANK_TO_TENS",
+      "to": "M.INCOME",
+      "type": "rests_on",
+      "why": "Interest is paid per full 10 gold."
+    },
+    {
+      "from": "P.SAVE_EARLY_GOLD",
+      "to": "P.HP_IS_A_BUDGET",
+      "type": "rests_on",
+      "why": "Gold is worth most in stage 2."
+    },
+    {
+      "from": "P.NO_IDLE_BANK",
+      "to": "M.INCOME",
+      "type": "rests_on",
+      "why": "Interest stops at its cap."
+    },
+    {
+      "from": "P.NO_IDLE_BANK",
+      "to": "P.BANK_TO_TENS",
+      "type": "refines",
+      "why": "Banking stops paying above the cap."
+    },
+    {
+      "from": "P.NO_GOLD_AT_ELIMINATION",
+      "to": "M.PLACEMENT",
+      "type": "rests_on",
+      "why": "Placement only counts how long you last."
+    },
+    {
+      "from": "P.NO_GOLD_AT_ELIMINATION",
+      "to": "P.COUNT_LOSSES_LEFT",
+      "type": "rests_on",
+      "why": "A bank earns only for the rounds you survive."
+    },
+    {
+      "from": "P.BANK_TO_TENS",
+      "to": "P.SPEND_WHEN_IT_FLIPS",
+      "type": "trades_off",
+      "why": "Every gold held is a gold not changing this fight."
+    },
+    {
+      "from": "P.STABILIZE_FLOOR",
+      "to": "P.BANK_TO_TENS",
+      "type": "overrides",
+      "why": "Under the floor, a round of interest is worth less than the HP."
+    },
+    {
+      "from": "P.ROLL_WHEN_FORCED",
+      "to": "P.BANK_TO_TENS",
+      "type": "overrides",
+      "why": "With two losses left the bank has no rounds to pay back in."
+    },
+    {
+      "from": "P.ROLL_WHEN_FORCED",
+      "to": "P.STOP_AT_A_NUMBER",
+      "type": "overrides",
+      "why": "On the last losses the stop is the price of what you hunt, not a ten."
+    },
+    {
+      "from": "P.NO_GOLD_AT_ELIMINATION",
+      "to": "P.BANK_TO_TENS",
+      "type": "overrides",
+      "why": "Interest on a bank you will not live to spend is worth nothing."
+    },
+    {
+      "from": "P.COMMIT_TO_A_STREAK",
+      "to": "M.STREAK_GOLD",
+      "type": "rests_on",
+      "why": "The pay sits at the end of the run."
+    },
+    {
+      "from": "P.PROTECT_WIN_STREAK",
+      "to": "M.STREAK_GOLD",
+      "type": "rests_on",
+      "why": "A broken run restarts from nothing."
+    },
+    {
+      "from": "P.PROTECT_WIN_STREAK",
+      "to": "P.COMMIT_TO_A_STREAK",
+      "type": "refines",
+      "why": "The win-streak half of committing."
+    },
+    {
+      "from": "P.LOSS_STREAK_PLAN",
+      "to": "P.COMMIT_TO_A_STREAK",
+      "type": "refines",
+      "why": "The loss-streak half of committing."
+    },
+    {
+      "from": "P.LOSS_STREAK_PLAN",
+      "to": "M.PLAYER_DAMAGE",
+      "type": "rests_on",
+      "why": "The same losses cost more HP each stage."
+    },
+    {
+      "from": "P.FLIP_TO_HOLD",
+      "to": "P.LOSS_STREAK_PLAN",
+      "type": "refines",
+      "why": "How the planned flip should land."
+    },
+    {
+      "from": "P.LOSS_STREAK_PLAN",
+      "to": "P.HP_IS_A_BUDGET",
+      "type": "trades_off",
+      "why": "Streak gold is bought with HP that gets dearer every stage."
+    },
+    {
+      "from": "P.ONE_SPIKE_PER_STRETCH",
+      "to": "M.ROUNDS",
+      "type": "rests_on",
+      "why": "Stages 3 and 4 hold most of the player rounds, at similar prices."
+    },
+    {
+      "from": "P.ONE_SPIKE_PER_STRETCH",
+      "to": "M.XP",
+      "type": "rests_on",
+      "why": "The levels you want cost most of what the stretch pays."
+    },
+    {
+      "from": "P.ONE_SPIKE_PER_STRETCH",
+      "to": "P.COUNT_LOSSES_LEFT",
+      "type": "rests_on",
+      "why": "The losses you can afford decide how late the spike can be."
+    },
+    {
+      "from": "P.LEVEL_TO_CARRY_COST",
+      "to": "M.SHOP_ODDS",
+      "type": "rests_on",
+      "why": "Each cost peaks at one level."
+    },
+    {
+      "from": "P.LEVEL_PLAN",
+      "to": "P.LEVEL_TO_CARRY_COST",
+      "type": "refines",
+      "why": "The carry's cost sets where the curve stops."
+    },
+    {
+      "from": "P.LEVEL_WITH_GOLD_TO_ROLL",
+      "to": "M.XP",
+      "type": "rests_on",
+      "why": "XP bought is rolls not made."
+    },
+    {
+      "from": "P.LEVEL_WITH_GOLD_TO_ROLL",
+      "to": "M.SHOP_ODDS",
+      "type": "rests_on",
+      "why": "Better odds pay only through rolls."
+    },
+    {
+      "from": "P.LEVEL_WITH_GOLD_TO_ROLL",
+      "to": "P.LEVEL_TO_CARRY_COST",
+      "type": "trades_off",
+      "why": "Gold for the level is gold not rolled."
+    },
+    {
+      "from": "P.ROLL_WHEN_FORCED",
+      "to": "P.COUNT_LOSSES_LEFT",
+      "type": "rests_on",
+      "why": "Forced means two losses or fewer left."
+    },
+    {
+      "from": "P.ROLL_WITH_PAIRS",
+      "to": "M.SHARED_POOL",
+      "type": "rests_on",
+      "why": "A pair needs one copy, not three."
+    },
+    {
+      "from": "P.ROLL_WITH_PAIRS",
+      "to": "P.ONE_SPIKE_PER_STRETCH",
+      "type": "enables",
+      "why": "Held pairs make the spike far cheaper."
+    },
+    {
+      "from": "P.STOP_AT_A_NUMBER",
+      "to": "M.INCOME",
+      "type": "rests_on",
+      "why": "Rebuilding from 0 takes about six rounds to reach 30."
+    },
+    {
+      "from": "P.STOP_AT_A_NUMBER",
+      "to": "M.SHOP_ODDS",
+      "type": "rests_on",
+      "why": "Each set of rolls finds less than the one before."
+    },
+    {
+      "from": "P.SLOW_ROLL_WHEN_HOLDING",
+      "to": "M.SHARED_POOL",
+      "type": "rests_on",
+      "why": "Nine copies do not fit in one bank."
+    },
+    {
+      "from": "P.SLOW_ROLL_WHEN_HOLDING",
+      "to": "P.BANK_TO_TENS",
+      "type": "refines",
+      "why": "Slow rolling spends only income above a ten."
+    },
+    {
+      "from": "P.STRONGEST_BOARD",
+      "to": "M.PLAYER_DAMAGE",
+      "type": "rests_on",
+      "why": "Each surviving enemy unit costs 1 HP."
+    },
+    {
+      "from": "P.FILL_THE_BOARD",
+      "to": "M.BOARD_SIZE",
+      "type": "rests_on",
+      "why": "Slots equal level."
+    },
+    {
+      "from": "P.FILL_THE_BOARD",
+      "to": "P.STRONGEST_BOARD",
+      "type": "refines",
+      "why": "The cheapest part of the strongest board."
+    },
+    {
+      "from": "P.UPGRADES_OVER_TRAITS",
+      "to": "M.SHARED_POOL",
+      "type": "rests_on",
+      "why": "Three copies make a 2-star."
+    },
+    {
+      "from": "P.UPGRADES_OVER_TRAITS",
+      "to": "P.STRONGEST_BOARD",
+      "type": "refines",
+      "why": "What strongest means when traits and stars disagree."
+    },
+    {
+      "from": "P.BOARD_VS_LOBBY",
+      "to": "P.STRONGEST_BOARD",
+      "type": "refines",
+      "why": "Strongest is measured against the boards you meet."
+    },
+    {
+      "from": "P.CLEAR_BENCH",
+      "to": "M.INCOME",
+      "type": "rests_on",
+      "why": "Bench units hold gold that earns no interest."
+    },
+    {
+      "from": "P.SLAM_ITEMS",
+      "to": "M.ITEMS",
+      "type": "rests_on",
+      "why": "Components do nothing until built."
+    },
+    {
+      "from": "P.SLAM_ITEMS",
+      "to": "P.STRONGEST_BOARD",
+      "type": "enables",
+      "why": "A slammed item is board strength now."
+    },
+    {
+      "from": "P.ITEMS_ON_CARRY",
+      "to": "M.ITEMS",
+      "type": "rests_on",
+      "why": "Three item slots per unit."
+    },
+    {
+      "from": "P.AUGMENT_FITS_STATE",
+      "to": "M.ROUNDS",
+      "type": "rests_on",
+      "why": "Augments come on fixed rounds."
+    },
+    {
+      "from": "P.AUGMENT_FITS_STATE",
+      "to": "P.HP_IS_A_BUDGET",
+      "type": "rests_on",
+      "why": "Low HP makes stabilizing worth more than gold."
+    },
+    {
+      "from": "P.AVOID_CONTEST",
+      "to": "M.SHARED_POOL",
+      "type": "rests_on",
+      "why": "Copies are shared across the lobby."
+    },
+    {
+      "from": "P.PIVOT_TOWARD_STRENGTH",
+      "to": "P.AVOID_CONTEST",
+      "type": "refines",
+      "why": "What to do when a line is contested."
+    },
+    {
+      "from": "P.PIVOT_TOWARD_STRENGTH",
+      "to": "P.UPGRADES_OVER_TRAITS",
+      "type": "rests_on",
+      "why": "A finished 2-star elsewhere beats a contested 1-star."
+    },
+    {
+      "from": "P.ROLL_WITH_PAIRS",
+      "to": "P.PIVOT_TOWARD_STRENGTH",
+      "type": "enables",
+      "why": "Pairs you hold show which line is closest."
+    },
+    {
+      "from": "P.COUNTER_POSITION",
+      "to": "P.PROTECT_CARRY",
+      "type": "refines",
+      "why": "Protection depends on what the opponent can reach."
+    },
+    {
+      "from": "P.OUTLAST_THE_LOBBY",
+      "to": "M.PLACEMENT",
+      "type": "rests_on",
+      "why": "Placement counts who goes out first."
+    },
+    {
+      "from": "P.OUTLAST_THE_LOBBY",
+      "to": "P.STABILIZE_FLOOR",
+      "type": "refines",
+      "why": "Players about to go out below you widen the floor."
+    },
+    {
+      "from": "P.STRONGEST_BOARD",
+      "to": "S.STAGE2_BLEED",
+      "type": "leads_to",
+      "why": "A weak stage 2 board loses fights it did not plan to lose."
+    },
+    {
+      "from": "P.COMMIT_TO_A_STREAK",
+      "to": "S.STAGE2_BLEED",
+      "type": "leads_to",
+      "why": "Drifting between wins and losses pays HP without streak gold."
+    },
+    {
+      "from": "S.STAGE2_BLEED",
+      "to": "S.LOW_HP_STAGE4",
+      "type": "leads_to",
+      "why": "HP lost in stage 2 is HP missing at every later checkpoint."
+    },
+    {
+      "from": "P.LOSS_STREAK_PLAN",
+      "to": "S.LOW_HP_STAGE4",
+      "type": "leads_to",
+      "why": "Losses after stage 2 cost far more HP each."
+    },
+    {
+      "from": "P.ONE_SPIKE_PER_STRETCH",
+      "to": "S.LOW_HP_STAGE4",
+      "type": "leads_to",
+      "why": "Without a spike the stage 3 losses keep coming."
+    },
+    {
+      "from": "P.NO_IDLE_BANK",
+      "to": "S.LOW_HP_STAGE4",
+      "type": "leads_to",
+      "why": "Gold sitting idle is HP paid for nothing."
+    },
+    {
+      "from": "P.BOARD_VS_LOBBY",
+      "to": "S.LOW_HP_STAGE4",
+      "type": "leads_to",
+      "why": "A board weaker than the ones it meets keeps losing."
+    },
+    {
+      "from": "P.LEVEL_WITH_GOLD_TO_ROLL",
+      "to": "P.ONE_SPIKE_PER_STRETCH",
+      "type": "leads_to",
+      "why": "Gold spent on levels without rolls leaves the board where it was."
+    },
+    {
+      "from": "S.LOW_HP_STAGE4",
+      "to": "S.BELOW_FLOOR",
+      "type": "leads_to",
+      "why": "From a low start, one or two stage 4 losses cross the floor."
+    },
+    {
+      "from": "S.BELOW_FLOOR",
+      "to": "S.LETHAL_STAGE5",
+      "type": "leads_to",
+      "why": "Under the floor, stage 5 starts one or two losses from out."
+    },
+    {
+      "from": "S.BELOW_FLOOR",
+      "to": "P.ROLL_WHEN_FORCED",
+      "type": "leads_to",
+      "why": "Under the floor the next lost fight may be the last one you can afford."
+    },
+    {
+      "from": "P.ROLL_WHEN_FORCED",
+      "to": "S.ELIMINATED_WITH_GOLD",
+      "type": "leads_to",
+      "why": "A forced roll not taken leaves the gold in the bank when the game ends."
+    },
+    {
+      "from": "S.LETHAL_STAGE5",
+      "to": "S.ELIMINATED_WITH_GOLD",
+      "type": "leads_to",
+      "why": "Any gold still held this low has a round or two left to matter."
+    },
+    {
+      "from": "P.BOARD_VS_LOBBY",
+      "to": "S.ELIMINATED_WITH_GOLD",
+      "type": "leads_to",
+      "why": "Losses to stronger boards ended the game before the bank was spent."
+    },
+    {
+      "from": "P.NO_GOLD_AT_ELIMINATION",
+      "to": "S.ELIMINATED_WITH_GOLD",
+      "type": "explains",
+      "why": "The principle this reading breaks."
+    },
+    {
+      "from": "P.STABILIZE_FLOOR",
+      "to": "S.BELOW_FLOOR",
+      "type": "explains",
+      "why": "The principle this reading breaks."
+    },
+    {
+      "from": "P.OUTLAST_THE_LOBBY",
+      "to": "S.LOW_HP_STAGE4",
+      "type": "explains",
+      "why": "Placement is decided by who keeps HP longest."
+    }
+  ]
+}

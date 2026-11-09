@@ -12,6 +12,7 @@ import { buildMatchPlan } from './plan-builder';
 import { getRuleEvidence, getRuleMeta, categoryGradeValidated } from './rules-loader';
 import { canGradeOverall, captureNotes, gradableCategories } from './coverage';
 import { boardUnits } from '../ledger/merge';
+import { traceGame } from './rule-network';
 
 // Maximum decision points (resolved + pending combined) before truncating.
 const MAX_POINTS = 20;
@@ -112,6 +113,7 @@ export function buildBrief(
     decisionPoints: pendingPoints,
     commonPatterns,
     flaggedCategories: [...new Set(allPoints.map(p => p.category))],
+    gameStory:       traceGame(match, allPoints, meta),
     // Graded from the FULL point list (pre-truncation, always-on rules
     // included) and normalized by round count — see src/coach/scoring.ts.
     // Always-on rules stay in on purpose: the S-D thresholds were set with them

@@ -1,0 +1,31 @@
+{
+  "_comment": "Set 17 layer of the rule network, for replaying Set 17 games. Stage damage is unchanged from Riot's 16.1 notes through 18.6, so Set 17 shares Set 18's table; level 8 cost 60 XP from 7 until 18.2. Set 17 had god rounds at 2-4, 3-4 and 4-4 in place of carousels, and no Wisps.",
+  "set": "set17",
+  "patch": "17.x",
+  "values": {
+    "stageBase": {
+      "2": 2,
+      "3": 6,
+      "4": 7,
+      "5": 10,
+      "6": 12,
+      "7": 17
+    }
+  },
+  "overrides": [
+    {
+      "id": "M.PLAYER_DAMAGE",
+      "statement": "A lost player round costs the stage's base damage (2, 6, 7, 10, 12, 17 for stages 2 to 7) plus 1 for each enemy unit left alive."
+    },
+    {
+      "id": "M.XP",
+      "statement": "4 gold buys 4 XP and every round gives 2 XP free. Level 8 cost 60 XP from 7 in Set 17."
+    },
+    {
+      "id": "M.ROUNDS",
+      "statement": "From stage 2 each stage has seven rounds, with a god round at 2-4, 3-4 and 4-4 and a PvE round at x-7. Stages 3 and 4 hold most of the game's player rounds."
+    }
+  ],
+  "nodes": [],
+  "edges": []
+}

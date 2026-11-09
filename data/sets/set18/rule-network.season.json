@@ -1,0 +1,164 @@
+{
+  "_comment": "Set 18 (Enchanted Wilds) layer of the rule network, checked at patch 18.6: the numbers the detectors use, Set 18 wording for nodes whose text quotes them, and the Wisp mechanic. Merged over data/core/rule-network.json by src/coach/rule-network.ts.",
+  "set": "set18",
+  "patch": "18.6",
+  "values": {
+    "stageBase": {
+      "2": 2,
+      "3": 6,
+      "4": 7,
+      "5": 10,
+      "6": 12,
+      "7": 17
+    }
+  },
+  "overrides": [
+    {
+      "id": "M.INCOME",
+      "statement": "5 gold a round once the opening rounds are over, 1 gold for a won player round, and 1 gold of interest for every 10 gold held, normally up to 5 at 50."
+    },
+    {
+      "id": "M.STREAK_GOLD",
+      "statement": "A run of 2 to 4 pays 1 gold, a run of 5 pays 2, a run of 6 or more pays 3, for wins and losses alike. A won round adds 1 on top."
+    },
+    {
+      "id": "M.PLAYER_DAMAGE",
+      "statement": "A lost player round costs the stage's base damage (2, 6, 7, 10, 12, 17 for stages 2 to 7) plus 1 for each enemy unit left alive."
+    },
+    {
+      "id": "M.XP",
+      "statement": "4 gold buys 4 XP and every round gives 2 XP free. Level 7 is 36 XP from 6, level 8 is 56 XP from 7, level 9 is 68 from 8."
+    },
+    {
+      "id": "M.SHOP_ODDS",
+      "statement": "A roll costs 2 gold. Each level sets the odds of each cost: 2-costs peak at level 6 (40%), 3-costs at 7 (40%), 4-costs at 8 (30%), 5-costs at 9 (15%)."
+    },
+    {
+      "id": "M.SHARED_POOL",
+      "statement": "Every player draws from one pool: 30, 25, 18, 10 and 9 copies of each 1- to 5-cost. Three copies make a 2-star, nine a 3-star."
+    },
+    {
+      "id": "M.ROUNDS",
+      "statement": "From stage 2 each stage has seven rounds: augments at 2-1, 3-2 and 4-2, a carousel at x-4 and a PvE round at x-7. Stages 3 and 4 hold ten player rounds at nearly one price; stage 5 raises it."
+    },
+    {
+      "id": "P.HP_IS_A_BUDGET",
+      "statement": "A loss saves about the same gold in every stage but costs more HP each stage: about 1.7 HP per gold in stage 2 and 3.3 in stage 4. Spend HP early for gold; spend gold late to keep HP."
+    },
+    {
+      "id": "P.STABILIZE_FLOOR",
+      "statement": "Keep enough HP for two losses at the next stage's prices: more than about 18 going into stage 3, 20 into stage 4, 26 into stage 5, 30 into stage 6."
+    },
+    {
+      "id": "P.NO_IDLE_BANK",
+      "name": "Gold above 50 earns nothing",
+      "statement": "Interest stops at 50, so gold held above it while losing buys no income and costs HP.",
+      "advice": "Above 50 while losing, put the excess into levels or rolls."
+    },
+    {
+      "id": "P.NO_GOLD_AT_ELIMINATION",
+      "advice": "With one or two losses left, spend what the next fight needs; below about 20 HP that is usually everything but the price of a Combat Wisp."
+    },
+    {
+      "id": "P.COMMIT_TO_A_STREAK",
+      "statement": "Streak gold sits at the end of a run: rounds 5 and 6 pay more than the first four together, and trading wins and losses pays none."
+    },
+    {
+      "id": "P.PROTECT_WIN_STREAK",
+      "statement": "On 5 or more wins, losing one round costs 9 gold over the next three rounds plus the HP.",
+      "advice": "On a long win streak, spend up to about 30 gold to keep it when the spend holds several fights."
+    },
+    {
+      "id": "P.LOSS_STREAK_PLAN",
+      "statement": "Five losses cost about 25 HP in stage 2 but 45 in stage 3 and 50 in stage 4 for the same 5 streak gold. Without a planned flip it becomes the poverty loop.",
+      "unless": "A trait pays for losses (Coven in Set 18)."
+    },
+    {
+      "id": "P.FLIP_TO_HOLD",
+      "statement": "Win, lose, win, lose after a long loss streak pays 2 gold and still costs two fights."
+    },
+    {
+      "id": "P.ONE_SPIKE_PER_STRETCH",
+      "statement": "The ten player rounds of stages 3 and 4 pay about 50 to 100 gold; levels 7 and 8 alone cost 92. Only one plan fits, and a board that keeps losing must spend by about 3-6."
+    },
+    {
+      "id": "P.LEVEL_TO_CARRY_COST",
+      "statement": "Roll where your carry's cost is most common: 2-costs at 6, 3-costs at 7, 4-costs at 8, 5-costs at 9.",
+      "advice": "Level first for 4-costs once your gold is about 1.5 times the gold left to level 8."
+    },
+    {
+      "id": "P.LEVEL_PLAN",
+      "statement": "Standard timings (6 at 3-2, 7 at 4-1, 8 at 4-2 or 5-1) shift with streaks and comp. Across 3,181 Set 18 lobbies top-4 and bottom-4 players differ by 0.1 level at each stage."
+    },
+    {
+      "id": "P.ROLL_WITH_PAIRS",
+      "statement": "A held pair cuts a 2-star 4-cost from about 81 gold of rolls to 30. With four or more pairs about 10 gold of rolls is cheap insurance."
+    },
+    {
+      "id": "P.AUGMENT_FITS_STATE",
+      "statement": "Economy and item augments pay most at 2-1; at 3-2 and 4-2 an augment that stabilizes a losing board beats more gold."
+    },
+    {
+      "id": "P.AVOID_CONTEST",
+      "statement": "Each player on your units draws from the same pool; with 10 copies of a 4-cost, two others on it make your 2-star far dearer."
+    },
+    {
+      "id": "P.OUTLAST_THE_LOBBY",
+      "statement": "Placement is relative. Across Set 18 lobbies, top-4 finishers held a median 65 HP at 4-1 and bottom-4 finishers 42; their levels differed by 0.1."
+    },
+    {
+      "id": "S.LOW_HP_STAGE4",
+      "statement": "Under 60 HP at 4-1. Across Set 18 lobbies the median player who finished bottom 4 held 42 HP there, against 65 for the top 4.",
+      "sources": [
+        "rules-map-2026-10",
+        "metabot-benchmarks"
+      ]
+    },
+    {
+      "id": "S.ELIMINATED_WITH_GOLD",
+      "statement": "Gold was still in the bank when the game ended. Players at higher ranks leave less: 18.2 gold on average in Iron, 8.1 in Diamond."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "M.WISPS",
+      "kind": "mechanic",
+      "domain": "set",
+      "basis": "riot",
+      "name": "Wisps (Set 18)",
+      "statement": "One Wisp a round from every other shop. Below 20 HP stat consumables, Golden Goose, Major Gambit and Barter are not offered (18.4); under 10 gold, 0-cost Wisps can appear from 4-1 to 5-7; past stage 5 every other Wisp is a Combat Wisp.",
+      "sources": [
+        "tftsense-hp",
+        "tftsense-econ"
+      ]
+    },
+    {
+      "id": "P.LATE_GOLD_FOR_WISPS",
+      "kind": "principle",
+      "domain": "set",
+      "basis": "riot",
+      "name": "Keep a few gold for a Combat Wisp late",
+      "statement": "Past stage 5 every other Wisp is a Combat Wisp, and the shop only shows Wisps you can afford.",
+      "advice": "On a last-life roll-down, stop a few gold above a Combat Wisp's price.",
+      "sources": [
+        "tftsense-hp",
+        "tftsense-rolling"
+      ],
+      "engineRules": []
+    }
+  ],
+  "edges": [
+    {
+      "from": "P.LATE_GOLD_FOR_WISPS",
+      "to": "M.WISPS",
+      "type": "rests_on",
+      "why": "Combat Wisps only show if you can afford them."
+    },
+    {
+      "from": "P.LATE_GOLD_FOR_WISPS",
+      "to": "P.STOP_AT_A_NUMBER",
+      "type": "refines",
+      "why": "Late, the stop sits above a Combat Wisp's price."
+    }
+  ]
+}

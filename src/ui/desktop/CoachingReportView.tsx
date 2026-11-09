@@ -4,6 +4,7 @@ import { ALL_CATEGORIES, CATEGORY_LABELS } from '../../coach/scoring';
 import { CoachingCard } from './CoachingCard';
 import { MatchTrajectoryCharts } from './MatchTrajectoryCharts';
 import { GamePlanSummary } from './GamePlanSummary';
+import { GameStoryView } from './GameStoryView';
 import { EmptyState } from './EmptyState';
 import styles from './CoachingReportView.module.css';
 
@@ -152,6 +153,8 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
             </header>
 
             <GamePlanSummary plan={report.plan} />
+
+            {report.game_story && <GameStoryView story={report.game_story} />}
 
             {/* Severity filter chips */}
             <div className={styles.filters}>

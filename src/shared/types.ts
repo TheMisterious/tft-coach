@@ -55,15 +55,21 @@ export interface PlayerState {
 
 export interface RoundInfo {
   stage: string;         // e.g. "3-2"
-  type: 'PVP' | 'PVE' | 'realm_of_the_gods' | 'unknown';
+  type: RoundType;
   outcome?: 'win' | 'loss' | 'draw';
 }
 
 // ─── Per-round snapshot ───────────────────────────────────────────────────────
 
+// 'carousel' is the shared draft at X-4: GEP's round_start type "Carousel",
+// seen from Set 18, which brought the carousel back. Set 17 replaced it with
+// Realm of the Gods, whose rounds sent no round_start at all, so they never
+// became rounds of their own (see godPicks below).
+export type RoundType = 'PVP' | 'PVE' | 'carousel' | 'unknown';
+
 export interface RoundSnapshot {
   label: string;                      // "3-2"
-  type: 'PVP' | 'PVE' | 'realm_of_the_gods' | 'unknown';
+  type: RoundType;
   outcome?: 'win' | 'loss' | 'draw';
   goldStart: number;
   goldEnd: number;
@@ -84,7 +90,8 @@ export interface RoundSnapshot {
   interestEarned: number;
   streakCount: number;
   streakType: 'win' | 'loss' | 'none';
-  // Set 17 — Realm of Gods (populated only for realm_of_the_gods rounds)
+  // Set 17 only — Realm of the Gods. Set 18 brought the carousel back and GEP
+  // sends no god_* fields there, so these stay unset.
   godChosen?: string;                 // e.g. "Ahri" | "Evelynn" | "Kayle" | "Thresh" | "Pengu"
   godOfferingHpCost?: number;        // HP cost of the chosen Evelynn offering, if any
   // Real per-unit damage/blocked/healed/shielded from this round's fight
@@ -155,7 +162,8 @@ export interface MatchSnapshot {
   placementSource?: PlacementSource;
   finalBoard: BoardState;
   augments: string[];                 // all picked augments
-  // Set 17 — collected god picks across all three god rounds (2-4, 3-4, 4-4)
+  // Set 17 only — god picks across its three god rounds (2-4, 3-4, 4-4).
+  // Always empty from Set 18 on, where X-4 is an ordinary carousel again.
   godPicks: Array<{ round: string; god: string }>;
   // Always set by reconstructSnapshots(); absent on hand-built test snapshots,
   // which are treated as fully observed.

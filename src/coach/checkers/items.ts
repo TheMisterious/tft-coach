@@ -175,7 +175,7 @@ function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData, context: 
     category: 'items',
     severity: 'critical',
     observed: `Main carry ${carryName} had only ${itemCount} completed item(s) at stage 4 entry`,
-    recommended: 'Two God rounds have occurred by 4-1 — your carry should have at least 2 completed items',
+    recommended: 'By 4-1, stages 2 and 3 and their item drops are over — a main carry usually holds 2 completed items by here',
     reasonMetrics: { carry: carryName, itemCount },
     coaching_text: byHp(r41.health, {
       low:  `${carryName} entered stage 4 with only ${itemCount} completed item(s) — and you're already at ${r41.health} HP. This is the worst combination: a weak board AND a low-HP position. Every fight from here where your carry underperforms accelerates elimination. Slam any available components immediately onto ${carryName}, even off-BiS items.`,

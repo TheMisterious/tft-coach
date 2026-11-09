@@ -89,6 +89,23 @@ describe('Set 18 GEP shapes', () => {
     expect(detectSet(SET18_LEDGER)).toBe('set18');
   });
 
+  it('reads X-4 as an ordinary carousel, not a god round', () => {
+    // Set 18 brought the carousel back: round_type says "Carousel" and a
+    // normal round_start fires (all three recorded Set 18 matches).
+    const ledger: LedgerEntry[] = [
+      ...SET18_LEDGER,
+      info('match_info', 'round_type', { stage: '2-4', name: 'Carousel', type: 'Carousel' }),
+      event('round_start', 'Carousel'),
+      event('round_end'),
+      info('match_info', 'round_type', { stage: '2-5', type: 'PVP' }),
+    ];
+    const snapshot = reconstructSnapshots(ledger);
+    const carousel = snapshot.rounds.find(r => r.label === '2-4');
+    expect(carousel?.type).toBe('carousel');
+    expect(carousel?.godChosen).toBeUndefined();
+    expect(snapshot.godPicks).toEqual([]);
+  });
+
   it('still reads the Set 17 shapes the same way', () => {
     const ledger = oneRoundLedger(
       ['TFT17_Ahri'],

@@ -1,9 +1,9 @@
 // Round label detection and snapshot reconstruction from the ledger.
 //
 // KNOWN BUG: Stage 5-7 sometimes skips match_info events (Overwolf open issue).
-// Fallback: count round_start events since the last Realm of the Gods round to derive the label.
+// Fallback: the stage from the latest match_info.round_type (labelForRoundStart).
 
-import type { LedgerEntry, RoundSnapshot, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats, LobbyPlayerState, PlacementSource } from '../shared/types';
+import type { LedgerEntry, RoundSnapshot, RoundType, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats, LobbyPlayerState, PlacementSource } from '../shared/types';
 import { safeParseGep } from '../capture/safe-parse';
 import { normalizeBoardSnapshot, boardChampionIds } from './merge';
 import { findFinalPlacement } from './placement';
@@ -185,8 +185,12 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   const augmentSlots: Record<string, string> = {};
   let benchItems: string[]   = [];
   let roundStartTs:  number  = 0;
-  let roundType: 'PVP' | 'PVE' | 'realm_of_the_gods' | 'unknown' = 'unknown';
-  // Realm of Gods state. Confirmed via a real ledger (tests/goldens/2026-07-03-rank-5.jsonl):
+  let roundType: RoundType = 'unknown';
+  // Set 17 only — Realm of the Gods, which replaced the carousel for that one
+  // set. Set 18 brought the carousel back: X-4 arrives as round_type
+  // { type: "Carousel" } with a normal round_start, and no god_* field is
+  // ever sent, so none of the state below is touched. Set 17 behaviour,
+  // confirmed via a real ledger (tests/goldens/2026-07-03-rank-5.jsonl):
   //  - match_info.god_names fires ONCE for the whole match — the two candidate
   //    gods never change — with match_info.god_picked_favor telling us which
   //    SIDE ("favor_left"/"favor_right") is currently picked, resolved against
@@ -412,7 +416,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
           if (opp.name) lastOpponentName = opp.name;
         }
 
-        // Set 17 — Realm of Gods. Confirmed via a real recorded match (see
+        // Set 17 only — Realm of Gods. Confirmed via a real recorded match (see
         // src/ledger/diagnostics.ts __debugRawSamples): GEP does NOT expose a
         // "realm_of_gods" feature or a "god_chosen" key. It sends the two
         // offered gods as match_info.god_names (e.g. ["TFT17_God_Thresh",
@@ -671,9 +675,9 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       if (e.name === 'round_start') {
         const data = e.data as { game_stage?: string; type?: string } | string;
         const typeStr = typeof data === 'object' ? (data?.type ?? '') : (data ?? '');
-        const newRoundType = typeStr === 'PVP' ? 'PVP'
+        const newRoundType: RoundType = typeStr === 'PVP' ? 'PVP'
                   : typeStr === 'PVE' ? 'PVE'
-                  : typeStr === 'realm_of_the_gods' ? 'realm_of_the_gods'
+                  : typeStr === 'Carousel' ? 'carousel'
                   : 'unknown';
 
         // Previous round never got a round_end — synthesize its close before

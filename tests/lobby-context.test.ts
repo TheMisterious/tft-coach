@@ -5,6 +5,7 @@
 // suppressions that keep the rules from giving actively bad advice.
 
 import { describe, it, expect } from 'vitest';
+import { existsSync } from 'fs';
 import path from 'path';
 import { standingFor, ordinal, lobbyClause } from '../src/coach/lobby-context';
 import { checkLobby } from '../src/coach/checkers/lobby';
@@ -148,11 +149,13 @@ describe('LOBBY_002 — health behind the lobby', () => {
   });
 });
 
-describe('lobby capture, end to end', () => {
+// Golden ledgers are never committed (they carry other players' Riot IDs), so
+// a fresh clone has none — skip rather than fail, as coach.regression does.
+const LOBBY_GOLDEN = path.resolve(__dirname, 'goldens/2026-07-04-rank-6.jsonl');
+
+describe.skipIf(!existsSync(LOBBY_GOLDEN))('lobby capture, end to end', () => {
   it('populates a roster for every round of a real match', async () => {
-    const { snapshot } = await replayLedger(
-      path.resolve(__dirname, 'goldens/2026-07-04-rank-6.jsonl')
-    );
+    const { snapshot } = await replayLedger(LOBBY_GOLDEN);
     const withLobby = snapshot.rounds.filter(r => r.lobby?.length);
     expect(withLobby.length).toBe(snapshot.rounds.length);
 
@@ -166,9 +169,7 @@ describe('lobby capture, end to end', () => {
     // GEP calls it "xp" but it tracks me.xp.level round for round. If this ever
     // regresses to real experience points, every lobby level comparison silently
     // becomes nonsense — so it is asserted against the round's own level.
-    const { snapshot } = await replayLedger(
-      path.resolve(__dirname, 'goldens/2026-07-04-rank-6.jsonl')
-    );
+    const { snapshot } = await replayLedger(LOBBY_GOLDEN);
     const mismatches = snapshot.rounds
       .filter(r => r.lobby?.some(p => p.isLocal))
       .filter(r => r.lobby!.find(p => p.isLocal)!.level !== r.level)

@@ -29,6 +29,8 @@ import { getRuleEvidence, getRuleMeta, getAllRules } from './rules-loader';
 import { pairsHeld } from './upgrades';
 import { standingFor, ordinal } from './lobby-context';
 import { getChampionName } from '../enrichment/meta-lookup';
+import { readFights, describeBoard, isComponent, type Fight } from './fights';
+import { boardUnits } from '../ledger/merge';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const coreNetwork = require('../../data/core/rule-network.json') as CoreNetwork;
@@ -101,7 +103,7 @@ export interface RuleNetwork extends CoreNetwork {
 }
 
 export const EDGE_TYPES: EdgeType[] = ['rests_on', 'refines', 'enables', 'trades_off', 'overrides', 'leads_to', 'explains'];
-const BASES: StoryBasis[] = ['riot', 'sums', 'benchmark', 'heuristic', 'audit'];
+const BASES: StoryBasis[] = ['riot', 'sums', 'benchmark', 'heuristic', 'audit', 'recorded'];
 
 export function seasonNetworkFor(setId: string | undefined): SeasonNetwork | undefined {
   return setId ? seasonNetworks[setId] : undefined;
@@ -201,7 +203,7 @@ function hasCycle(edges: NetworkEdge[]): boolean {
 // Readings the existing checkers do not make. Each returns the rounds it fired
 // at, with the facts behind it.
 
-interface Firing {
+export interface Firing {
   nodeId: string;
   rounds: string[];
   facts: string[];
@@ -213,7 +215,8 @@ interface Firing {
   contributing?: string[];
 }
 
-type DetectorId = 'belowNextStageFloor' | 'eliminatedWithGold' | 'forcedRollSkipped' | 'noSpikeWhileLosing' | 'lossStreakPastStage2';
+type DetectorId = 'belowNextStageFloor' | 'eliminatedWithGold' | 'forcedRollSkipped' | 'noSpikeWhileLosing' | 'lossStreakPastStage2'
+  | 'behindOnItems' | 'behindOnBoard' | 'carryContested';
 type Detector = (match: MatchSnapshot, net: RuleNetwork, meta?: MetaData) => Omit<Firing, 'nodeId'>[];
 type StageBase = Record<string, number>;
 
@@ -376,7 +379,97 @@ const DETECTORS: Record<DetectorId, Detector> = {
       facts: [`Loss streak at ${r.streakCount} by ${r.label}, where a loss costs ${now} HP against ${early} in stage 2.`],
     }];
   },
+
+  // ─── Fights (src/coach/fights.ts) ──────────────────────────────────────────
+
+  // S.BEHIND_ON_ITEMS: in 40%+ of the stage 3-4 fights with the opponent's
+  // board recorded (at least four), it held two or more finished items more.
+  // In 78 recorded games this fired in 45% of bottom-four finishes and 12% of
+  // top-four ones; the threshold was set on those games, so it is exploratory.
+  behindOnItems(match, _net, meta) {
+    const fights = midGameKnown(match, meta);
+    const behind = fights.filter(f => f.opp!.items >= f.own.items + 2);
+    if (fights.length < 4 || behind.length / fights.length < 0.4) return [];
+    const rounds = new Map(match.rounds.map(r => [r.label, r]));
+    const spare = (label: string) => {
+      const r = rounds.get(label);
+      if (!r || !meta) return 0;
+      return r.benchItems.filter(id => id && isComponent(id, meta)).length;
+    };
+    const worst = behind.slice().sort((a, b) => (b.opp!.items - b.own.items) - (a.opp!.items - a.own.items)).slice(0, 3)
+      .sort((a, b) => roundNumber(a.round) - roundNumber(b.round));
+    return [{
+      rounds: behind.map(f => f.round),
+      facts: [
+        `In ${behind.length} of ${fights.length} stage 3-4 fights the board you met held two or more finished items more than yours.`,
+        ...worst.map(f => {
+          const loose = f.own.components + spare(f.round);
+          return `${f.round}: they had ${f.opp!.items} finished items, you had ${f.own.items}${loose ? `, with ${loose} unbuilt component${loose === 1 ? '' : 's'} on your units or bench` : ''}; you ${f.result === 'loss' ? `lost (${f.hpBefore} → ${f.hpAfter})` : 'won'}.`;
+        }),
+      ],
+    }];
+  },
+
+  // S.BEHIND_ON_BOARD: in half or more of the stage 3-4 fights with the
+  // opponent's board recorded (at least four), it was worth a fifth more than
+  // yours (cost times copies). Fired in 45% of bottom-four and 15% of top-four
+  // finishes across 78 recorded games; exploratory, as above.
+  behindOnBoard(match, _net, meta) {
+    const fights = midGameKnown(match, meta);
+    const behind = fights.filter(f => f.opp!.value >= f.own.value * 1.2);
+    if (fights.length < 4 || behind.length / fights.length < 0.5) return [];
+    const worst = behind.slice().sort((a, b) => b.opp!.value / Math.max(1, b.own.value) - a.opp!.value / Math.max(1, a.own.value)).slice(0, 3)
+      .sort((a, b) => roundNumber(a.round) - roundNumber(b.round));
+    return [{
+      rounds: behind.map(f => f.round),
+      facts: [
+        `In ${behind.length} of ${fights.length} stage 3-4 fights the board you met was worth a fifth or more than yours.`,
+        ...worst.map(f => `${f.round}: their ${describeBoard(f.opp!)} against your ${describeBoard(f.own)}; you ${f.result === 'loss' ? `lost (${f.hpBefore} → ${f.hpAfter})` : 'won'}.`),
+      ],
+    }];
+  },
+
+  // P.AVOID_CONTEST broken: your top damage unit was on the boards of two or
+  // more different opponents you fought in stages 3 and 4.
+  carryContested(match, _net, meta) {
+    if (!meta) return [];
+    const fights = fightsOf(match, meta).filter(f => f.stage >= 3 && Object.keys(f.ownShares).length > 0);
+    const carry = topUnit(fights);
+    if (!carry) return [];
+    const seen = new Map<string, string>();
+    for (const r of match.rounds) {
+      if (r.type !== 'PVP' || !r.opponentBoardFresh || !r.opponentName) continue;
+      if (stageOf(r.label) < 3 || stageOf(r.label) > 4) continue;
+      const copy = boardUnits(r.opponentBoard).filter(u => u.name === carry).sort((a, b) => Number(b.level) - Number(a.level))[0];
+      if (copy && !seen.has(r.opponentName)) seen.set(r.opponentName, `${r.label}, ${Number(copy.level) || 1}★`);
+    }
+    if (seen.size < 2) return [];
+    return [{
+      rounds: [...seen.values()].map(v => v.split(',')[0]),
+      facts: [`${getChampionName(carry, meta)}, your top damage unit, was on the boards of ${seen.size} opponents you fought: ${[...seen].map(([name, at]) => `${name} (${at})`).join('; ')}.`],
+    }];
+  },
 };
+
+// readFights once per match: several detectors read the same fights.
+const fightCache = new WeakMap<MatchSnapshot, Fight[]>();
+function fightsOf(match: MatchSnapshot, meta: MetaData): Fight[] {
+  let f = fightCache.get(match);
+  if (!f) { f = readFights(match, meta); fightCache.set(match, f); }
+  return f;
+}
+
+// Stage 3 and 4 fights where the opponent's whole board was recorded.
+function midGameKnown(match: MatchSnapshot, meta?: MetaData): Fight[] {
+  return meta ? fightsOf(match, meta).filter(f => (f.stage === 3 || f.stage === 4) && f.opp) : [];
+}
+
+// The unit with the most of your damage across fights.
+function topUnit(fights: Fight[]): string | undefined {
+  const total = new Map<string, number>();
+  for (const f of fights) for (const [u, sh] of Object.entries(f.ownShares)) total.set(u, (total.get(u) ?? 0) + sh);
+  return [...total].sort((a, b) => b[1] - a[1])[0]?.[0];
+}
 
 // ─── Tracing a game ──────────────────────────────────────────────────────────
 
@@ -385,6 +478,7 @@ const TERMINALS = ['S.ELIMINATED_WITH_GOLD', 'S.LETHAL_STAGE5', 'S.BELOW_FLOOR',
 
 const BASIS_LABEL: Record<StoryBasis, string> = {
   riot: "Riot's numbers",
+  recorded: 'Read from your recording',
   sums: "Arithmetic on Riot's numbers",
   benchmark: 'Set 18 ladder statistics',
   heuristic: 'Expert rule of thumb',
@@ -447,6 +541,18 @@ function evidenceLabel(node: NetworkNode, firing: Firing): string {
   return 'Not yet audited in your games';
 }
 
+// Every network node that fired in a match, from the checkers and the
+// detectors, with its rounds and facts. traceGame orders these into a story;
+// the audit counts them by placement.
+export function networkFirings(match: MatchSnapshot, points: DecisionPoint[], meta?: MetaData, net: RuleNetwork = loadRuleNetwork(match.setId)): Map<string, Firing> {
+  const detected: Firing[] = [];
+  for (const n of net.nodes) {
+    if (!n.detector) continue;
+    for (const f of DETECTORS[n.detector](match, net, meta)) detected.push({ ...f, nodeId: n.id });
+  }
+  return mergeFirings([...firingsFromPoints(net, points), ...detected]);
+}
+
 // One ordered account of how a bottom-four match was lost: the worst reading
 // it reached, and every recorded break or reading that leads to it through
 // the network, earliest first. Undefined for top-four finishes, unknown
@@ -454,12 +560,7 @@ function evidenceLabel(node: NetworkNode, firing: Firing): string {
 export function traceGame(match: MatchSnapshot, points: DecisionPoint[], meta?: MetaData, net: RuleNetwork = loadRuleNetwork(match.setId)): GameStory | undefined {
   if (match.finalPlacement <= 4 || match.placementSource === 'none') return undefined;
   const nodes = new Map(net.nodes.map(n => [n.id, n]));
-  const detected: Firing[] = [];
-  for (const n of net.nodes) {
-    if (!n.detector) continue;
-    for (const f of DETECTORS[n.detector](match, net, meta)) detected.push({ ...f, nodeId: n.id });
-  }
-  const fired = mergeFirings([...firingsFromPoints(net, points), ...detected]);
+  const fired = networkFirings(match, points, meta, net);
 
   const terminal = TERMINALS.find(id => fired.has(id));
   if (!terminal) return undefined;
@@ -502,6 +603,9 @@ export function traceGame(match: MatchSnapshot, points: DecisionPoint[], meta?: 
       const node = nodes.get(id)!;
       const firing = fired.get(id)!;
       const principle = node.kind === 'principle' ? node : explainer(id);
+      // A reading is trusted as far as its own basis (a fact read from the
+      // recording, or a measured checkpoint); a decision as far as its principle.
+      const basis = node.kind === 'symptom' ? node.basis : (principle?.basis ?? node.basis);
       return {
         nodeId: id,
         kind: node.kind === 'symptom' ? 'reading' : 'decision',
@@ -511,8 +615,8 @@ export function traceGame(match: MatchSnapshot, points: DecisionPoint[], meta?: 
         principle: principle?.name,
         advice: principle?.advice,
         unless: principle?.unless,
-        basis: principle?.basis ?? node.basis,
-        basisLabel: BASIS_LABEL[principle?.basis ?? node.basis],
+        basis,
+        basisLabel: BASIS_LABEL[basis],
         evidence: evidenceLabel(node, firing),
         ledTo: leads.filter(e => e.from === id && included.has(e.to)).map(e => ({ nodeId: e.to, name: nodes.get(e.to)!.name, why: e.why })),
       };

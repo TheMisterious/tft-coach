@@ -35,6 +35,7 @@ export async function generateCoachingReport(brief: MatchBrief): Promise<Coachin
     round_trajectory: brief.roundTrajectory,
     plan: brief.plan,
     ...(brief.gameStory ? { game_story: brief.gameStory } : {}),
+    ...(brief.fights?.length ? { fights: brief.fights } : {}),
   };
 }
 

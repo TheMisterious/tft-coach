@@ -127,6 +127,9 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   let board:         BoardState = {};
   let bench:         BoardState = {};
   let opponentBoard: BoardState = {};
+  // opponentBoard carries over between rounds (the guard below keeps the last
+  // non-empty one), so whether GEP sent it during this round is tracked apart.
+  let opponentBoardThisRound = false;
   let shop:          string[]   = [];
 
   let gold    = 0;
@@ -293,6 +296,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       shop:           [...shop],
       augmentsPicked:     [...augments],
       opponentBoard:      { ...opponentBoard },
+      opponentBoardFresh: opponentBoardThisRound,
       interestEarned:     interest,
       streakCount,
       streakType,
@@ -305,6 +309,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     lastRoundOutcome = undefined;
     lastBattleStats  = undefined;
     lastOpponentName = undefined;
+    opponentBoardThisRound = false;
     bestLocalDamage      = undefined;
     bestLocalDamageTotal = 0;
   }
@@ -534,6 +539,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         // Same transient-empty-snapshot guard as board_pieces above.
         if (Object.keys(next).length > 0 || Object.keys(opponentBoard).length === 0) {
           opponentBoard = next;
+          if (Object.keys(next).length > 0) opponentBoardThisRound = true;
         }
       }
 

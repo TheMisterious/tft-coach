@@ -663,7 +663,8 @@
         "tftsense-fundamentals",
         "metabot-scouting"
       ],
-      "engineRules": []
+      "engineRules": [],
+      "detector": "carryContested"
     },
     {
       "id": "P.PIVOT_TOWARD_STRENGTH",
@@ -794,6 +795,34 @@
         "metabot-benchmarks",
         "tftsense-hp",
         "bunnymuffins-heuristics"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "S.BEHIND_ON_ITEMS",
+      "kind": "symptom",
+      "domain": "items",
+      "basis": "recorded",
+      "name": "Fought boards with more items",
+      "statement": "In at least 40% of the stage 3 and 4 fights where the opponent's board was recorded, it held two or more finished items more than yours.",
+      "detector": "behindOnItems",
+      "sources": [
+        "mobalytics-items",
+        "tftsense-fundamentals"
+      ],
+      "engineRules": []
+    },
+    {
+      "id": "S.BEHIND_ON_BOARD",
+      "kind": "symptom",
+      "domain": "board",
+      "basis": "recorded",
+      "name": "Fought stronger boards",
+      "statement": "In at least half of the stage 3 and 4 fights where the opponent's board was recorded, it was worth a fifth or more than yours, counting each unit's cost times its copies.",
+      "detector": "behindOnBoard",
+      "sources": [
+        "tftsense-fundamentals",
+        "tftsense-midgame"
       ],
       "engineRules": []
     }
@@ -1254,6 +1283,72 @@
       "to": "S.LOW_HP_STAGE4",
       "type": "explains",
       "why": "Placement is decided by who keeps HP longest."
+    },
+    {
+      "from": "P.SLAM_ITEMS",
+      "to": "S.BEHIND_ON_ITEMS",
+      "type": "leads_to",
+      "why": "Components held instead of built leave fewer finished items than the boards you meet."
+    },
+    {
+      "from": "P.SLAM_ITEMS",
+      "to": "S.BEHIND_ON_ITEMS",
+      "type": "explains",
+      "why": "The principle this reading breaks."
+    },
+    {
+      "from": "P.ONE_SPIKE_PER_STRETCH",
+      "to": "S.BEHIND_ON_BOARD",
+      "type": "leads_to",
+      "why": "Without a spike the board falls behind the boards it meets."
+    },
+    {
+      "from": "P.AVOID_CONTEST",
+      "to": "S.BEHIND_ON_BOARD",
+      "type": "leads_to",
+      "why": "A contested carry stays at fewer stars while the boards around it grow."
+    },
+    {
+      "from": "P.BOARD_VS_LOBBY",
+      "to": "S.BEHIND_ON_BOARD",
+      "type": "explains",
+      "why": "The principle this reading breaks."
+    },
+    {
+      "from": "S.BEHIND_ON_ITEMS",
+      "to": "S.LOW_HP_STAGE4",
+      "type": "leads_to",
+      "why": "Fights against better-itemized boards are lost more often, and each loss costs the stage's damage."
+    },
+    {
+      "from": "S.BEHIND_ON_ITEMS",
+      "to": "S.LETHAL_STAGE5",
+      "type": "leads_to",
+      "why": "Fights against better-itemized boards are lost more often, and each loss costs the stage's damage."
+    },
+    {
+      "from": "S.BEHIND_ON_ITEMS",
+      "to": "S.BELOW_FLOOR",
+      "type": "leads_to",
+      "why": "Fights against better-itemized boards are lost more often, and each loss costs the stage's damage."
+    },
+    {
+      "from": "S.BEHIND_ON_BOARD",
+      "to": "S.LOW_HP_STAGE4",
+      "type": "leads_to",
+      "why": "Fights against stronger boards are lost more often, and each loss costs the stage's damage."
+    },
+    {
+      "from": "S.BEHIND_ON_BOARD",
+      "to": "S.LETHAL_STAGE5",
+      "type": "leads_to",
+      "why": "Fights against stronger boards are lost more often, and each loss costs the stage's damage."
+    },
+    {
+      "from": "S.BEHIND_ON_BOARD",
+      "to": "S.BELOW_FLOOR",
+      "type": "leads_to",
+      "why": "Fights against stronger boards are lost more often, and each loss costs the stage's damage."
     }
   ]
 }

@@ -7,10 +7,10 @@
 import { describe, it, expect } from 'vitest';
 import {
   loadRuleNetwork, validateNetwork, validateSeason, seasonNetworkFor, seasonNetworkSets,
-  traceGame, lossesLeft, stageFloor, type RuleNetwork,
+  traceGame, networkFirings, lossesLeft, stageFloor, type RuleNetwork,
 } from '../src/coach/rule-network';
 import { getCoreRules, getSeasonRules } from '../src/coach/rules-loader';
-import type { DecisionPoint, LobbyPlayerState, MatchSnapshot, RoundSnapshot } from '../src/shared/types';
+import type { DecisionPoint, LobbyPlayerState, MatchSnapshot, MetaData, RoundSnapshot } from '../src/shared/types';
 
 // Seven opponents, all healthier than the player unless told otherwise.
 function lobby(myHp: number, others = [70, 65, 60, 55, 50, 45, 40]): LobbyPlayerState[] {
@@ -206,5 +206,47 @@ describe('traceGame', () => {
     const ids = story.steps.map(s => s.nodeId);
     expect(ids).not.toContain('P.BOARD_VS_LOBBY');
     expect(ids).not.toContain('P.BANK_TO_TENS');
+  });
+});
+
+describe('fight readings', () => {
+  const meta = {
+    champions: {
+      Veigar: { name: 'Veigar', tier: 3, role: 'carry', traits: [] },
+      Ornn:   { name: 'Ornn',   tier: 4, role: 'tank',  traits: [] },
+      Teemo:  { name: 'Teemo',  tier: 2, role: 'carry', traits: [] },
+    },
+    itemData: { TFT_Item_BlueBuff: { name: 'Blue Buff', isComponent: false, composition: [], tags: ['offense'], keyStats: {} } },
+    items: {},
+  } as unknown as MetaData;
+  const cell = (name: string, level: number, items = 0) =>
+    ({ name, level, item_1: items > 0 ? 'TFT_Item_BlueBuff' : '', item_2: items > 1 ? 'TFT_Item_BlueBuff' : '', item_3: items > 2 ? 'TFT_Item_BlueBuff' : '' });
+  const mine = { a: cell('Veigar', 2, 1), b: cell('Ornn', 1), c: cell('Teemo', 2) };
+  const fight = (label: string, opponentBoard: Record<string, ReturnType<typeof cell>>, health: number, opponentName = 'Them') =>
+    round(label, { board: mine, opponentBoard, opponentBoardFresh: true, opponentName, health });
+  const fired = (rs: RoundSnapshot[]) => [...networkFirings(match(rs), [], meta).keys()];
+
+  // Worth 20 against your 15, three more finished items.
+  const richer = { a: cell('Veigar', 2, 3), b: cell('Ornn', 2, 1), c: cell('Teemo', 1) };
+  const even   = { a: cell('Veigar', 2, 1), b: cell('Ornn', 1), c: cell('Teemo', 2) };
+
+  it('reads boards with more items and more value from at least four recorded fights', () => {
+    const ids = fired([fight('3-1', richer, 90), fight('3-2', richer, 80), fight('3-3', even, 80), fight('4-1', richer, 70)]);
+    expect(ids).toContain('S.BEHIND_ON_ITEMS');
+    expect(ids).toContain('S.BEHIND_ON_BOARD');
+  });
+
+  it('stays quiet when the boards met were even, or too few were recorded', () => {
+    expect(fired([fight('3-1', even, 90), fight('3-2', even, 80), fight('3-3', richer, 80), fight('4-1', even, 70)]))
+      .not.toContain('S.BEHIND_ON_BOARD');
+    expect(fired([fight('3-1', richer, 90), fight('3-2', richer, 80), fight('3-3', richer, 70)]))
+      .not.toContain('S.BEHIND_ON_ITEMS');
+  });
+
+  it('reads a contested carry from the boards of two different opponents', () => {
+    const withVeigar = { a: cell('Veigar', 2), b: cell('Ornn', 1), c: cell('Teemo', 1) };
+    const rs = [fight('3-1', withVeigar, 90, 'Alpha'), fight('3-2', withVeigar, 80, 'Beta')]
+      .map(r => ({ ...r, battleStats: { own: [{ name: 'Veigar', totalDamage: 800, totalBlocked: 0, healed: 0, shielded: 0 }, { name: 'Ornn', totalDamage: 200, totalBlocked: 0, healed: 0, shielded: 0 }], opponent: [] } }));
+    expect(fired(rs)).toContain('P.AVOID_CONTEST');
   });
 });

@@ -5,6 +5,7 @@ import { CoachingCard } from './CoachingCard';
 import { MatchTrajectoryCharts } from './MatchTrajectoryCharts';
 import { GamePlanSummary } from './GamePlanSummary';
 import { GameStoryView } from './GameStoryView';
+import { FightsView } from './FightsView';
 import { EmptyState } from './EmptyState';
 import styles from './CoachingReportView.module.css';
 
@@ -155,6 +156,8 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
             <GamePlanSummary plan={report.plan} />
 
             {report.game_story && <GameStoryView story={report.game_story} />}
+
+            {report.fights && report.fights.length > 0 && <FightsView fights={report.fights} />}
 
             {/* Severity filter chips */}
             <div className={styles.filters}>

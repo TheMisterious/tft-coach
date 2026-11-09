@@ -87,6 +87,9 @@ export interface RoundSnapshot {
   shop: string[];                     // champion IDs
   augmentsPicked: string[];           // augment IDs picked so far this match
   opponentBoard: BoardState;
+  // True when GEP sent the opponent's board during this round; opponentBoard
+  // otherwise still holds an earlier round's board. Absent on older snapshots.
+  opponentBoardFresh?: boolean;
   interestEarned: number;
   streakCount: number;
   streakType: 'win' | 'loss' | 'none';
@@ -426,14 +429,54 @@ export interface CoachingReport {
   // (src/coach/rule-network.ts). Absent when no checkpoint reading fired, and on
   // reports made before the network existed.
   game_story?: GameStory;
+  // Every player fight, both boards and who did the damage. Absent on reports
+  // made before fights were read.
+  fights?: FightRow[];
+}
+
+// ─── Fights (src/coach/fights.ts) ───────────────────────────────────────────
+
+export interface BoardRead {
+  units: number;
+  // Gold the units are worth: cost times copies (1, 3 and 9 for 1 to 3 stars).
+  value: number;
+  twoStars: number;
+  threeStars: number;
+  // Finished items, artifacts and emblems in item slots.
+  items: number;
+  // Unbuilt components sitting in item slots.
+  components: number;
+}
+
+export interface DamageLead {
+  unit: string;        // champion id
+  name: string;        // display name
+  stars: number;       // 0 when the unit's board was not recorded
+  share: number;       // of its side's damage this fight, 0 to 1
+  items: string[];     // display names
+}
+
+// One player fight as the report shows it.
+export interface FightRow {
+  round: string;
+  stage: number;
+  result: 'win' | 'loss';
+  hpBefore: number;
+  hpAfter: number;
+  opponent?: string;
+  own: BoardRead;
+  opp?: BoardRead;     // only when GEP sent the opponent's whole board that round
+  ownLead?: DamageLead;
+  oppLead?: DamageLead;
 }
 
 // ─── Game story (rule network trace) ────────────────────────────────────────
 
 // How far a network node can be trusted: a Riot-published number, arithmetic
 // on Riot numbers, a large-sample ladder statistic, an expert rule of thumb,
-// or a measured link in this player's own games.
-export type StoryBasis = 'riot' | 'sums' | 'benchmark' | 'heuristic' | 'audit';
+// a measured link in this player's own games, or a fact read straight from
+// the match recording.
+export type StoryBasis = 'riot' | 'sums' | 'benchmark' | 'heuristic' | 'audit' | 'recorded';
 
 export interface StoryStep {
   nodeId: string;
@@ -483,6 +526,7 @@ export interface MatchBrief {
   // still-hidden candidate rules that leave no note. Absent on older briefs.
   flaggedCategories?: DecisionCategory[];
   gameStory?: GameStory;
+  fights?: FightRow[];
   // Grades computed from the full, pre-truncation decision-point list (see
   // rule-engine.ts) — deliberately independent of what made it into
   // resolvedNotes/decisionPoints after the MAX_POINTS/MAX_PER_RULE cuts.

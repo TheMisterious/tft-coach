@@ -265,8 +265,35 @@ export function deriveSetMeta(input: DeriveInput): DeriveOutput {
     });
   }
 
+  // Forms Riot's records never name: Set 18 records every Lux element as
+  // DA_Lux18_Base, so DA_18_Lux_Inferno never appears. Added after BiS, which
+  // needs a tally of the unit's own.
+  Object.assign(roles, variantRoles(champions, roles));
+
   return {
     roles, carryBis, comps,
     stats: { matches: matches.length, boards, topFourBoards, patches: [...patches].sort(), unmappedChampions, unknownItems, roleEvidence },
   };
+}
+
+// A champion named "<Base> (<form>)" — "Lux (Inferno)" — with no role of its
+// own takes the carry/tank role of the one champion named exactly <Base>. It
+// is the same unit in another form, not a judgement about it. Nothing is
+// inherited when the base name is ambiguous or only reads as flex.
+export function variantRoles(
+  champions: Record<string, ChampionEntry>, roles: Record<string, DerivedRole>,
+): Record<string, DerivedRole> {
+  const idsByName = new Map<string, string[]>();
+  for (const [id, c] of Object.entries(champions)) {
+    if (c?.name) idsByName.set(c.name, [...(idsByName.get(c.name) ?? []), id]);
+  }
+  const inherited: Record<string, DerivedRole> = {};
+  for (const [id, c] of Object.entries(champions)) {
+    if (roles[id] || !c?.name) continue;
+    const base = /^(.+) \([^)]+\)$/.exec(c.name)?.[1];
+    const baseIds = base ? idsByName.get(base) : undefined;
+    const baseRole = baseIds?.length === 1 ? roles[baseIds[0]] : undefined;
+    if (baseRole && baseRole !== 'flex') inherited[id] = baseRole;
+  }
+  return inherited;
 }

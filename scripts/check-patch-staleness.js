@@ -1,20 +1,28 @@
 #!/usr/bin/env node
 // Warns when data/sets/set{N}/rules.season.json hasn't been manually
 // re-reviewed since the live game patch moved on. Season rules encode
-// balance-sensitive thresholds (level timings, HP curves, the Realm of Gods
-// mechanic) that can silently go stale after a patch — this script doesn't
+// balance-sensitive thresholds (level timings, HP curves, set mechanics like
+// Set 17's Realm of the Gods) that can silently go stale after a patch — this script doesn't
 // know whether they're actually wrong, it just flags "these were last
 // checked against patch X, live is now patch Y, go look."
 //
 // Usage: node scripts/check-patch-staleness.js [setId]
-//   (defaults to set17)
+//   (defaults to the newest data/sets/set{N} folder — the live set)
 
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
 const DATA_ROOT = path.resolve(__dirname, '..', 'data');
-const setId = process.argv[2] || 'set17';
+const setId = process.argv[2] || newestSetId();
+
+function newestSetId() {
+  const sets = fs.readdirSync(path.join(DATA_ROOT, 'sets'))
+    .map(name => ({ name, n: Number(/^set(\d+)$/.exec(name)?.[1]) }))
+    .filter(s => Number.isFinite(s.n))
+    .sort((a, b) => b.n - a.n);
+  return sets[0]?.name ?? 'set17';
+}
 
 function getJson(url) {
   return new Promise((resolve, reject) => {

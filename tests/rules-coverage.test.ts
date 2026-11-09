@@ -15,7 +15,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'fs';
 import path from 'path';
-import { getAllRules } from '../src/coach/rules-loader';
+import { getAllRules, getSeasonRules } from '../src/coach/rules-loader';
 
 const CHECKERS_DIR = path.resolve(__dirname, '../src/coach/checkers');
 
@@ -49,5 +49,20 @@ describe('rule catalog coverage', () => {
       unused,
       `registry rule(s) never referenced by any checker: ${unused.join(', ')} — dead catalog entry, or a checker forgot to attach ruleId to its DecisionPoint`
     ).toEqual([]);
+  });
+});
+
+describe('season rules per set', () => {
+  it('every set folder has its season file in the registry', () => {
+    const setsDir = path.resolve(__dirname, '../data/sets');
+    for (const setId of readdirSync(setsDir).filter(d => /^set\d+$/.test(d))) {
+      expect(getSeasonRules(setId).length, `${setId}/rules.season.json is empty or not loaded by rules-loader.ts`).toBeGreaterThan(0);
+    }
+  });
+
+  it('keeps Set 17 Realm of the Gods rules out of Set 18', () => {
+    const set18 = getSeasonRules('set18').map(r => r.unique_id);
+    expect(set18.filter(id => id.startsWith('SET17_'))).toEqual([]);
+    expect(getSeasonRules('set17').map(r => r.unique_id)).toContain('SET17_001');
   });
 });

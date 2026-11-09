@@ -778,7 +778,7 @@
   "DA_Lux18_Blackthorn": {
     "name": "Lux (Blackthorn)",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Blackthorn",
       "Avatar"
@@ -790,7 +790,7 @@
   "DA_Lux18_Blossom": {
     "name": "Lux (Blossom)",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Blossom",
       "Avatar"
@@ -802,7 +802,7 @@
   "DA_18_Lux_Coven": {
     "name": "Lux (Coven)",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Coven",
       "Avatar"
@@ -814,7 +814,7 @@
   "DA_18_Lux_Elderwood": {
     "name": "Lux (Elderwood)",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Elderwood",
       "Avatar"
@@ -826,7 +826,7 @@
   "DA_18_Lux_Fae": {
     "name": "Lux (Fae)",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Fae",
       "Avatar"
@@ -838,7 +838,7 @@
   "DA_18_Lux_Inferno": {
     "name": "Lux (Inferno)",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Inferno",
       "Avatar"
@@ -850,7 +850,7 @@
   "DA_18_Lux_Moonbeam": {
     "name": "Lux (Lunar)",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Lunar",
       "Avatar"
@@ -862,7 +862,7 @@
   "DA_18_Lux_Primal": {
     "name": "Lux (Primal)",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Primal",
       "Avatar"
@@ -874,7 +874,7 @@
   "DA_18_Lux_Sunbeam": {
     "name": "Lux (Solar)",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Solar",
       "Avatar"

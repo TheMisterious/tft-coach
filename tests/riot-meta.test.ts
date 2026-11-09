@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 import champions from '../data/sets/set18/champions.json';
 import itemData from '../data/core/item-data.json';
 import {
-  deriveSetMeta, itemTagger, itemResolver, championResolver,
+  deriveSetMeta, itemTagger, itemResolver, championResolver, variantRoles,
   MIN_APPEARANCES, MIN_REROLL_BOARDS, type RiotMatchFull, type RiotParticipant, type ChampionEntry, type ItemEntry,
 } from '../scripts/riot-meta/derive';
 
@@ -68,6 +68,27 @@ describe('deriveSetMeta', () => {
     expect(bis.components_priority[0]).toBe('DA_Component_BFSword');
     expect(bis.notes).toMatch(/top-4 boards/);
     expect(out.carryBis[TANK]).toBeUndefined();
+  });
+
+  it('gives a form Riot never records the role of the champion it is a form of', () => {
+    const lux = matchesOf(MIN_APPEARANCES, () => [board(1, {
+      units: [{ character_id: 'DA_Lux18_Base', tier: 2, itemNames: ['DA_SpearOfShojin', 'DA_JeweledGauntlet', 'DA_VoidStaff'] }],
+    })]);
+    const roles = deriveSetMeta({ matches: lux, champions: CHAMPS, itemData: ITEMS, source: 'test' }).roles;
+    expect(roles.DA_Lux18_Base).toBe('carry');
+    expect(roles.DA_18_Lux_Inferno).toBe('carry');   // "Lux (Inferno)"
+    expect(roles.DA_Lux18_Blossom).toBe('carry');    // "Lux (Blossom)"
+  });
+
+  it('inherits nothing from a base that reads as flex, or from an ambiguous name', () => {
+    const champs = {
+      a: { name: 'Lux', tier: 5, role: 'flex', traits: [] },
+      b: { name: 'Lux (Inferno)', tier: 5, role: 'flex', traits: [] },
+      c: { name: 'Twin', tier: 1, role: 'flex', traits: [] },
+      d: { name: 'Twin', tier: 1, role: 'flex', traits: [] },
+      e: { name: 'Twin (Fae)', tier: 1, role: 'flex', traits: [] },
+    };
+    expect(variantRoles(champs, { a: 'flex', c: 'carry', d: 'carry' })).toEqual({});
   });
 
   it('leaves a champion with too few appearances out of the role table', () => {

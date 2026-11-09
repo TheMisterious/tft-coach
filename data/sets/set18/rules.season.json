@@ -1,9 +1,236 @@
 {
-  "_comment": "NOT YET CURATED for Set 18 (created 2026-10-13). Season rules (thresholds tied to a set's balance) are re-derived per set; none are written for Set 18 yet. Note src/coach/rules-loader.ts still imports data/sets/set17/rules.season.json statically for the rule registry, so this file is not read by the app today.",
+  "_comment": "Season rules for Set 18 (carried over 2026-11-09). Every non-SET17_* entry of data/sets/set17/rules.season.json, metadata unchanged: these checkers already ran on Set 18 matches with Set 17 wording and thresholds, and the thresholds themselves live in src/coach/checkers/*.ts. NONE has been re-verified against Set 18 balance — patch_meta stays null until someone does. Set 17 Realm of the Gods rules (SET17_*) are left out: Set 18 brought the carousel back.",
   "patch_meta": {
-    "_comment": "Tracks which Data Dragon version these thresholds were last manually verified against. null means never verified.",
+    "_comment": "Tracks which Data Dragon version these thresholds were last manually verified against. null means never verified — run `npm run check:patch` after reviewing patch_sensitivity:high/medium rules and it will report the current live version to fill in here.",
     "verified_ddragon_version": null,
     "verified_at": null
   },
-  "rules": []
+  "rules": [
+    {
+      "unique_id": "LEVEL_001",
+      "human_readable_name": "Late Level 6 — Not Reaching Level 6 by Round 3-2",
+      "category": "leveling",
+      "subcategory": "level_timing",
+      "short_summary": "Player failed to reach level 6 by round 3-2, missing the primary early stabilization window.",
+      "source_tier": "community_inferred",
+      "severity": "high",
+      "confidence": "high",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "LEVEL_002",
+      "human_readable_name": "Late Level 7 — Not Reaching Level 7 by Round 4-1",
+      "category": "leveling",
+      "subcategory": "level_timing",
+      "short_summary": "Player failed to reach level 7 by round 4-1, delaying access to 3-cost-dominant shop odds.",
+      "source_tier": "community_inferred",
+      "severity": "high",
+      "confidence": "high",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "LEVEL_003",
+      "human_readable_name": "Fast 8 Execution Delay — Level 8 Not Hit by Round 4-2",
+      "category": "leveling",
+      "subcategory": "fast8_timing",
+      "short_summary": "Player had sufficient gold but failed to reach level 8 by round 4-2.",
+      "source_tier": "community_inferred",
+      "severity": "high",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "LEVEL_005",
+      "human_readable_name": "Late Level 9 — Failing to Reach Level 9 While HP-Stable",
+      "category": "leveling",
+      "subcategory": "late_game_leveling",
+      "short_summary": "Player remained at level 8 through stage 5+ with sufficient gold and HP to push to level 9.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "LEVEL_006",
+      "human_readable_name": "Streak-Adjusted Level Target Missed",
+      "category": "leveling",
+      "subcategory": "streak_timing",
+      "short_summary": "Player was on a real (3+) win or loss streak but missed the streak-adjusted level checkpoint, which is one round earlier than the generic target.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "ROLL_001",
+      "human_readable_name": "Over-Rolling — Excessive Spend at Wrong Level for Carry Cost",
+      "category": "rolling",
+      "subcategory": "roll_level_mismatch",
+      "short_summary": "Player rolled heavily (15+g) at a level where their intended carry cost tier has low shop odds.",
+      "source_tier": "mixed",
+      "severity": "high",
+      "confidence": "high",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "HP_001",
+      "human_readable_name": "Stage 2 Excessive HP Bleed",
+      "category": "hp_management",
+      "subcategory": "early_game_damage",
+      "short_summary": "Player lost more than 15 HP during stage 2, indicating a critically weak early board.",
+      "source_tier": "mixed",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "HP_002",
+      "human_readable_name": "Stage 3 Critical HP Threshold",
+      "category": "hp_management",
+      "subcategory": "mid_game_damage",
+      "short_summary": "Player ended stage 3 below 60 HP, indicating dangerous bleed through the mid-game.",
+      "source_tier": "mixed",
+      "severity": "high",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "HP_003",
+      "human_readable_name": "Stage 5 Lethal Zone — Below 25 HP Entering Stage 5",
+      "category": "hp_management",
+      "subcategory": "late_game_survival",
+      "short_summary": "Player entered stage 5 with 25 or fewer HP — a single full loss likely results in elimination.",
+      "source_tier": "mixed",
+      "severity": "high",
+      "confidence": "high",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "ITEM_002",
+      "human_readable_name": "Carry Item Misallocation — Carry Items on Tank Units",
+      "category": "itemization",
+      "subcategory": "item_placement",
+      "short_summary": "Player placed two or more damage-oriented items on a tank-role unit.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "BOARD_001",
+      "human_readable_name": "Board Strength Lag — Unit Cost Sum Below Stage Benchmark",
+      "category": "board_strength",
+      "subcategory": "unit_cost_proxy",
+      "short_summary": "Player's total board unit cost sum was below the stage-appropriate benchmark.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium",
+      "benchmarks": {
+        "2": 12,
+        "3": 20,
+        "4": 30,
+        "5": 45
+      }
+    },
+    {
+      "unique_id": "AUGMENT_001",
+      "human_readable_name": "Economy Augment Chosen During HP Crisis",
+      "category": "augments",
+      "subcategory": "augment_selection",
+      "short_summary": "Player picked an economy-category augment (from this set's augment pool) while below 45 HP.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "AUGMENT_002",
+      "human_readable_name": "Missing Augment Data — Coverage Gap",
+      "category": "augments",
+      "subcategory": "data_gap",
+      "short_summary": "No augment picks were captured for a bottom-4 finish, so augment decisions could not be coached.",
+      "source_tier": "official",
+      "severity": "minor",
+      "confidence": "high",
+      "patch_sensitivity": "low"
+    },
+    {
+      "unique_id": "AUGMENT_003",
+      "human_readable_name": "Carry Augment Payoff Unrealised",
+      "category": "augments",
+      "subcategory": "augment_selection",
+      "short_summary": "Player picked a champion-specific carry augment, but that champion either never reached the final board or finished with fewer than 2 completed items.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "AUGMENT_004",
+      "human_readable_name": "Item-Shaping Augment Without a Built Carry",
+      "category": "augments",
+      "subcategory": "augment_selection",
+      "short_summary": "Player picked an item-shaping augment (augments.json 'items' category) but no unit on the final board reached 2+ completed items.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "POSITION_002",
+      "human_readable_name": "No Frontline Unit at Stage 4+",
+      "category": "positioning",
+      "subcategory": "frontline",
+      "short_summary": "Player's board had no tank-role unit (per this set's champions.json role tags) for 2+ consecutive stage-4+ PvP rounds.",
+      "source_tier": "community_inferred",
+      "severity": "moderate",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "ECON_004",
+      "human_readable_name": "Below Season Econ-Benchmark Curve",
+      "category": "economy",
+      "subcategory": "benchmark_curve",
+      "short_summary": "Player's gold at a curated checkpoint round (data/sets/set{N}/econ-benchmarks.json) was below the set's expected minimum.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "LEVEL_004",
+      "human_readable_name": "Naked Level — XP Bought Without a Gold or Board Cushion",
+      "category": "leveling",
+      "subcategory": "level_timing",
+      "short_summary": "Player bought XP leaving fewer than 10g remaining without a stable 2-starred core (fewer than 3 two-star units) to justify the risk.",
+      "source_tier": "community_inferred",
+      "severity": "medium",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    },
+    {
+      "unique_id": "ITEM_005",
+      "human_readable_name": "Component Conversion Opportunity",
+      "category": "itemization",
+      "subcategory": "item_selection",
+      "short_summary": "Player held 2 unbuilt components that form a real completed item (per data/core/item-data.json, Community Dragon composition/stat data) for 3+ consecutive rounds, instead of slamming them into a build matching the round's actual situation (HP crisis -> tank/sustain stats, otherwise -> offense stats).",
+      "source_tier": "official",
+      "severity": "medium",
+      "confidence": "high",
+      "patch_sensitivity": "low"
+    },
+    {
+      "unique_id": "TRAIT_001",
+      "human_readable_name": "Stuck One Unit Short of a Trait Breakpoint",
+      "category": "traits",
+      "subcategory": "breakpoint_completion",
+      "short_summary": "Player was exactly one unit away from the next trait tier (data/sets/set{N}/trait-breakpoints.json) for 3+ consecutive PvP rounds without completing it.",
+      "source_tier": "community_inferred",
+      "severity": "minor",
+      "confidence": "medium",
+      "patch_sensitivity": "medium"
+    }
+  ]
 }

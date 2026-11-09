@@ -9,9 +9,16 @@
 // the real sample size, and regression/cluster sections simply don't render
 // when the model didn't have enough data to compute them, rather than
 // showing a hedged placeholder.
+//
+// Below TRENDS_MIN_MATCHES the page shows progress toward that bar plus a
+// made-up example profile (player-trends-sample.ts) in its own box, labelled
+// "Example", so a new player can see what the page will hold (Overwolf QA).
+// The example is never blended into the player's own sections.
 
 import React from 'react';
 import type { FeatureVector, PlayerProfile } from '../../shared/types';
+import { TRENDS_MIN_MATCHES } from '../../profile/trend-model';
+import { SAMPLE_PLAYER_PROFILE } from './player-trends-sample';
 import styles from './PlayerTrendsView.module.css';
 
 const FEATURE_LABELS: Partial<Record<keyof FeatureVector, string>> = {
@@ -69,7 +76,7 @@ function correlationPhrase(value: number): string {
 }
 
 const CONFIDENCE_COPY: Record<PlayerProfile['confidence'], string> = {
-  insufficient_data: 'Not enough matches yet — patterns need at least 15 Player-Trends-eligible matches before anything reliable can show up here.',
+  insufficient_data: `Not enough matches yet — patterns need at least ${TRENDS_MIN_MATCHES} Player-Trends-eligible matches before anything reliable can show up here.`,
   exploratory: 'Exploratory — patterns below are directional, not statistically reliable yet. More matches will sharpen this.',
   moderate: 'Based on your match history so far. Still single-player data — treat this as a strong hint, not a verdict.',
 };
@@ -180,12 +187,64 @@ function ClusterCards({ profile }: { profile: PlayerProfile }) {
   );
 }
 
+// Shown instead of ConfidenceBanner until the profile has enough matches.
+// `profile` is null before the first match is ever saved.
+function ProgressBanner({ profile }: { profile: PlayerProfile | null }) {
+  const recorded = profile?.sampleSize ?? 0;
+  const pct = Math.min(100, Math.round((recorded / TRENDS_MIN_MATCHES) * 100));
+  return (
+    <div className={styles.banner}>
+      <span className={styles.bannerSample}>{recorded} of {TRENDS_MIN_MATCHES} matches recorded</span>
+      <div
+        className={styles.progressTrack}
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={TRENDS_MIN_MATCHES}
+        aria-valuenow={recorded}
+      >
+        <div className={styles.progressFill} style={{ width: `${pct}%` }} />
+      </div>
+      <p className={styles.bannerText}>
+        Player Trends is built from the matches coachv records on this PC — no account or sign-in needed.
+        Keep coachv running while you play, and your own patterns replace the example below
+        after {TRENDS_MIN_MATCHES} recorded matches.
+      </p>
+      {profile && profile.skippedStaleSchemaCount > 0 && (
+        <p className={styles.bannerStale}>
+          {profile.skippedStaleSchemaCount} older match(es) need reprocessing before they can count toward this.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function SamplePreview() {
+  return (
+    <section className={styles.preview} aria-label="Example Player Trends, not your data">
+      <div className={styles.previewHeader}>
+        <span className={styles.previewTag}>Example</span>
+        <span className={styles.previewNote}>
+          What this page shows after {TRENDS_MIN_MATCHES} matches. Made-up numbers, not your data.
+        </span>
+      </div>
+      <div className={styles.previewBody}>
+        <CorrelationsList profile={SAMPLE_PLAYER_PROFILE} />
+        <RegressionSection profile={SAMPLE_PLAYER_PROFILE} />
+        <ClusterCards profile={SAMPLE_PLAYER_PROFILE} />
+      </div>
+    </section>
+  );
+}
+
 export function PlayerTrendsView({ profile }: { profile: PlayerProfile | null }) {
-  if (!profile) {
+  if (!profile || profile.confidence === 'insufficient_data') {
     return (
-      <div className={styles.empty}>
-        <div className={styles.emptyTitle}>No Player Trends data yet</div>
-        <div className={styles.emptySubtext}>Play (or reprocess) a match to start building your profile.</div>
+      <div className={styles.root}>
+        <div className={styles.title}>Player Trends</div>
+        <ProgressBanner profile={profile} />
+        {/* The player's own early correlations, if any, before the example. */}
+        {profile && <CorrelationsList profile={profile} />}
+        <SamplePreview />
       </div>
     );
   }

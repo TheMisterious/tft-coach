@@ -124,7 +124,10 @@ function DesktopApp() {
           Player Trends
         </button>
       </div>
-      <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+      {/* Never scrolls itself: each view owns its scrolling panes, so the
+          window chrome above and the ad below stay put (Overwolf QA flagged a
+          scrollable main window). */}
+      <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
         {view === 'match' ? (
           <CoachingReportView
             report={currentReport ?? undefined}

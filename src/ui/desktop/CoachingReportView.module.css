@@ -1,6 +1,10 @@
+/* 100% of the content area, not 100vh: the title bar, status bar, tabs and
+   ad banner sit around this view, so a viewport-tall root overflowed by their
+   combined height and the whole window scrolled (Overwolf QA, Medium). The
+   sidebar and main panel below scroll on their own instead. */
 .root {
   display: flex;
-  height: 100vh;
+  height: 100%;
   background: #11111b;
   color: #cdd6f4;
   font-family: 'Segoe UI', system-ui, sans-serif;

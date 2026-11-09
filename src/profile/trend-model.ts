@@ -21,6 +21,11 @@ const MIN_PAIRS_FOR_CORRELATION = 5;
 const RIDGE_LAMBDA = 1.0;
 const MIN_CLUSTER_SIZE = 5;
 
+// Below this many eligible matches a profile is 'insufficient_data': raw
+// correlations only, no regression or clusters. Exported so the Player Trends
+// view can show progress toward it.
+export const TRENDS_MIN_MATCHES = 15;
+
 const FEATURE_KEYS: Array<keyof FeatureVector> = [
   'econBankingPhaseRatio', 'econPhaseSwitchCount', 'interestMissedRoundCount',
   'overcapRoundCount', 'preStage3RollGold',
@@ -134,7 +139,7 @@ export function buildPlayerProfile(records: FeatureRecord[], skippedStaleSchemaC
   const n = records.length;
   const correlations = n > 0 ? computeCorrelations(records) : [];
 
-  if (n < 15) {
+  if (n < TRENDS_MIN_MATCHES) {
     return {
       computedAt: Date.now(),
       sampleSize: n,

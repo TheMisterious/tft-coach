@@ -2,11 +2,11 @@
 
 An [Overwolf](https://www.overwolf.com/) app that watches your Teamfight Tactics
 match locally and, once it ends, produces a round-by-round coaching report —
-what went wrong, when, and what to do instead. No telemetry. Coaching runs
-entirely on your machine — the only outbound network calls are to Riot's own
-Data Dragon/Community Dragon CDNs for champion/item data, and, if you choose
-to sign in with Riot, to the small coachv backend that handles that sign-in
-(see [Linking a Riot account](#linking-a-riot-account-optional) below).
+what happened, when, and the usual answer. No telemetry, no account, no
+sign-in. Coaching runs entirely on your machine from Overwolf's Game Events
+Provider; the app calls no authenticated Riot API. The only outbound network
+calls are to Riot's public Data Dragon/Community Dragon CDNs for
+champion/item data, and to Overwolf's ad service for the desktop window's ad.
 
 > Not endorsed by Riot Games. TFT and Teamfight Tactics are trademarks of Riot
 > Games, Inc.
@@ -28,8 +28,8 @@ gold, board, shop, augments, ...) while you play. coachv:
    (`tests/coaching-prose.test.ts` enforces the wording).
 4. **Resolves** raw IDs (`TFT17_Teemo`, `TFT_Item_RabadonsDeathcap`, ...) to
    friendly names and builds a compact brief.
-5. **Renders** a report in a desktop window, with an in-game overlay showing
-   static reference info (trait table, item recipes) during the match itself.
+5. **Renders** the report in the desktop window. In game, the only thing shown
+   is a "report ready" notification once the match is over.
 
 There is currently no LLM in the loop — `src/coach/report-generator.ts` is a
 deterministic template filler over the rule engine's output. The name is a
@@ -42,8 +42,10 @@ This app is built around what Riot's policies (via Overwolf) actually allow:
 - **No live scouting, opponent tracking, or in-game prescriptions.** Coaching
   only happens after the match ends, which Riot explicitly permits.
 - **No augment win rates are ever displayed**, in the app or in coaching text.
-- **The in-game overlay is static only** — reference tables, not live advice.
-- Ads (if ever added) would only appear in the desktop window, never in-game.
+- **Nothing live in game.** The only in-game element is a short "report
+  ready" notification after the match.
+- **Ads only in the desktop window:** one 728x90 Overwolf ad at the bottom,
+  removed while the window is minimized. Never in game.
 
 If you fork this: keep these rules. They're the difference between "allowed
 post-match analysis" and "the kind of live-assist tool Riot bans."
@@ -86,7 +88,7 @@ npm run dev      # webpack --watch, outputs to dist/
 
 Load `dist/` as an unpacked extension in Overwolf
 (Settings → About → Development options → Load unpacked extension). The app
-targets TFT (`game_ids: [21570]`, see `public/manifest.json`) and launches
+targets TFT (`game_ids: [28164]`, see `public/manifest.json`) and launches
 automatically when the game starts.
 
 **Testing without playing a real match:** two Overwolf sample tools are
@@ -96,39 +98,6 @@ without a running game, and
 [`ow-events-recorder`](https://github.com/overwolf/ow-events-recorder) records
 a real session to a `.erp` file you can replay later. Neither is part of this
 repo.
-
-## Linking a Riot account (optional)
-
-Round-by-round coaching works fully offline with no setup. Linking a Riot
-account adds two extra things GEP can never see on its own: your current
-ranked tier/LP shown in the desktop window's status bar, and a background
-check that compares Riot's own record of your placement against what this
-app captured, flagging a mismatch if the two ever disagree.
-
-This does **not** replace GEP or change how coaching reports are generated —
-Riot's match API only returns a match's *final* result (placement, augments,
-final board), never the round-by-round timeline the rule engine reasons
-about.
-
-**Setup (player):** click the ⚙ (gear) icon in the desktop window's status
-bar, then **Sign in with Riot**. Riot's own sign-in page opens in your
-browser; when you finish, coachv comes back to the front, signed in. Pick
-the server you play on (`na1`, `euw1`, `kr`, `vn2`, ...) in the same panel.
-
-**How it works:** Riot Sign On (RSO). The player never types a key or a
-password into coachv. The sign-in runs through `server/rso-worker`, a
-Cloudflare Worker that holds the RSO client secret and the production API
-key, neither of which may ship inside the app. It returns a session bound to
-the signed-in account, and the app uses that session for the two reads it
-needs: rank, and the latest match's placement. See
-[server/rso-worker/README.md](server/rso-worker/README.md) to deploy it, and
-build the app with `COACHV_BACKEND_URL` set to its origin. Without it the
-sign-in button is disabled and everything else works as before.
-
-App side: `src/enrichment/riot-sign-in.ts` (start/finish the sign-in),
-`src/enrichment/coachv-backend.ts` (backend calls), and the `coachv://` URL
-scheme in `public/manifest.json`. Earlier builds asked players to paste a
-personal API key; any such key still in local storage is deleted on load.
 
 ## Scripts
 
@@ -140,7 +109,7 @@ personal API key; any such key still in local storage is deleted on load.
 | `npm run test:watch` | Vitest in watch mode |
 | `npm run lint` | Type-check only (`tsc --noEmit`) |
 | `npm run fetch:ddragon` | Refresh champion/item/augment names + champion tile icons from Riot Data Dragon + Community Dragon |
-| `npm run fetch:riot-meta` | Derive a set's champion roles, carry BiS and reroll comps from top players' Riot match records (needs `RIOT_API_KEY`; `--cached` re-derives offline) |
+| `npm run fetch:riot-meta` | Development-time only: derive a set's champion roles, carry BiS and reroll comps from top players' Riot match records into `data/sets/` (needs `RIOT_API_KEY`; `--cached` re-derives offline). The shipped app never calls the Riot API |
 | `npm run data:augment-effects` | Re-derive `augment-effects.json` from Data Dragon augment text |
 | `npm run fetch:metatft` | Optional, off by default — see script header |
 | `npm run check:patch` | Warns if the newest set's `rules.season.json` hasn't been reviewed since the latest patch (pass a set id for another) |

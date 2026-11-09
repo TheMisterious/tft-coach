@@ -1,10 +1,10 @@
 // Final placement and its provenance (src/ledger/placement.ts). The order is
-// the whole point: GEP's own end-of-match placement, then Riot's official one
-// appended after the match, then the live-rank fallback, then nothing — and
-// "nothing" must stay distinguishable from a real 8th.
+// the whole point: GEP's own end-of-match placement, then the live-rank
+// fallback, then nothing — and "nothing" must stay distinguishable from a
+// real 8th.
 
 import { describe, it, expect } from 'vitest';
-import { findFinalPlacement, RIOT_LEDGER_FEATURE } from '../src/ledger/placement';
+import { findFinalPlacement } from '../src/ledger/placement';
 import { reconstructSnapshots } from '../src/ledger/rounds';
 import type { LedgerEntry } from '../src/shared/types';
 
@@ -14,14 +14,8 @@ const info = (feature: string, key: string, value: unknown, ts = 1): LedgerEntry
 describe('findFinalPlacement', () => {
   it('prefers GEP me.placement over everything else', () => {
     expect(findFinalPlacement([
-      info('me', 'rank', 5), info(RIOT_LEDGER_FEATURE, 'placement', 4), info('me', 'placement', 3),
+      info('me', 'rank', 5), info('me', 'placement', 3),
     ])).toEqual({ placement: 3, source: 'gep' });
-  });
-
-  it('prefers Riot placement over the live-rank fallback', () => {
-    expect(findFinalPlacement([
-      info('me', 'rank', 5), info(RIOT_LEDGER_FEATURE, 'placement', 4),
-    ])).toEqual({ placement: 4, source: 'riot' });
   });
 
   it('falls back to the last valid live rank, ignoring rank 0 (still alive)', () => {
@@ -42,9 +36,4 @@ describe('reconstructSnapshots placement provenance', () => {
     expect(snapshot.placementSource).toBe('none');
   });
 
-  it('reads a Riot placement appended after the match', () => {
-    const snapshot = reconstructSnapshots([info('me', 'rank', 0), info(RIOT_LEDGER_FEATURE, 'placement', 2, 99)]);
-    expect(snapshot.finalPlacement).toBe(2);
-    expect(snapshot.placementSource).toBe('riot');
-  });
 });

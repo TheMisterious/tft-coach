@@ -43,16 +43,6 @@ export function toggleDesktopWindow(): void {
   });
 }
 
-// Show and focus, never hide — for returning the player from somewhere else
-// (the browser, after Riot sign-in), where a toggle could minimize instead.
-export function showDesktopWindow(): void {
-  overwolf.windows.obtainDeclaredWindow('desktop', (res: any) => {
-    if (!res?.success) return;
-    const win = res.window;
-    ensureWindowOnScreen(win, () => overwolf.windows.restore(win.id, () => focusWindow(win.id)));
-  });
-}
-
 // grabFocus=true is what brings a desktop window in front of a fullscreen
 // game (Overwolf minimizes the game to do it); without it the window is raised
 // behind the game. Only ever called from an explicit hotkey press — the

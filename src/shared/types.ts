@@ -125,7 +125,7 @@ export interface LobbyPlayerState {
 
 // Where finalPlacement came from — see src/ledger/placement.ts. 'none' means
 // finalPlacement is a placeholder 8, not a result.
-export type PlacementSource = 'gep' | 'riot' | 'rank' | 'none';
+export type PlacementSource = 'gep' | 'rank' | 'none';
 
 // What the ledger actually observed, as opposed to the defaults the
 // reconstruction starts from (level 1, 0 gold, 100 HP, empty board). A checker
@@ -356,8 +356,8 @@ export interface MatchPlan {
 }
 
 // Current-patch reference context for the match's comp/champion choices,
-// sourced from AggregateMetaTable (crowd data across many high-elo players
-// via Riot's official API — see src/enrichment/meta-crawler.ts). Deliberately
+// sourced from AggregateMetaTable (crowd data across many high-elo players;
+// see "Aggregate meta table" below — normally absent now). Deliberately
 // NOT a tier-list judgment: `compStanding` is pure reference info ("this trait
 // combo has averaged Xth place recently"), never phrased as a mistake.
 // `missedChampion` is the ONLY place an implied "you had a better option"
@@ -594,11 +594,6 @@ export interface MatchRecord {
   lastRound: string;
   brief?: MatchBrief;
   coachingReport?: CoachingReport;
-  // Best-effort ground-truth check against Riot's match-v1, when a Riot
-  // account is linked in settings. Never overrides a GEP placement; when GEP
-  // sent none at all, Riot's placement is appended to the ledger and the
-  // record rebuilt from it (placementSource 'riot'). See src/background/main.ts.
-  riotCrossCheck?: RiotCrossCheck;
   // Set-invariant behavioral stats + set-specific vocabulary for this match —
   // see the "Player Trends" section above. Additive/optional so this stays
   // the single source of truth for match history (no second store): older
@@ -607,36 +602,11 @@ export interface MatchRecord {
   matchLabels?: MatchLabels;
 }
 
-// ─── Riot API (bring-your-own-key, see src/enrichment/riot-api.ts) ───────────
-
-export interface RiotAccount {
-  puuid: string;
-  gameName: string;
-  tagLine: string;
-}
-
-export interface RiotLeagueEntry {
-  queueType: string;
-  tier: string;
-  rank: string;        // division, e.g. "II" (absent for apex tiers)
-  leaguePoints: number;
-  wins: number;
-  losses: number;
-}
-
-export interface RiotCrossCheck {
-  riotPlacement: number;
-  matched: boolean;
-  checkedAt: number;
-}
-
-// ─── Meta crawler (src/enrichment/meta-crawler.ts) ──────────────────────────
-// Aggregate crowd stats harvested across many high-elo players via Riot's
-// official league-v1 (top-player lists) + match-v1 (per-match results) APIs
-// — the official, sanctioned replacement for the unofficial-proxy
-// scripts/fetch-metatft.js (never wired into the app). Runtime-only: cached
-// in localStorage (src/persistence/meta-cache.ts), not a data/ file, since
-// it's sourced live under the user's own key rather than shipped/committed.
+// ─── Aggregate meta table ────────────────────────────────────────────────────
+// Crowd stats across many high-elo players, read from localStorage
+// (src/persistence/meta-cache.ts). Nothing produces it any more: the in-app
+// crawler that filled it from Riot's API was removed with Riot sign-in on
+// 2026-11-09, so every consumer sees it absent ("no meta context").
 
 export interface AggregateStatBucket {
   samples: number;
@@ -650,32 +620,6 @@ export interface AggregateMetaTable {
   augments: Record<string, AggregateStatBucket>;      // augment id -> stats
   computedAt: number;
   matchSampleCount: number; // unique matches harvested (participants counted separately per bucket)
-}
-
-// One harvested match participant, reduced to only what the aggregation
-// needs — NOT the raw Riot payload (keeps localStorage small; a crawl can
-// touch thousands of participants across many matches over time).
-export interface HarvestedParticipant {
-  matchId: string; // lets computeAggregateTable count unique matches, not just participants
-  placement: number;
-  championIds: string[];
-  traitKey: string;
-  augmentIds: string[];
-}
-
-// Resumable crawl progress — a single crawl tick (runMetaCrawlTick) advances
-// this by a small bounded amount and persists it, so a multi-hundred-player
-// crawl survives app restarts instead of needing to run start-to-finish in
-// one sitting. seedPuuids/cursor implement the "which top players have we
-// pulled a recent match for already this cycle" progress; seenMatchIds
-// dedupes match bodies (many top players share lobbies, so the same match id
-// would otherwise be fetched/harvested once per participant in it).
-export interface MetaCrawlState {
-  seedPuuids: string[];
-  cursor: number;
-  seedFetchedAt: number;
-  seenMatchIds: string[];
-  accumulator: HarvestedParticipant[];
 }
 
 export interface MatchSummary {
@@ -839,13 +783,10 @@ export interface MetaData {
   // is curated): every set-specific table above is empty, and the rule engine
   // runs only its set-agnostic checkers. See meta-lookup.ts's loadMeta.
   setDataMissing?: boolean;
-  // Crowd meta data aggregated across many high-elo players via Riot's
-  // official API (src/enrichment/meta-crawler.ts), cached at runtime in
-  // localStorage (src/persistence/meta-cache.ts) — NOT a static data/ file,
-  // since it's sourced live under the user's own Riot key, not shipped.
-  // Optional: absent until a Riot account is linked and a first crawl cycle
-  // completes; every consumer must treat that as "no meta data known yet,"
-  // not a crash. See MetaContext's doc comment for how this is used.
+  // Crowd meta data from localStorage (src/persistence/meta-cache.ts). No
+  // longer produced by anything (see "Aggregate meta table" above), so it is
+  // absent; every consumer must treat that as "no meta data known yet," not a
+  // crash. See MetaContext's doc comment for how this is used.
   metaTierTable?: AggregateMetaTable;
 }
 

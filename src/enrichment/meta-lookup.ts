@@ -91,9 +91,8 @@ async function loadMetaFiles(setId: string): Promise<MetaData> {
   // file missing a bucket) falls back to "no overrides" for that bucket rather
   // than crashing every checker that reads meta.augmentModifiers.*.
   const augmentModifiers: AugmentModifiers = { ...EMPTY_AUGMENT_MODIFIERS, ...augmentModifiersRaw };
-  // Runtime-only, sourced from the user's own Riot-API-driven meta crawl
-  // (src/enrichment/meta-crawler.ts), not a data/ file — undefined until a
-  // Riot account is linked and a first crawl cycle completes. Read
+  // Runtime-only, not a data/ file, and no longer produced by anything (see
+  // src/persistence/meta-cache.ts), so normally undefined. Read
   // synchronously/defensively (loadAggregateMetaTable already try/catches a
   // missing localStorage global, same as every other persistence accessor).
   const metaTierTable = loadAggregateMetaTable();

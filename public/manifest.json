@@ -27,7 +27,6 @@
         "start_minimized": true
       }
     ],
-    "url_protocol": { "schemes": ["coachv"] },
     "uninstall_window": {
       "file": "uninstall/uninstall.html",
       "required_runtime": 10000

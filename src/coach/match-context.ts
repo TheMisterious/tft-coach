@@ -90,11 +90,10 @@ export function computeCarryDamage(match: MatchSnapshot): Map<string, number> {
 }
 
 // A trait becomes "active" once the board meets its lowest breakpoint tier.
-// Exported so plan-builder.ts's per-round comp trajectory AND
-// meta-crawler.ts's per-harvested-final-board trait-key derivation share one
-// definition of "what traits are active on this board" instead of a third
-// reimplementation — plan-builder.ts previously had its own private copy of
-// exactly this logic (activeTraitsForRound), moved here unchanged.
+// Exported so plan-builder.ts's per-round comp trajectory shares one
+// definition of "what traits are active on this board" — plan-builder.ts
+// previously had its own private copy of exactly this logic
+// (activeTraitsForRound), moved here unchanged.
 export function computeActiveTraitSet(board: BoardState, meta: MetaData): Set<string> {
   const counts: Record<string, number> = {};
   for (const cell of boardUnits(board)) {
@@ -114,9 +113,9 @@ export function computeActiveTraitSet(board: BoardState, meta: MetaData): Set<st
 
 // Canonical sort-order key for a trait set, so "TraitA + TraitB" and
 // "TraitB + TraitA" (a Set's insertion order isn't meaningful) resolve to the
-// same lookup key — used by meta-crawler.ts (building AggregateMetaTable's
-// traitCombos bucket) and meta-blend.ts (looking a match's own final trait
-// set up in that same table) so the two never drift out of sync.
+// same lookup key — the key AggregateMetaTable's traitCombos bucket was
+// built with, and the one meta-blend.ts looks a match's own final trait set
+// up by.
 export function traitSetKey(traits: Set<string> | string[]): string {
   return [...traits].sort().join(',');
 }

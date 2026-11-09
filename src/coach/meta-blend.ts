@@ -1,4 +1,5 @@
-// Blends AggregateMetaTable (crowd data from src/enrichment/meta-crawler.ts)
+// Blends AggregateMetaTable (crowd data; nothing produces it since the
+// in-app crawler was removed on 2026-11-09, so it is normally absent)
 // into coaching output — deliberately never a tier-list judgment. See
 // MetaContext's doc comment in shared/types.ts for the full reasoning; the
 // short version: comp/champion standing is always neutral reference info,

@@ -25,7 +25,7 @@ import { buildMetaContext } from './meta-blend';
 // same notion getActiveTraits() (src/enrichment/meta-lookup.ts) already uses
 // for the live in-game trait readout, applied here per-round instead of once.
 // Thin wrapper: the actual derivation now lives in match-context.ts's
-// computeActiveTraitSet, shared with meta-crawler.ts's harvested-board key.
+// computeActiveTraitSet.
 function activeTraitsForRound(round: RoundSnapshot, meta: MetaData): Set<string> {
   return computeActiveTraitSet(round.board, meta);
 }

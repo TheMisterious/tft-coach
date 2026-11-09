@@ -7,9 +7,6 @@
 // its provenance, best first:
 //
 //   gep   me.placement, sent by GEP at match end.
-//   riot  Riot match-v1's placement, appended to the ledger AFTER the match by
-//         src/background/main.ts (feature 'riot' — GEP never sends it). The
-//         official result, so it outranks the live-rank fallback below.
 //   rank  the last live me.rank of 1-8. Rank only changes on an elimination,
 //         so this is normally right, but it is a fallback, not a report.
 //   none  nothing at all. The caller decides what to show; this match must not
@@ -17,11 +14,8 @@
 
 import type { LedgerEntry, PlacementSource } from '../shared/types';
 
-export const RIOT_LEDGER_FEATURE = 'riot';
-
 export function findFinalPlacement(entries: LedgerEntry[]): { placement: number; source: Exclude<PlacementSource, 'none'> } | null {
   return lastValid(entries, 'me', 'placement', 'gep')
-    ?? lastValid(entries, RIOT_LEDGER_FEATURE, 'placement', 'riot')
     ?? lastValid(entries, 'me', 'rank', 'rank');
 }
 

@@ -29,10 +29,8 @@ import { getCurrentMatchId,
          flushSync,
          waitForFlush,
          forceMatchId,
-         appendToSavedLedger,
          getLedgerDir }           from '../ledger/ledger';
 import { reconstructSnapshots }   from '../ledger/rounds';
-import { RIOT_LEDGER_FEATURE }    from '../ledger/placement';
 import type { MatchHistoryEntry } from '../coach/history-context';
 import { pickLedgersToRecover }   from './recovery';
 import { readMatch, coachMatch }  from './pipeline';
@@ -41,11 +39,7 @@ import { saveMatch, loadMatch, listRecentMatches, loadAllFeatureRecords, savePla
 import { summarizeLedgerCoverage, formatLedgerCoverage, sampleRawValues, formatRawSamples } from '../ledger/diagnostics';
 import { ensureWindowOnScreen } from './window-position';
 import { readHotkeyBinding } from '../shared/hotkey';
-import { registerToggleHotkey, showDesktopWindow } from './desktop-toggle';
-import { loadSettings, hasLinkedAccount } from '../persistence/settings';
-import { formatRiotRank, riotUnitsToBoardState, countBoardItems, type RiotMatch } from '../enrichment/riot-api';
-import { getRank, getLatestMatch, BackendError } from '../enrichment/coachv-backend';
-import { completeRiotSignIn, signInFailureMessage } from '../enrichment/riot-sign-in';
+import { registerToggleHotkey } from './desktop-toggle';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -431,10 +425,6 @@ async function runCoachingPipeline(): Promise<void> {
     console.log('[bg] pipeline step 8: opening desktop window');
     openDesktopWindow(report);
 
-    // 9-10. Optional Riot API enrichment — fire-and-forget, never blocks or
-    // risks the already-delivered local report on a network/key failure.
-    runRiotEnrichment(matchId, snapshot.finalPlacement, datePlayed);
-
     console.log('[bg] pipeline complete — placement:', snapshot.finalPlacement);
   } catch (e) {
     console.error('[bg] pipeline error:', e);
@@ -449,9 +439,9 @@ async function runCoachingPipeline(): Promise<void> {
 }
 
 // Rebuilds a saved match's record from its ledger on disk with the parsing and
-// rules live now, keeping what the ledger cannot reproduce (datePlayed, the
-// Riot cross-check). Never opens a window — callers decide that. Shared by
-// the Riot placement recovery and the two debug entry points.
+// rules live now, keeping what the ledger cannot reproduce (datePlayed, and
+// any field an older record carries). Never opens a window — callers decide
+// that. Shared by recovery and the two debug entry points.
 // datePlayed defaults to the ledger's last entry — when the match ended.
 // Returns null for a ledger that is not a playable match (spectating noise, a
 // fragment): those must never be saved as one.
@@ -633,142 +623,20 @@ function showInGameToast(message: string): void {
   });
 }
 
-// ─── Optional Riot API enrichment ──────────────────────────────────────────
-// For a player signed in with Riot (src/enrichment/riot-sign-in.ts), through
-// the coachv backend (src/enrichment/coachv-backend.ts). Both steps are
-// best-effort: no account, an expired session, a rate limit or a network
-// failure here must never affect the core local pipeline above, which already
-// fully succeeded by the time this runs.
-
-const SIGN_IN_EXPIRED_LABEL = 'Riot sign-in expired — sign in again in ⚙';
-
-const RIOT_PLACEMENT_RETRY_DELAYS_MS = [0, 60_000, 180_000];
-
-async function runRiotEnrichment(matchId: string, finalPlacement: number, datePlayed: number): Promise<void> {
-  const settings = loadSettings();
-  if (!hasLinkedAccount(settings)) return;
-  const { platform } = settings;
-  const { puuid, session } = settings.account!;
-
-  // Step 9: rank refresh, pushed to the desktop window's StatusBar.
-  try {
-    const entries = await getRank(session, platform);
-    const label = formatRiotRank(entries);
-    const mw = (overwolf.windows.getMainWindow() as any);
-    if (typeof mw?.receiveRiotRank === 'function') mw.receiveRiotRank(label);
-    console.log('[bg] riot step 9: rank refreshed —', label);
-  } catch (e) {
-    console.warn('[bg] riot step 9: rank refresh failed —', e);
-    // Surface a lapsed session in the status bar instead of only logging, so
-    // the player knows why rank/cross-check stopped updating.
-    if (e instanceof BackendError && e.status === 401) {
-      const mw = (overwolf.windows.getMainWindow() as any);
-      if (typeof mw?.receiveRiotRank === 'function') mw.receiveRiotRank(SIGN_IN_EXPIRED_LABEL, true);
-    }
-  }
-
-  // Step 10: Riot's official placement (tft-match-v1 — final result only, no
-  // round-by-round data, see enrichment/riot-api.ts). Always appended to the
-  // ledger, so every later replay and scripts/rule-audit.ts sees it. When GEP
-  // sent no placement at all — the client closed straight after elimination —
-  // the saved record is rebuilt from that ledger so history and Player Trends
-  // get the real result instead of a placeholder 8th. A GEP placement is never
-  // overridden: a disagreement is recorded in riotCrossCheck only.
-  try {
-    const record = loadMatch(matchId);
-    if (!record) return;
-    const gepHadNone = record.placementSource === 'none';
-
-    // Riot publishes a match a minute or two after it ends, and a client closed
-    // on elimination gets here sooner than that — so a match whose placement
-    // depends on this lookup is retried rather than given up after one call.
-    let match: RiotMatch | null = null;
-    for (const delayMs of gepHadNone ? RIOT_PLACEMENT_RETRY_DELAYS_MS : [0]) {
-      if (delayMs) await new Promise(resolve => setTimeout(resolve, delayMs));
-      const candidate = await getLatestMatch(session, platform);
-      if (!candidate) continue;
-      // Skip a clearly different match — the previous one (not yet published
-      // this one), or a later one the user already queued into.
-      const driftMs = Math.abs(candidate.info.game_datetime - datePlayed);
-      if (driftMs > 5 * 60 * 1000) {
-        console.log('[bg] riot step 10: most recent Riot match is', Math.round(driftMs / 1000), 's away from local match end — not this one');
-        continue;
-      }
-      match = candidate;
-      break;
-    }
-    if (!match) return;
-
-    const participant = match.info.participants.find(p => p.puuid === puuid);
-    if (!participant) return;
-
-    await appendToSavedLedger(matchId, [{
-      ts: Date.now(), kind: 'info', feature: RIOT_LEDGER_FEATURE, key: 'placement', value: participant.placement,
-    }]);
-    if (gepHadNone) {
-      await rebuildMatchFromLedger(matchId, record.datePlayed);
-      console.log('[bg] riot step 10: GEP sent no placement — record rebuilt with Riot\'s', participant.placement);
-    }
-
-    const current = loadMatch(matchId) ?? record;
-    saveMatch({
-      ...current,
-      riotCrossCheck: {
-        riotPlacement: participant.placement,
-        matched: participant.placement === current.placement,
-        checkedAt: Date.now(),
-      },
-    });
-    console.log('[bg] riot step 10: placement cross-check —', 'local:', finalPlacement, 'riot:', participant.placement);
-
-    // Step 11 used to regenerate and re-send a second report when Riot's
-    // final board had more equipped items than GEP captured. That created a
-    // confusing "second report" after the match was already finished and the
-    // local report was visible. Keep the cross-check for diagnostics, but do
-    // not overwrite or redisplay the user's first report here.
-    try {
-      const riotBoard = riotUnitsToBoardState(participant.units ?? []);
-      const localSnapshot = reconstructSnapshots(await readLedger(matchId));
-      if (countBoardItems(riotBoard) <= countBoardItems(localSnapshot.finalBoard)) {
-        console.log('[bg] riot step 11: GEP finalBoard already at least as complete as Riot\'s — no reprocess needed');
-        return;
-      }
-
-      console.log('[bg] riot step 11: Riot\'s final board has more equipped items than GEP captured — keeping the original report and only recording the diagnostic cross-check');
-    } catch (e) {
-      console.warn('[bg] riot step 11: finalBoard reconciliation failed —', e);
-    }
-  } catch (e) {
-    console.warn('[bg] riot step 10: placement cross-check failed —', e);
-  }
-}
-
 // ─── Hotkey listener ──────────────────────────────────────────────────────────
 
 // See desktop-toggle.ts for why this is a custom hotkey that takes focus.
 registerToggleHotkey();
 
-// ─── Riot sign-in return ────────────────────────────────────────────────────
-// The backend sends the browser to coachv://rso?… once Riot sign-in finishes;
-// Overwolf delivers that link to the running app here (manifest
-// data.url_protocol). The docs name the fields both origin/parameter and
-// source/url, so both are read.
-overwolf.extensions?.onAppLaunchTriggered?.addListener((event: any) => {
-  const origin = event?.origin ?? event?.source;
-  const link = String(event?.parameter ?? event?.url ?? '');
-  if (origin !== 'urlscheme' || !link) return;
-
-  const result = completeRiotSignIn(link);
-  if (!result.ok && result.reason === 'not_ours') return;
-  console.log('[bg] riot sign-in:', result.ok ? `signed in as ${result.account.gameName}#${result.account.tagLine}` : result.reason);
-
-  const mw = (overwolf.windows.getMainWindow() as any);
-  if (typeof mw?.receiveRiotSignIn === 'function') {
-    mw.receiveRiotSignIn(result.ok ? { ok: true } : { ok: false, message: signInFailureMessage(result.reason) });
-  }
-  // The player is in their browser; bring them back to where they started.
-  showDesktopWindow();
-});
+// ─── Stored Riot account data from earlier builds ─────────────────────────────
+// 0.1.0/0.1.1 stored a pasted personal Riot API key under tft:settings, and the
+// sign-in build stored a Riot session there; the meta crawler kept its progress
+// under tft:meta-crawl-state. coachv no longer links a Riot account, so none of
+// it is read again — remove it rather than leave a key on the player's machine.
+for (const key of ['tft:settings', 'tft:meta-crawl-state']) {
+  try { localStorage.removeItem(key); }
+  catch (e) { console.warn('[bg] could not remove stored', key, '—', e); }
+}
 
 // Make sure the desktop window exists and is on-screen, but do NOT restore it
 // here. Restoring on background startup can steal focus and kick the user out
@@ -974,10 +842,3 @@ console.log('[bg] background controller started');
   console.log(`[debug] backfill complete — processed:${processed} skipped:${skipped}`);
   return { processed, skipped };
 };
-
-// ─── Meta crawler (see src/enrichment/meta-crawler.ts) ──────────────────────
-// Not scheduled. It pulled Challenger/GM/Master matches with the player's own
-// pasted API key; with Riot sign-in there is no key on this machine, and a
-// crawl from every install would spend the backend's one production key. It
-// belongs in a scheduled backend job — until then the aggregate meta table is
-// simply absent, which meta-blend.ts already treats as "no meta context".

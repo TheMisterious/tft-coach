@@ -25,6 +25,11 @@ import { attachHistoryContext }  from './history-context';
 import { attachContributingDecisions } from './decision-trace';
 import type { MatchHistoryEntry } from './history-context';
 import { observedCategories }    from './coverage';
+import { boardUnits }            from '../ledger/merge';
+
+function stageOf(label: string): number {
+  return Number(label.split('-')[0]) || 0;
+}
 
 const SEVERITY_ORDER: Record<Severity, number> = {
   critical: 0,
@@ -123,6 +128,8 @@ export function extractDecisionPoints(
     .map(applyConfidenceHedge);
 
   points = suppressHoldGoldAdviceDuringHpCrisis(points, context);
+  points = suppressLevelTimingOnRerollLine(points, match, meta);
+  points = suppressStreakTiersWithoutAugments(points, match);
   points = mergeEconShortfallsAtSameRound(points);
   points = linkCompoundingPatterns(points);
   points = attachLobbyContext(points, match);
@@ -139,6 +146,50 @@ export function extractDecisionPoints(
     const rankB = b.ruleId ? MVP_RANK.get(b.ruleId) ?? Infinity : Infinity;
     if (rankA !== rankB) return rankA - rankB;
     return roundToNumber(a.round) - roundToNumber(b.round);
+  });
+}
+
+// A reroll line stays low on purpose: it rolls at 5-7 for 3-stars of cheap
+// units while the lobby levels. Level-timing rules measured against a
+// standard or fast-8 curve read that as falling behind; a 6th place on
+// 2026-11-09 with 3-star Veigar, Rek'Sai and Ornn was told "level 5 at 4-1,
+// behind every opponent, levelling at the next window is the usual answer".
+// The fight readings (rule-network.ts) judge whether the line worked.
+const LEVEL_TIMING_RULES = new Set(['LEVEL_001', 'LEVEL_002', 'LEVEL_003', 'LEVEL_005', 'LEVEL_006', 'LOBBY_001']);
+
+export function isRerollLine(match: MatchSnapshot, meta: MetaData): boolean {
+  const at41 = match.rounds.find(r => r.label === '4-1') ?? match.rounds.filter(r => stageOf(r.label) <= 4).slice(-1)[0];
+  if (!at41 || at41.level > 6) return false;
+  const throughStage4 = match.rounds.filter(r => stageOf(r.label) <= 4);
+  const cheapThreeStar = throughStage4.some(r => boardUnits(r.board)
+    .some(u => Number(u.level) >= 3 && (meta.champions?.[u.name]?.tier ?? 9) <= 3));
+  const rolledMidGame = match.rounds
+    .filter(r => stageOf(r.label) === 3 || stageOf(r.label) === 4)
+    .reduce((sum, r) => sum + r.rollsSpent * 2, 0);
+  return cheapThreeStar || rolledMidGame >= 30;
+}
+
+function suppressLevelTimingOnRerollLine(points: DecisionPoint[], match: MatchSnapshot, meta: MetaData): DecisionPoint[] {
+  if (!isRerollLine(match, meta)) return points;
+  return points.filter(p => {
+    if (!p.ruleId || !LEVEL_TIMING_RULES.has(p.ruleId)) return true;
+    console.log(`[rule-engine] suppressed ${p.ruleId} at ${p.round} — reroll line, low level is the plan`);
+    return false;
+  });
+}
+
+// GEP sends Set 18 augment picks as blank names, and some augments change how
+// a streak counts (the player behind the 6th place above took one that doubled
+// it: three losses, a streak of 6). Without the picks, "never reached the +2g
+// tier" can be false, so the streak-tier rules stay quiet.
+const STREAK_TIER_RULES = new Set(['STREAK_002', 'STREAK_003']);
+
+function suppressStreakTiersWithoutAugments(points: DecisionPoint[], match: MatchSnapshot): DecisionPoint[] {
+  if (!match.capture || match.capture.augmentsSeen) return points;
+  return points.filter(p => {
+    if (!p.ruleId || !STREAK_TIER_RULES.has(p.ruleId)) return true;
+    console.log(`[rule-engine] suppressed ${p.ruleId} — augment picks not recorded, and an augment can change the streak count`);
+    return false;
   });
 }
 

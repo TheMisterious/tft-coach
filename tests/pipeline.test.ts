@@ -100,3 +100,23 @@ describe('coachMatch', () => {
     expect(coached.matchLabels).toBeTruthy();
   });
 });
+
+describe('streaks without a reported result', () => {
+  // GEP sent no round_outcome for some fights; HP says who won.
+  it('counts a fight that cost HP as a loss, and keeps the streak going', () => {
+    const fight = (stage: string, hp: number) => [
+      info('match_info', 'round_type', { stage, type: 'PVP' }),
+      event('round_start', 'PVP'),
+      info('board', 'board_pieces', { cell_1: unit('DA_18_Akali_AD') }),
+      info('me', 'health', hp),
+      event('round_end'),
+    ];
+    const read = readMatch([
+      info('roster', 'player_status', { Me: { health: 100, xp: 4, localplayer: true } }),
+      info('me', 'gold', 10), info('me', 'health', 100),
+      ...fight('2-5', 95), ...fight('2-6', 89), ...fight('3-1', 81), ...fight('3-2', 81),
+    ]);
+    expect(read.snapshot?.rounds.map(r => `${r.label}:${r.outcome}:${r.streakType}${r.streakCount}`))
+      .toEqual(['2-5:loss:loss1', '2-6:loss:loss2', '3-1:loss:loss3', '3-2:win:win1']);
+  });
+});

@@ -258,6 +258,17 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
 
   function pushRoundSnapshot(label: string, type: typeof roundType) {
     const interest = Math.min(5, Math.floor(gold / 10));
+    // GEP sends no round_outcome for some fights (a 6th place's 3-1 among
+    // them, which left its 3-loss streak reading as 2). A won fight never
+    // costs HP, so a PvP round that closes with no outcome reads as lost when
+    // HP fell and won when it held, and the streak follows it.
+    if (type === 'PVP' && lastRoundOutcome === undefined && healthSeen) {
+      const before = rounds.length > 0 ? rounds[rounds.length - 1].health : 100;
+      const inferred: 'win' | 'loss' = health < before ? 'loss' : 'win';
+      lastRoundOutcome = inferred;
+      if (streakType === inferred) streakCount++;
+      else { streakType = inferred; streakCount = 1; }
+    }
     rounds.push({
       label,
       type,

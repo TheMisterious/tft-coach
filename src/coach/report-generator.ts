@@ -28,7 +28,8 @@ export async function generateCoachingReport(brief: MatchBrief): Promise<Coachin
     notes,
     ...(otherNotes ? { other_notes: otherNotes } : {}),
     ...(brief.commonPatterns?.length ? { common_patterns: brief.commonPatterns } : {}),
-    // Every note, measured or not: a category is only credited as clean when
+    // Every note, measured or not, plus the rules that left only a common-
+    // pattern line or nothing: a category is only credited as clean when
     // nothing at all was flagged in it.
     strengths: buildStrengths(brief, allNotes),
     round_trajectory: brief.roundTrajectory,
@@ -182,8 +183,11 @@ function buildStrengths(brief: MatchBrief, notes: CoachingNote[]): string[] {
   }
 
   // Clean means graded and unflagged — a category the match never let us
-  // judge (see src/coach/coverage.ts) is not a strength.
-  const flaggedCategories = new Set(notes.map(n => n.category));
+  // judge (see src/coach/coverage.ts) is not a strength. Always-on rules leave
+  // no note, only a common-pattern line, so their categories come from the
+  // brief: an 8th that missed interest twice was once told its economy was
+  // clean, right under the line saying so.
+  const flaggedCategories = new Set([...notes.map(n => n.category), ...(brief.flaggedCategories ?? [])]);
   for (const [category, label] of Object.entries(CLEAN_CATEGORY_STRENGTHS)) {
     if (strengths.length >= 3) break;
     const cat = category as DecisionCategory;

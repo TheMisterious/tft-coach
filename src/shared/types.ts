@@ -441,6 +441,9 @@ export interface MatchBrief {
   // One line per always-on rule (fires in nearly every audited match): shown
   // instead of its notes. Absent on briefs built before the split.
   commonPatterns?: string[];
+  // Every category any rule flagged this match, including always-on and
+  // still-hidden candidate rules that leave no note. Absent on older briefs.
+  flaggedCategories?: DecisionCategory[];
   // Grades computed from the full, pre-truncation decision-point list (see
   // rule-engine.ts) — deliberately independent of what made it into
   // resolvedNotes/decisionPoints after the MAX_POINTS/MAX_PER_RULE cuts.

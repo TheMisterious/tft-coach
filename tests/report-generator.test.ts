@@ -130,3 +130,21 @@ describe('buildTldr', () => {
     expect(report.tldr).toContain('0 coaching notes');
   });
 });
+
+describe('buildStrengths', () => {
+  it('credits a graded category with nothing flagged in it', async () => {
+    const report = await generateCoachingReport(makeBrief({ placement: 6, categoryGrades: { econ: 'B' } }));
+    expect(report.strengths.join(' ')).toContain('Economy management was clean');
+  });
+
+  it('does not call a category clean when an always-on rule flagged it', async () => {
+    // Always-on rules leave only a common-pattern line, no note.
+    const report = await generateCoachingReport(makeBrief({
+      placement: 8,
+      categoryGrades: { econ: 'B' },
+      commonPatterns: ['Missed Interest — End-of-Round Below Threshold: 2 times this game.'],
+      flaggedCategories: ['econ'],
+    }));
+    expect(report.strengths.join(' ')).not.toContain('Economy management was clean');
+  });
+});

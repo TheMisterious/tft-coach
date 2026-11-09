@@ -111,6 +111,7 @@ export function buildBrief(
     resolvedNotes,
     decisionPoints: pendingPoints,
     commonPatterns,
+    flaggedCategories: [...new Set(allPoints.map(p => p.category))],
     // Graded from the FULL point list (pre-truncation, always-on rules
     // included) and normalized by round count — see src/coach/scoring.ts.
     // Always-on rules stay in on purpose: the S-D thresholds were set with them

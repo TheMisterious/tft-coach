@@ -56,7 +56,7 @@ function traceFor(p: DecisionPoint, match: MatchSnapshot, meta?: MetaData): Cont
 
   const first = window[0], last = window[window.length - 1];
   const observations = [
-    hpLine(first, checkpoint, window),
+    hpLine(match, checkpoint, window),
     goldLine(window),
     spendLine(first, last, window),
     upgradeLine(window, last, meta),
@@ -66,11 +66,17 @@ function traceFor(p: DecisionPoint, match: MatchSnapshot, meta?: MetaData): Cont
   return observations.length ? { window: `${name} (${first.label} to ${last.label})`, observations } : undefined;
 }
 
-function hpLine(first: RoundSnapshot, checkpoint: RoundSnapshot, window: RoundSnapshot[]): string | undefined {
-  const fights = window.filter(r => r.type === 'PVP' && r.outcome);
+// HP from before the window's first round, so a loss in that round counts.
+// GEP sends no round_outcome for some fights; an HP drop marks those as lost.
+function hpLine(match: MatchSnapshot, checkpoint: RoundSnapshot, window: RoundSnapshot[]): string | undefined {
+  const before = (r: RoundSnapshot) => {
+    const i = match.rounds.indexOf(r);
+    return i > 0 ? match.rounds[i - 1].health : r.health;
+  };
+  const fights = window.filter(r => r.type === 'PVP' && (r.outcome || r.health !== before(r)));
   if (fights.length === 0) return undefined;
-  const losses = fights.filter(r => r.outcome === 'loss').length;
-  return `HP ${first.health} → ${checkpoint.health}: lost ${losses} of ${fights.length} player fights.`;
+  const losses = fights.filter(r => r.outcome ? r.outcome === 'loss' : r.health < before(r)).length;
+  return `HP ${before(window[0])} → ${checkpoint.health}: lost ${losses} of ${fights.length} player fights.`;
 }
 
 function goldLine(window: RoundSnapshot[]): string | undefined {

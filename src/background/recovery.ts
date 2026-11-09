@@ -37,3 +37,20 @@ export function pickLedgersToRecover(
     .sort((a, b) => (ledgerTimestamp(b) ?? 0) - (ledgerTimestamp(a) ?? 0))
     .slice(0, RECOVERY_MAX_PER_LAUNCH);
 }
+
+// Saved reports are written once, by the build that played the match. After an
+// update they would keep showing what the old code made of the game (a wrong
+// placement, no "How the game went") until the next match. When the app
+// version differs from the one that last refreshed them, every saved match is
+// rebuilt from its ledger, oldest first so each one's history is the matches
+// before it.
+export const REPORTS_VERSION_KEY = 'tft:reports-version';
+
+export function matchesToRebuild(
+  indexNewestFirst: Array<{ pseudo_match_id: string }>,
+  lastVersion: string | null,
+  currentVersion: string | null,
+): string[] {
+  if (!currentVersion || lastVersion === currentVersion) return [];
+  return indexNewestFirst.map(s => s.pseudo_match_id).reverse();
+}

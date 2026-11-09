@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pickLedgersToRecover, ledgerTimestamp, RECOVERY_MAX_AGE_MS, RECOVERY_MAX_PER_LAUNCH } from '../src/background/recovery';
+import { pickLedgersToRecover, ledgerTimestamp, matchesToRebuild, RECOVERY_MAX_AGE_MS, RECOVERY_MAX_PER_LAUNCH } from '../src/background/recovery';
 
 const NOW = 1794200000000;
 const ago = (ms: number) => `fallback-${NOW - ms}`;
@@ -31,5 +31,19 @@ describe('pickLedgersToRecover', () => {
     expect(pickLedgersToRecover(['abc-pseudo.jsonl', `${ago(5)}.jsonl`], () => false, new Set(), NOW))
       .toEqual([ago(5), 'abc-pseudo']);
     expect(ledgerTimestamp('fallback-1794166486409')).toBe(1794166486409);
+  });
+});
+
+describe('matchesToRebuild', () => {
+  const index = [{ pseudo_match_id: 'new' }, { pseudo_match_id: 'mid' }, { pseudo_match_id: 'old' }];
+
+  it('rebuilds every saved match, oldest first, after a version change', () => {
+    expect(matchesToRebuild(index, '0.1.2', '0.2.2')).toEqual(['old', 'mid', 'new']);
+    expect(matchesToRebuild(index, null, '0.2.2')).toEqual(['old', 'mid', 'new']);
+  });
+
+  it('does nothing when the version is unchanged or unknown', () => {
+    expect(matchesToRebuild(index, '0.2.2', '0.2.2')).toEqual([]);
+    expect(matchesToRebuild(index, '0.1.2', null)).toEqual([]);
   });
 });

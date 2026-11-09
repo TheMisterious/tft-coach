@@ -32,7 +32,7 @@ import { getCurrentMatchId,
          getLedgerDir }           from '../ledger/ledger';
 import { reconstructSnapshots }   from '../ledger/rounds';
 import type { MatchHistoryEntry } from '../coach/history-context';
-import { pickLedgersToRecover }   from './recovery';
+import { pickLedgersToRecover, matchesToRebuild, REPORTS_VERSION_KEY } from './recovery';
 import { readMatch, coachMatch }  from './pipeline';
 import { buildPlayerProfile }     from '../profile/trend-model';
 import { saveMatch, loadMatch, listRecentMatches, loadAllFeatureRecords, savePlayerProfile } from '../persistence/db';
@@ -539,7 +539,63 @@ async function recoverUnreportedMatches(): Promise<void> {
   }
 }
 
-setTimeout(() => { recoverUnreportedMatches(); }, RECOVERY_DELAY_MS);
+// After an update, rebuild every saved report with the code now running (see
+// matchesToRebuild in recovery.ts). Skipped during a match, and the version is
+// only recorded once the pass finishes, so an interrupted pass runs again on
+// the next launch. A match whose ledger is gone keeps its old report.
+function currentAppVersion(): Promise<string | null> {
+  return new Promise(resolve => {
+    try {
+      overwolf.extensions.current.getManifest((m: any) => resolve(m?.meta?.version ?? null));
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+async function refreshReportsForNewVersion(): Promise<void> {
+  const state = (window as any).appState;
+  const version = await currentAppVersion();
+  const ids = matchesToRebuild(listRecentMatches(200), localStorage.getItem(REPORTS_VERSION_KEY), version);
+  if (ids.length === 0) return;
+  console.log('[bg] app version', version, '— rebuilding', ids.length, 'saved report(s) with the current code');
+
+  let newest: { report: any; datePlayed: number } | undefined;
+  for (const id of ids) {
+    if (state.matchActive || state.isProcessing) {
+      console.log('[bg] report rebuild paused for a match — the rest run next launch');
+      return;
+    }
+    try {
+      const datePlayed = loadMatch(id)?.datePlayed;
+      const rebuilt = await rebuildMatchFromLedger(id, datePlayed);
+      if (!rebuilt?.persisted) {
+        console.log('[bg] report rebuild:', id, rebuilt ? 'could not be saved' : 'has no usable ledger — old report kept');
+        continue;
+      }
+      if (!newest || (datePlayed ?? 0) >= newest.datePlayed) newest = { report: rebuilt.report, datePlayed: datePlayed ?? 0 };
+    } catch (e) {
+      console.error('[bg] report rebuild:', id, 'failed —', e);
+    }
+  }
+  try { localStorage.setItem(REPORTS_VERSION_KEY, version!); }
+  catch (e) { console.warn('[bg] report rebuild: could not record the version —', e); }
+
+  if (newest) {
+    state.latestReport = newest.report;
+    try {
+      const mw = (overwolf.windows.getMainWindow() as any);
+      if (typeof mw?.receiveReport === 'function') mw.receiveReport(newest.report);
+    } catch (e) {
+      console.warn('[bg] report rebuild: desktop window not ready —', e);
+    }
+  }
+}
+
+setTimeout(async () => {
+  await recoverUnreportedMatches();
+  await refreshReportsForNewVersion();
+}, RECOVERY_DELAY_MS);
 
 // ─── Window helpers ───────────────────────────────────────────────────────────
 

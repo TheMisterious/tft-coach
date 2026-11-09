@@ -14,7 +14,7 @@ let buffer: LedgerEntry[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let pendingFlush: Promise<void> = Promise.resolve();
 
-function getLedgerDir(): string {
+export function getLedgerDir(): string {
   // overwolf.io.paths.documents resolves to the Windows Documents folder.
   const docs = (overwolf?.io?.paths?.documents as string | undefined) ?? '';
   return `${docs}/TFT-Coach/ledgers`;

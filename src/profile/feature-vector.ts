@@ -18,7 +18,7 @@ import type {
   FeatureVector,
   Cell,
 } from '../shared/types';
-import { identifyCarry, boardItemIds } from '../ledger/merge';
+import { identifyCarry, boardItemIds, boardUnits } from '../ledger/merge';
 import { unitItems, isComponent } from '../coach/checkers/items';
 import { resolveHexCell, HEX_ROWS } from '../shared/hex-grid';
 import { computeCarryDamage } from '../coach/match-context';
@@ -250,7 +250,7 @@ function computeCombatDamageStats(
     if (round.type !== 'PVP' || stageOf(round.label) < 4) continue;
     if (!round.battleStats?.own?.length) continue;
 
-    const units = Object.values(round.board).filter(c => c?.name && c.name !== '0');
+    const units = boardUnits(round.board);
     if (units.length === 0) continue;
 
     const carry = identifyCarry(units, meta, activeComp, carryDamage);

@@ -37,6 +37,9 @@ const mvpData = require('../../data/rules.mvp.json') as { mvp_top_20: Array<{ pr
 const evidenceData = require('../../data/core/rule-evidence.json') as RuleEvidenceFile;
 
 interface RuleEvidenceFile {
+  // Per category: does its letter grade track final placement? Written by the
+  // same audit run (scripts/rule-audit.ts, "Category grades").
+  categoryGrades?: Record<string, { verdict: 'tracks' | 'contradicts' | 'unproven' | 'untestable' }>;
   rules: Record<string, {
     verdict: RuleVerdict;
     status?: 'confirmed' | 'exploratory';
@@ -118,4 +121,16 @@ export function getMvpRules(): string[] {
   return mvpData.mvp_top_20
     .sort((a, b) => a.priority_rank - b.priority_rank)
     .map(r => r.rule_id);
+}
+
+// Whether a category's letter grade has been shown to track final placement in
+// the audited matches. Measured on the recorded corpus (2026-11-09), four
+// categories' letters ran BACKWARDS — better letters in worse finishes — and
+// three tracked nothing; showing those letters told the player something false.
+// An evidence file from before category grades were audited validates every
+// category, so it changes nothing.
+export function categoryGradeValidated(category: string): boolean {
+  const grades = evidenceData.categoryGrades;
+  if (!grades) return true;
+  return grades[category]?.verdict === 'tracks';
 }

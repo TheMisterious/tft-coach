@@ -11,6 +11,7 @@
     "lint": "tsc --noEmit",
     "fetch:ddragon": "node scripts/fetch-ddragon.js",
     "fetch:metatft": "node scripts/fetch-metatft.js",
+    "fetch:riot-meta": "ts-node --transpile-only scripts/fetch-riot-meta.ts",
     "check:patch": "node scripts/check-patch-staleness.js",
     "data:augment-effects": "node scripts/derive-augment-effects.js"
   },

@@ -1,0 +1,403 @@
+{
+  "_comment": "Written by scripts/fetch-riot-meta.ts — provenance of the derived roles, carry-bis.json and comps.json. Do not hand-edit.",
+  "source": "400 vn2 Challenger-Master matches, patch , 2026-11-08",
+  "generated": "2026-11-08T18:40:55.010Z",
+  "platform": "vn2",
+  "set": 18,
+  "matches": 400,
+  "boards": 3172,
+  "topFourBoards": 1588,
+  "patches": [],
+  "roleEvidence": {
+    "DA_Lux18_Base": {
+      "appearances": 452,
+      "itemized": 224,
+      "offense": 548,
+      "tank": 139
+    },
+    "DA_18_Lillia": {
+      "appearances": 729,
+      "itemized": 443,
+      "offense": 263,
+      "tank": 1171
+    },
+    "DA_18_Hecarim": {
+      "appearances": 489,
+      "itemized": 208,
+      "offense": 141,
+      "tank": 549
+    },
+    "DA_18_Alistar": {
+      "appearances": 555,
+      "itemized": 146,
+      "offense": 120,
+      "tank": 393
+    },
+    "DA_18_LeBlanc": {
+      "appearances": 500,
+      "itemized": 166,
+      "offense": 421,
+      "tank": 115
+    },
+    "DA_18_Ezreal": {
+      "appearances": 468,
+      "itemized": 382,
+      "offense": 1037,
+      "tank": 147
+    },
+    "DA_18_Xayah": {
+      "appearances": 321,
+      "itemized": 39,
+      "offense": 107,
+      "tank": 27
+    },
+    "DA_18_Ornn": {
+      "appearances": 570,
+      "itemized": 154,
+      "offense": 93,
+      "tank": 434
+    },
+    "DA_Amumu18": {
+      "appearances": 1035,
+      "itemized": 456,
+      "offense": 314,
+      "tank": 1221
+    },
+    "DA_18_Ivern": {
+      "appearances": 546,
+      "itemized": 158,
+      "offense": 341,
+      "tank": 139
+    },
+    "DA_18_Maokai": {
+      "appearances": 514,
+      "itemized": 281,
+      "offense": 178,
+      "tank": 782
+    },
+    "DA_Sentinel18": {
+      "appearances": 1259,
+      "itemized": 550,
+      "offense": 338,
+      "tank": 1443
+    },
+    "DA_Draven18": {
+      "appearances": 372,
+      "itemized": 340,
+      "offense": 940,
+      "tank": 224
+    },
+    "DA_18_Kennen": {
+      "appearances": 607,
+      "itemized": 302,
+      "offense": 700,
+      "tank": 486
+    },
+    "DA_18_ElderDragon": {
+      "appearances": 477,
+      "itemized": 433,
+      "offense": 1213,
+      "tank": 290
+    },
+    "DA_Taric18": {
+      "appearances": 776,
+      "itemized": 262,
+      "offense": 223,
+      "tank": 700
+    },
+    "DA_18_Alune": {
+      "appearances": 369,
+      "itemized": 197,
+      "offense": 486,
+      "tank": 133
+    },
+    "DA_18_Veigar": {
+      "appearances": 280,
+      "itemized": 122,
+      "offense": 348,
+      "tank": 32
+    },
+    "DA_18_RekSai": {
+      "appearances": 214,
+      "itemized": 79,
+      "offense": 97,
+      "tank": 204
+    },
+    "DA_Fiddlesticks18": {
+      "appearances": 782,
+      "itemized": 135,
+      "offense": 206,
+      "tank": 307
+    },
+    "DA_18_Cassiopeia": {
+      "appearances": 133,
+      "itemized": 84,
+      "offense": 226,
+      "tank": 29
+    },
+    "DA_18_Ahri": {
+      "appearances": 495,
+      "itemized": 426,
+      "offense": 1104,
+      "tank": 269
+    },
+    "DA_Murkwolf18": {
+      "appearances": 303,
+      "itemized": 58,
+      "offense": 141,
+      "tank": 76
+    },
+    "DA_18_Sentry": {
+      "appearances": 365,
+      "itemized": 42,
+      "offense": 116,
+      "tank": 23
+    },
+    "DA_Krug18": {
+      "appearances": 669,
+      "itemized": 218,
+      "offense": 151,
+      "tank": 588
+    },
+    "DA_Brambleback18": {
+      "appearances": 343,
+      "itemized": 292,
+      "offense": 824,
+      "tank": 483
+    },
+    "DA_Scuttlecrab18": {
+      "appearances": 320,
+      "itemized": 63,
+      "offense": 38,
+      "tank": 175
+    },
+    "DA_CrimsonRaptor18": {
+      "appearances": 163,
+      "itemized": 78,
+      "offense": 218,
+      "tank": 63
+    },
+    "DA_18_Zyra": {
+      "appearances": 570,
+      "itemized": 433,
+      "offense": 1085,
+      "tank": 194
+    },
+    "DA_18_Elise": {
+      "appearances": 66,
+      "itemized": 32,
+      "offense": 40,
+      "tank": 72
+    },
+    "DA_18_Diana": {
+      "appearances": 479,
+      "itemized": 74,
+      "offense": 172,
+      "tank": 138
+    },
+    "DA_18_Yorick": {
+      "appearances": 844,
+      "itemized": 85,
+      "offense": 87,
+      "tank": 205
+    },
+    "DA_Karma18": {
+      "appearances": 338,
+      "itemized": 186,
+      "offense": 489,
+      "tank": 68
+    },
+    "DA_18_Sejuani": {
+      "appearances": 377,
+      "itemized": 200,
+      "offense": 109,
+      "tank": 571
+    },
+    "DA_18_Yunara": {
+      "appearances": 293,
+      "itemized": 154,
+      "offense": 417,
+      "tank": 84
+    },
+    "DA_18_Leona": {
+      "appearances": 336,
+      "itemized": 49,
+      "offense": 57,
+      "tank": 129
+    },
+    "DA_18_Kayle": {
+      "appearances": 291,
+      "itemized": 29,
+      "offense": 74,
+      "tank": 15
+    },
+    "DA_18_Azir": {
+      "appearances": 372,
+      "itemized": 163,
+      "offense": 453,
+      "tank": 73
+    },
+    "DA_18_Sett": {
+      "appearances": 668,
+      "itemized": 404,
+      "offense": 286,
+      "tank": 1119
+    },
+    "DA_18_Morgana": {
+      "appearances": 281,
+      "itemized": 225,
+      "offense": 583,
+      "tank": 212
+    },
+    "DA_KogMaw18_AD": {
+      "appearances": 474,
+      "itemized": 103,
+      "offense": 230,
+      "tank": 103
+    },
+    "DA_18_Soraka": {
+      "appearances": 443,
+      "itemized": 278,
+      "offense": 657,
+      "tank": 223
+    },
+    "DA_18_Malphite": {
+      "appearances": 286,
+      "itemized": 251,
+      "offense": 151,
+      "tank": 707
+    },
+    "DA_18_Kobuko": {
+      "appearances": 84,
+      "itemized": 19,
+      "offense": 26,
+      "tank": 43
+    },
+    "DA_18_Rakan": {
+      "appearances": 642,
+      "itemized": 43,
+      "offense": 33,
+      "tank": 110
+    },
+    "DA_Vi18": {
+      "appearances": 598,
+      "itemized": 233,
+      "offense": 160,
+      "tank": 630
+    },
+    "DA_18_Tristana": {
+      "appearances": 170,
+      "itemized": 94,
+      "offense": 252,
+      "tank": 39
+    },
+    "DA_18_Sivir": {
+      "appearances": 413,
+      "itemized": 346,
+      "offense": 913,
+      "tank": 129
+    },
+    "DA_18_GnarSmall": {
+      "appearances": 374,
+      "itemized": 109,
+      "offense": 255,
+      "tank": 181
+    },
+    "DA_18_Rammus": {
+      "appearances": 217,
+      "itemized": 120,
+      "offense": 92,
+      "tank": 334
+    },
+    "DA_18_Ashe": {
+      "appearances": 258,
+      "itemized": 146,
+      "offense": 357,
+      "tank": 57
+    },
+    "DA_18_Teemo": {
+      "appearances": 124,
+      "itemized": 65,
+      "offense": 185,
+      "tank": 33
+    },
+    "DA_18_Aphelios": {
+      "appearances": 375,
+      "itemized": 324,
+      "offense": 878,
+      "tank": 219
+    },
+    "DA_Nidalee18_AP": {
+      "appearances": 490,
+      "itemized": 380,
+      "offense": 982,
+      "tank": 407
+    },
+    "DA_18_Shen": {
+      "appearances": 296,
+      "itemized": 12,
+      "offense": 15,
+      "tank": 32
+    },
+    "DA_18_Rengar": {
+      "appearances": 171,
+      "itemized": 151,
+      "offense": 383,
+      "tank": 223
+    },
+    "DA_Gromp18_AP": {
+      "appearances": 97,
+      "itemized": 38,
+      "offense": 97,
+      "tank": 11
+    },
+    "DA_Cinderling18": {
+      "appearances": 141,
+      "itemized": 17,
+      "offense": 44,
+      "tank": 5
+    },
+    "DA_18_Warwick": {
+      "appearances": 56,
+      "itemized": 30,
+      "offense": 81,
+      "tank": 43
+    },
+    "DA_18_Akali_AD": {
+      "appearances": 107,
+      "itemized": 69,
+      "offense": 204,
+      "tank": 48
+    },
+    "DA_18_Camille": {
+      "appearances": 85,
+      "itemized": 63,
+      "offense": 176,
+      "tank": 96
+    },
+    "DA_18_Varus": {
+      "appearances": 197,
+      "itemized": 47,
+      "offense": 124,
+      "tank": 20
+    },
+    "DA_18_MasterYi_AD": {
+      "appearances": 174,
+      "itemized": 158,
+      "offense": 431,
+      "tank": 255
+    },
+    "DA_18_Caitlyn": {
+      "appearances": 41,
+      "itemized": 25,
+      "offense": 75,
+      "tank": 18
+    },
+    "DA_18_KhaZix": {
+      "appearances": 46,
+      "itemized": 36,
+      "offense": 98,
+      "tank": 43
+    }
+  }
+}

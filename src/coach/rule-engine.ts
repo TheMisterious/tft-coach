@@ -24,6 +24,7 @@ import { lobbyClause }           from './lobby-context';
 import { attachHistoryContext }  from './history-context';
 import { attachContributingDecisions } from './decision-trace';
 import type { MatchHistoryEntry } from './history-context';
+import { observedCategories }    from './coverage';
 
 const SEVERITY_ORDER: Record<Severity, number> = {
   critical: 0,
@@ -37,7 +38,12 @@ const SEVERITY_ORDER: Record<Severity, number> = {
 // 20-40g stabilising; STREAK_002 would otherwise flag that exact spend as
 // "wasted gold, should have committed to the loss streak instead" if the
 // stabilising roll didn't win the very next fight.
-const HOLD_GOLD_RULES = new Set(['ECON_001', 'ECON_002', 'STREAK_002']);
+//
+// ECON_002 ("sat above 50g without rolling or leveling") used to be in this
+// set and must not be: its advice is to SPEND, the same as the crisis advice.
+// Suppressing it hid exactly the low-HP gold-hoarding a deliberately poor QA
+// game produced, and the report graded that game's economy S.
+const HOLD_GOLD_RULES = new Set(['ECON_001', 'STREAK_002']);
 
 // Rule priority within a match, by unique_id (data/rules.mvp.json). Lower index
 // = higher priority. Used only as a tiebreaker within a severity band so the
@@ -108,7 +114,11 @@ export function extractDecisionPoints(
   const summary = checkerResults.map(([name, pts]) => `${name}:${pts.length}`).join(' ');
   console.log('[rule-engine] checker counts —', summary);
 
+  // A note in a category whose inputs GEP never sent is reading a default
+  // (level 1, empty board, 0 gold) as if it were the player's state.
+  const observed = observedCategories(match);
   let points = checkerResults.flatMap(([, pts]) => pts)
+    .filter(p => observed.has(p.category))
     .map(p => (p.ruleId && !p.tier) ? { ...p, tier: getRuleTier(p.ruleId) } : p)
     .map(applyConfidenceHedge);
 

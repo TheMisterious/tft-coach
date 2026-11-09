@@ -5,11 +5,13 @@
 // rule engine and placed in resolvedNotes. The reporter only needs to fill in
 // the remaining unresolved points and generate tldr, grade, and strengths.
 
-import type { MatchSnapshot, DecisionPoint, MatchBrief, CoachingNote, MetaData, RoundTrajectoryPoint } from '../shared/types';
+import type { MatchSnapshot, DecisionPoint, DecisionCategory, MatchBrief, CoachingNote, MetaData, RoundTrajectoryPoint } from '../shared/types';
 import { getChampionName, getItemName } from '../enrichment/meta-lookup';
-import { overallGrade, categoryGrades, capRepeats } from './scoring';
+import { overallGrade, categoryGrades, capRepeats, ALL_CATEGORIES } from './scoring';
 import { buildMatchPlan } from './plan-builder';
-import { getRuleEvidence, getRuleMeta } from './rules-loader';
+import { getRuleEvidence, getRuleMeta, categoryGradeValidated } from './rules-loader';
+import { canGradeOverall, captureNotes, gradableCategories } from './coverage';
+import { boardUnits } from '../ledger/merge';
 
 // Maximum decision points (resolved + pending combined) before truncating.
 const MAX_POINTS = 20;
@@ -86,6 +88,18 @@ export function buildBrief(
 
   console.log(`[brief] resolved:${resolvedNotes.length} pending:${pendingPoints.length} finalComp units:${Object.values(match.finalBoard).filter(c => c?.name && c.name !== '0').length}`);
 
+  const notes = captureNotes(match);
+
+  // A letter needs two things: this match recorded enough to judge the
+  // category, and the category's letter has been shown to track results at all.
+  const judgeable = gradableCategories(match);
+  const graded = new Set([...judgeable].filter(categoryGradeValidated));
+  const ungradedReasons: Partial<Record<DecisionCategory, 'no-data' | 'unvalidated'>> = {};
+  for (const category of ALL_CATEGORIES) {
+    if (!judgeable.has(category)) ungradedReasons[category] = 'no-data';
+    else if (!graded.has(category)) ungradedReasons[category] = 'unvalidated';
+  }
+
   return {
     placement:       match.finalPlacement,
     setId:           match.setId,
@@ -103,8 +117,13 @@ export function buildBrief(
     // in, and dropping them moved 27 of 74 audited games to an S, an 8th place
     // included. Re-deriving the grade is its own piece of work, not a side
     // effect of trimming notes.
-    overallGrade:    overallGrade(match.finalPlacement, allPoints, match.rounds.length),
-    categoryGrades:  categoryGrades(allPoints, match.rounds.length),
+    //
+    // Only what the recording can support is graded (src/coach/coverage.ts):
+    // a category with nothing observed to judge gets no letter instead of an S.
+    overallGrade:    canGradeOverall(match) ? overallGrade(match.finalPlacement, allPoints, match.rounds.length) : null,
+    categoryGrades:  categoryGrades(allPoints, match.rounds.length, graded),
+    ungradedReasons,
+    ...(notes.length > 0 ? { captureNotes: notes } : {}),
   };
 }
 
@@ -185,8 +204,7 @@ function buildFinalComp(
   match: MatchSnapshot,
   meta: MetaData
 ): Array<{ name: string; stars: number; items: string[] }> {
-  return Object.values(match.finalBoard)
-    .filter(c => c?.name && c.name !== '0')
+  return boardUnits(match.finalBoard)
     .map(c => ({
       name:  getChampionName(c.name, meta),
       stars: c.level,

@@ -1,1 +1,444 @@
-{}
+{
+  "DA_Lux18_Base": {
+    "role": "carry",
+    "items_bis": [
+      "DA_SpearOfShojin",
+      "DA_JeweledGauntlet",
+      "DA_VoidStaff"
+    ],
+    "items_alt": [
+      "DA_BlueBuff",
+      "DA_AdaptiveHelm"
+    ],
+    "components_priority": [
+      "DA_Component_TearOfTheGoddess",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Lux in 207 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Spear of Shojin 40%, Jeweled Gauntlet 28%, Void Staff 25%."
+  },
+  "DA_18_LeBlanc": {
+    "role": "carry",
+    "items_bis": [
+      "DA_VoidStaff",
+      "DA_Morellonomicon",
+      "DA_SpearOfShojin"
+    ],
+    "items_alt": [
+      "DA_RedBuff",
+      "DA_JeweledGauntlet"
+    ],
+    "components_priority": [
+      "DA_Component_TearOfTheGoddess",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on LeBlanc in 119 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Void Staff 45%, Morellonomicon 33%, Spear of Shojin 28%."
+  },
+  "DA_18_Ezreal": {
+    "role": "carry",
+    "items_bis": [
+      "DA_SpearOfShojin",
+      "DA_InfinityEdge",
+      "DA_LastWhisper"
+    ],
+    "items_alt": [
+      "DA_Deathblade",
+      "DA_StrikersFlail"
+    ],
+    "components_priority": [
+      "DA_Component_BFSword",
+      "DA_Component_SparringGloves"
+    ],
+    "notes": "Most built on Ezreal in 209 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Spear of Shojin 54%, Infinity Edge 43%, Last Whisper 43%."
+  },
+  "DA_Draven18": {
+    "role": "carry",
+    "items_bis": [
+      "DA_GuinsoosRageblade",
+      "DA_KrakensFury",
+      "DA_InfinityEdge"
+    ],
+    "items_alt": [
+      "DA_Deathblade",
+      "DA_LastWhisper"
+    ],
+    "components_priority": [
+      "DA_Component_RecurveBow",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Draven in 205 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Guinsoo's Rageblade 89%, Kraken's Fury 48%, Infinity Edge 31%."
+  },
+  "DA_18_ElderDragon": {
+    "role": "carry",
+    "items_bis": [
+      "DA_InfinityEdge",
+      "DA_LastWhisper",
+      "DA_Deathblade"
+    ],
+    "items_alt": [
+      "DA_BlueBuff",
+      "DA_SteraksGage"
+    ],
+    "components_priority": [
+      "DA_Component_BFSword",
+      "DA_Component_SparringGloves"
+    ],
+    "notes": "Most built on Elder Dragon in 287 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Infinity Edge 64%, Last Whisper 37%, Deathblade 25%."
+  },
+  "DA_18_Alune": {
+    "role": "carry",
+    "items_bis": [
+      "DA_JeweledGauntlet",
+      "DA_SpearOfShojin",
+      "DA_VoidStaff"
+    ],
+    "items_alt": [
+      "DA_AdaptiveHelm",
+      "DA_BlueBuff"
+    ],
+    "components_priority": [
+      "DA_Component_TearOfTheGoddess",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Alune in 161 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Jeweled Gauntlet 35%, Spear of Shojin 32%, Void Staff 21%."
+  },
+  "DA_18_Veigar": {
+    "role": "carry",
+    "items_bis": [
+      "DA_JeweledGauntlet",
+      "DA_BlueBuff",
+      "DA_HextechGunblade"
+    ],
+    "items_alt": [
+      "DA_Artifact_Dawncore",
+      "DA_Artifact_Manazane"
+    ],
+    "components_priority": [
+      "DA_Component_NeedlesslyLargeRod",
+      "DA_Component_TearOfTheGoddess"
+    ],
+    "notes": "Most built on Veigar in 63 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Jeweled Gauntlet 71%, Blue Buff 51%, Hextech Gunblade 30%."
+  },
+  "DA_18_Cassiopeia": {
+    "role": "carry",
+    "items_bis": [
+      "DA_HextechGunblade",
+      "DA_SpearOfShojin",
+      "DA_ArchangelsStaff"
+    ],
+    "items_alt": [
+      "DA_VoidStaff",
+      "DA_Morellonomicon"
+    ],
+    "components_priority": [
+      "DA_Component_BFSword",
+      "DA_Component_NeedlesslyLargeRod"
+    ],
+    "notes": "Most built on Cassiopeia in 46 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Hextech Gunblade 59%, Spear of Shojin 41%, Archangel's Staff 39%."
+  },
+  "DA_18_Ahri": {
+    "role": "carry",
+    "items_bis": [
+      "DA_JeweledGauntlet",
+      "DA_SpearOfShojin",
+      "DA_StrikersFlail"
+    ],
+    "items_alt": [
+      "DA_RabadonsDeathcap",
+      "DA_BlueBuff"
+    ],
+    "components_priority": [
+      "DA_Component_SparringGloves",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Ahri in 231 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Jeweled Gauntlet 79%, Spear of Shojin 39%, Striker's Flail 32%."
+  },
+  "DA_CrimsonRaptor18": {
+    "role": "carry",
+    "items_bis": [
+      "DA_GuinsoosRageblade",
+      "DA_KrakensFury",
+      "DA_HextechGunblade"
+    ],
+    "items_alt": [
+      "DA_LastWhisper",
+      "DA_TitansResolve"
+    ],
+    "components_priority": [
+      "DA_Component_NeedlesslyLargeRod",
+      "DA_Component_RecurveBow"
+    ],
+    "notes": "Most built on Mama Beak in 39 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Guinsoo's Rageblade 79%, Kraken's Fury 41%, Hextech Gunblade 36%."
+  },
+  "DA_18_Zyra": {
+    "role": "carry",
+    "items_bis": [
+      "DA_VoidStaff",
+      "DA_SpearOfShojin",
+      "DA_RedBuff"
+    ],
+    "items_alt": [
+      "DA_Morellonomicon",
+      "DA_ArchangelsStaff"
+    ],
+    "components_priority": [
+      "DA_Component_RecurveBow",
+      "DA_Component_TearOfTheGoddess"
+    ],
+    "notes": "Most built on Zyra in 228 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Void Staff 54%, Spear of Shojin 38%, Red Buff 24%."
+  },
+  "DA_Karma18": {
+    "role": "carry",
+    "items_bis": [
+      "DA_JeweledGauntlet",
+      "DA_BlueBuff",
+      "DA_RabadonsDeathcap"
+    ],
+    "items_alt": [
+      "DA_SpearOfShojin",
+      "DA_StrikersFlail"
+    ],
+    "components_priority": [
+      "DA_Component_NeedlesslyLargeRod",
+      "DA_Component_TearOfTheGoddess"
+    ],
+    "notes": "Most built on Karma in 103 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Jeweled Gauntlet 72%, Blue Buff 52%, Rabadon's Deathcap 41%."
+  },
+  "DA_18_Yunara": {
+    "role": "carry",
+    "items_bis": [
+      "DA_SpearOfShojin",
+      "DA_LastWhisper",
+      "DA_InfinityEdge"
+    ],
+    "items_alt": [
+      "DA_Deathblade",
+      "DA_RedBuff"
+    ],
+    "components_priority": [
+      "DA_Component_BFSword",
+      "DA_Component_SparringGloves"
+    ],
+    "notes": "Most built on Yunara in 105 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Spear of Shojin 48%, Last Whisper 35%, Infinity Edge 32%."
+  },
+  "DA_18_Azir": {
+    "role": "carry",
+    "items_bis": [
+      "DA_GuinsoosRageblade",
+      "DA_HextechGunblade",
+      "DA_RabadonsDeathcap"
+    ],
+    "items_alt": [
+      "DA_JeweledGauntlet",
+      "DA_GiantSlayer"
+    ],
+    "components_priority": [
+      "DA_Component_NeedlesslyLargeRod",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Azir in 95 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Guinsoo's Rageblade 39%, Hextech Gunblade 36%, Rabadon's Deathcap 27%."
+  },
+  "DA_18_Morgana": {
+    "role": "carry",
+    "items_bis": [
+      "DA_VoidStaff",
+      "DA_Morellonomicon",
+      "DA_RedBuff"
+    ],
+    "items_alt": [
+      "DA_HextechGunblade",
+      "DA_RabadonsDeathcap"
+    ],
+    "components_priority": [
+      "DA_Component_RecurveBow",
+      "DA_Component_GiantsBelt"
+    ],
+    "notes": "Most built on Morgana in 147 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Void Staff 73%, Morellonomicon 53%, Red Buff 23%."
+  },
+  "DA_18_Soraka": {
+    "role": "carry",
+    "items_bis": [
+      "DA_RabadonsDeathcap",
+      "DA_SpearOfShojin",
+      "DA_JeweledGauntlet"
+    ],
+    "items_alt": [
+      "DA_AdaptiveHelm",
+      "DA_VoidStaff"
+    ],
+    "components_priority": [
+      "DA_Component_NeedlesslyLargeRod",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Soraka in 159 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Rabadon's Deathcap 28%, Spear of Shojin 26%, Jeweled Gauntlet 24%."
+  },
+  "DA_18_Tristana": {
+    "role": "carry",
+    "items_bis": [
+      "DA_GuinsoosRageblade",
+      "DA_HextechGunblade",
+      "DA_KrakensFury"
+    ],
+    "items_alt": [
+      "DA_InfinityEdge",
+      "DA_RedBuff"
+    ],
+    "components_priority": [
+      "DA_Component_NeedlesslyLargeRod",
+      "DA_Component_RecurveBow"
+    ],
+    "notes": "Most built on Tristana in 42 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Guinsoo's Rageblade 67%, Hextech Gunblade 36%, Kraken's Fury 36%."
+  },
+  "DA_18_Sivir": {
+    "role": "carry",
+    "items_bis": [
+      "DA_InfinityEdge",
+      "DA_SpearOfShojin",
+      "DA_Deathblade"
+    ],
+    "items_alt": [
+      "DA_RedBuff",
+      "DA_LastWhisper"
+    ],
+    "components_priority": [
+      "DA_Component_BFSword",
+      "DA_Component_SparringGloves"
+    ],
+    "notes": "Most built on Sivir in 183 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Infinity Edge 61%, Spear of Shojin 26%, Deathblade 25%."
+  },
+  "DA_18_Ashe": {
+    "role": "carry",
+    "items_bis": [
+      "DA_SpearOfShojin",
+      "DA_RedBuff",
+      "DA_LastWhisper"
+    ],
+    "items_alt": [
+      "DA_InfinityEdge",
+      "DA_GuinsoosRageblade"
+    ],
+    "components_priority": [
+      "DA_Component_RecurveBow",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Ashe in 113 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Spear of Shojin 41%, Red Buff 36%, Last Whisper 26%."
+  },
+  "DA_18_Teemo": {
+    "role": "carry",
+    "items_bis": [
+      "DA_JeweledGauntlet",
+      "DA_StrikersFlail",
+      "DA_RabadonsDeathcap"
+    ],
+    "items_alt": [
+      "DA_SpearOfShojin",
+      "DA_BlueBuff"
+    ],
+    "components_priority": [
+      "DA_Component_NeedlesslyLargeRod",
+      "DA_Component_SparringGloves"
+    ],
+    "notes": "Most built on Teemo in 33 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Jeweled Gauntlet 76%, Striker's Flail 36%, Rabadon's Deathcap 33%."
+  },
+  "DA_18_Aphelios": {
+    "role": "carry",
+    "items_bis": [
+      "DA_GuinsoosRageblade",
+      "DA_KrakensFury",
+      "DA_InfinityEdge"
+    ],
+    "items_alt": [
+      "DA_Deathblade",
+      "DA_GiantSlayer"
+    ],
+    "components_priority": [
+      "DA_Component_RecurveBow",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Aphelios in 171 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Guinsoo's Rageblade 74%, Kraken's Fury 51%, Infinity Edge 42%."
+  },
+  "DA_Nidalee18_AP": {
+    "role": "carry",
+    "items_bis": [
+      "DA_SteraksGage",
+      "DA_InfinityEdge",
+      "DA_SpearOfShojin"
+    ],
+    "items_alt": [
+      "DA_EdgeOfNight",
+      "DA_HandOfJustice"
+    ],
+    "components_priority": [
+      "DA_Component_BFSword",
+      "DA_Component_GiantsBelt"
+    ],
+    "notes": "Most built on Nidalee in 232 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Sterak's Gage 42%, Infinity Edge 39%, Spear of Shojin 30%."
+  },
+  "DA_Gromp18_AP": {
+    "role": "carry",
+    "items_bis": [
+      "DA_GuinsoosRageblade",
+      "DA_LastWhisper",
+      "DA_SpearOfShojin"
+    ],
+    "items_alt": [
+      "DA_VoidStaff",
+      "DA_BlueBuff"
+    ],
+    "components_priority": [
+      "DA_Component_RecurveBow",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Gromp in 27 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Guinsoo's Rageblade 22%, Last Whisper 19%, Spear of Shojin 19%."
+  },
+  "DA_18_Warwick": {
+    "role": "carry",
+    "items_bis": [
+      "DA_SteraksGage",
+      "DA_SpearOfShojin",
+      "DA_EdgeOfNight"
+    ],
+    "items_alt": [
+      "DA_TitansResolve",
+      "DA_Quicksilver"
+    ],
+    "components_priority": [
+      "DA_Component_BFSword",
+      "DA_Component_ChainVest"
+    ],
+    "notes": "Most built on Warwick in 20 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Sterak's Gage 45%, Spear of Shojin 30%, Edge of Night 25%."
+  },
+  "DA_18_Akali_AD": {
+    "role": "carry",
+    "items_bis": [
+      "DA_HandOfJustice",
+      "DA_JeweledGauntlet",
+      "DA_EdgeOfNight"
+    ],
+    "items_alt": [
+      "DA_InfinityEdge",
+      "DA_Artifact_Fishbones"
+    ],
+    "components_priority": [
+      "DA_Component_SparringGloves",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Akali in 30 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Hand Of Justice 57%, Jeweled Gauntlet 37%, Edge of Night 33%."
+  },
+  "DA_18_KhaZix": {
+    "role": "carry",
+    "items_bis": [
+      "DA_HandOfJustice",
+      "DA_EdgeOfNight",
+      "DA_RabadonsDeathcap"
+    ],
+    "items_alt": [
+      "DA_Bloodthirster",
+      "DA_Artifact_SeekersArmguard"
+    ],
+    "components_priority": [
+      "DA_Component_NeedlesslyLargeRod",
+      "DA_Component_BFSword"
+    ],
+    "notes": "Most built on Kha'Zix in 17 top-4 boards (400 vn2 Challenger-Master matches, patch , 2026-11-08): Hand Of Justice 65%, Edge of Night 53%, Rabadon's Deathcap 35%."
+  }
+}

@@ -15,8 +15,8 @@
 import type {
   MetaCrawlState, AggregateMetaTable, AggregateStatBucket, HarvestedParticipant, MetaData,
 } from '../shared/types';
-import type { RiotSettings } from '../persistence/settings';
-import { hasLinkedAccount, matchContinentForPlatform } from '../persistence/settings';
+import type { RiotPlatform } from '../persistence/settings';
+import { matchContinentForPlatform } from '../persistence/settings';
 import {
   getChallengerLeague, getGrandmasterLeague, getMasterLeague,
   getMatchIdsByPuuid, getMatchById, riotUnitsToBoardState,
@@ -24,11 +24,19 @@ import {
 import { computeActiveTraitSet, traitSetKey } from '../coach/match-context';
 import { EMPTY_CRAWL_STATE } from '../persistence/meta-cache';
 
+// A Riot API key and the platform to crawl. Not the app's settings: the app no
+// longer holds a key (Riot sign-in, see src/persistence/settings.ts), so this
+// only runs where one exists — a backend job, or a developer's machine.
+export interface CrawlCredentials {
+  riotApiKey: string;
+  platform: RiotPlatform;
+}
+
 const MAX_SEEDS = 200;               // bounds total crawl duration per cycle
 const SEED_STALE_MS = 24 * 60 * 60 * 1000; // refresh the top-player list at most once/day
 const TICK_SIZE = 10;                // seed players advanced per call — keeps one tick fast
 
-async function refreshSeedList(state: MetaCrawlState, settings: RiotSettings): Promise<MetaCrawlState> {
+async function refreshSeedList(state: MetaCrawlState, settings: CrawlCredentials): Promise<MetaCrawlState> {
   try {
     const [challenger, grandmaster, master] = await Promise.all([
       getChallengerLeague(settings.riotApiKey, settings.platform),
@@ -52,10 +60,10 @@ async function refreshSeedList(state: MetaCrawlState, settings: RiotSettings): P
 // full cycle through the seed list completes.
 export async function runMetaCrawlTick(
   state: MetaCrawlState,
-  settings: RiotSettings,
+  settings: CrawlCredentials,
   meta: MetaData
 ): Promise<{ state: MetaCrawlState; table?: AggregateMetaTable }> {
-  if (!hasLinkedAccount(settings)) return { state };
+  if (!settings.riotApiKey) return { state };
 
   let next = state;
   const seedStale = next.seedPuuids.length === 0 || (Date.now() - next.seedFetchedAt) > SEED_STALE_MS;

@@ -2,7 +2,7 @@
   "DA_Gromp18_AP": {
     "name": "Gromp",
     "tier": 2,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Riftbeast",
       "Adaptor"
@@ -62,7 +62,7 @@
   "DA_Krug18": {
     "name": "Krug",
     "tier": 3,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Riftbeast",
       "Brawler"
@@ -74,7 +74,7 @@
   "DA_Sentinel18": {
     "name": "Sentinel",
     "tier": 4,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Riftbeast",
       "Vanguard",
@@ -112,7 +112,7 @@
   "DA_18_Ornn": {
     "name": "Ornn",
     "tier": 1,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Elderwood",
       "Defender"
@@ -124,7 +124,7 @@
   "DA_Nidalee18_AP": {
     "name": "Nidalee",
     "tier": 4,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Primal",
       "Adaptor"
@@ -136,7 +136,7 @@
   "DA_18_Hecarim": {
     "name": "Hecarim",
     "tier": 3,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Elderwood",
       "Vanguard"
@@ -148,7 +148,7 @@
   "DA_18_Ezreal": {
     "name": "Ezreal",
     "tier": 4,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Elderwood",
       "Executioner"
@@ -160,7 +160,7 @@
   "DA_18_Azir": {
     "name": "Azir",
     "tier": 3,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Blackthorn",
       "Executioner",
@@ -173,7 +173,7 @@
   "DA_18_RekSai": {
     "name": "Rek'Sai",
     "tier": 1,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Blackthorn",
       "Brawler"
@@ -185,7 +185,7 @@
   "DA_18_Veigar": {
     "name": "Veigar",
     "tier": 1,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Blackthorn",
       "Sprykin",
@@ -198,7 +198,7 @@
   "DA_18_Maokai": {
     "name": "Maokai",
     "tier": 5,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Old Growth",
       "Juggernaut"
@@ -210,7 +210,7 @@
   "DA_18_Malphite": {
     "name": "Malphite",
     "tier": 4,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Blackthorn",
       "Monolith"
@@ -235,7 +235,7 @@
   "DA_18_Yunara": {
     "name": "Yunara",
     "tier": 2,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Blossom",
       "Executioner"
@@ -247,7 +247,7 @@
   "DA_18_Sett": {
     "name": "Sett",
     "tier": 4,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Blossom",
       "Brawler"
@@ -259,7 +259,7 @@
   "DA_18_Ahri": {
     "name": "Ahri",
     "tier": 4,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Blossom",
       "Spellweaver"
@@ -271,7 +271,7 @@
   "DA_18_Ashe": {
     "name": "Ashe",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Blossom",
       "Hunter"
@@ -295,7 +295,7 @@
   "DA_18_Caitlyn": {
     "name": "Caitlyn",
     "tier": 2,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Coven",
       "Hunter"
@@ -307,7 +307,7 @@
   "DA_18_Cassiopeia": {
     "name": "Cassiopeia",
     "tier": 3,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Coven",
       "Spellweaver"
@@ -319,7 +319,7 @@
   "DA_18_Morgana": {
     "name": "Morgana",
     "tier": 4,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Coven",
       "Invoker"
@@ -344,7 +344,7 @@
   "DA_18_Lillia": {
     "name": "Lillia",
     "tier": 4,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Fae",
       "Defender"
@@ -368,7 +368,7 @@
   "DA_18_Teemo": {
     "name": "Teemo",
     "tier": 2,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Sprykin",
       "Invoker"
@@ -380,7 +380,7 @@
   "DA_18_Rammus": {
     "name": "Rammus",
     "tier": 3,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Sprykin",
       "Defender"
@@ -405,7 +405,7 @@
   "DA_18_Tristana": {
     "name": "Tristana",
     "tier": 3,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Fae",
       "Sprykin",
@@ -418,7 +418,7 @@
   "DA_18_Sivir": {
     "name": "Sivir",
     "tier": 4,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Primal",
       "Hunter"
@@ -430,7 +430,7 @@
   "DA_Vi18": {
     "name": "Vi",
     "tier": 3,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Primal",
       "Juggernaut"
@@ -442,7 +442,7 @@
   "DA_18_Akali_AD": {
     "name": "Akali",
     "tier": 1,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Inferno",
       "Adaptor",
@@ -467,7 +467,7 @@
   "DA_Amumu18": {
     "name": "Amumu",
     "tier": 4,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Inferno",
       "Juggernaut"
@@ -491,7 +491,7 @@
   "DA_18_Aphelios": {
     "name": "Aphelios",
     "tier": 4,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Lunar",
       "Rapidfire"
@@ -516,7 +516,7 @@
   "DA_18_Alune": {
     "name": "Alune",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Attuned",
       "Lunar",
@@ -553,7 +553,7 @@
   "DA_18_Sejuani": {
     "name": "Sejuani",
     "tier": 2,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Solar",
       "Juggernaut"
@@ -565,7 +565,7 @@
   "DA_18_KhaZix": {
     "name": "Kha'Zix",
     "tier": 3,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Rival"
     ],
@@ -600,7 +600,7 @@
   "DA_18_Zyra": {
     "name": "Zyra",
     "tier": 4,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Thornmaiden",
       "Summoner"
@@ -625,7 +625,7 @@
   "DA_18_Soraka": {
     "name": "Soraka",
     "tier": 4,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Flora Fatalis",
       "Executioner"
@@ -637,7 +637,7 @@
   "DA_Taric18": {
     "name": "Taric",
     "tier": 5,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Emerald Aspect",
       "Vanguard"
@@ -660,7 +660,7 @@
   "DA_Lux18_Base": {
     "name": "Lux",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Avatar"
     ],
@@ -671,7 +671,7 @@
   "DA_18_Alistar": {
     "name": "Alistar",
     "tier": 2,
-    "role": "flex",
+    "role": "tank",
     "traits": [
       "Elderwood",
       "Brawler"
@@ -683,7 +683,7 @@
   "DA_Draven18": {
     "name": "Draven",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Bounty Seeker"
     ],
@@ -694,7 +694,7 @@
   "DA_18_ElderDragon": {
     "name": "Elder Dragon",
     "tier": 5,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Apex Predator",
       "Riftbeast"
@@ -706,7 +706,7 @@
   "DA_Karma18": {
     "name": "Karma",
     "tier": 1,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Blossom",
       "Spellweaver"
@@ -718,7 +718,7 @@
   "DA_18_LeBlanc": {
     "name": "LeBlanc",
     "tier": 2,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Elderwood",
       "Spellweaver"
@@ -754,7 +754,7 @@
   "DA_18_Warwick": {
     "name": "Warwick",
     "tier": 2,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Blackthorn",
       "Ravager"
@@ -886,7 +886,7 @@
   "DA_CrimsonRaptor18": {
     "name": "Mama Beak",
     "tier": 3,
-    "role": "flex",
+    "role": "carry",
     "traits": [
       "Riftbeast",
       "Summoner",

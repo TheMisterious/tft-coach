@@ -224,6 +224,19 @@
       "defined_on": "2026-10-14"
     },
     {
+      "unique_id": "BOARD_004",
+      "human_readable_name": "Board Weaker Than the Boards Fought, While Losing",
+      "category": "board",
+      "subcategory": "strength",
+      "short_summary": "Over 3 consecutive stage 3-4 PvP rounds the player's board (unit cost x star) was under 80% of the average opponent board, and they lost at least 2 of those fights.",
+      "source_tier": "candidate",
+      "severity": "medium",
+      "confidence": "low",
+      "patch_sensitivity": "low",
+      "status": "candidate",
+      "defined_on": "2026-11-09"
+    },
+    {
       "unique_id": "ROLL_006",
       "human_readable_name": "Behind the Lobby at a Roll-Down Window, Gold Banked",
       "category": "rolling",

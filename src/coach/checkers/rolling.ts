@@ -17,7 +17,7 @@
 import type { MatchSnapshot, DecisionPoint, RoundSnapshot, MetaData, MatchContext } from '../../shared/types';
 import { NEUTRAL_CONTEXT, computeActiveComp, computeCarryDamage } from '../match-context';
 import { pivotContextClause } from '../plan-builder';
-import { identifyCarry } from '../../ledger/merge';
+import { identifyCarry, boardUnits } from '../../ledger/merge';
 
 // Shop odds indexed by [carry_cost - 1][level - 1] (levels 1-10, costs 1-5).
 // Source: lolchess.gg/guide/reroll, Set 17.
@@ -43,7 +43,7 @@ function inferCarryCost(
   activeComp: Set<string>,
   carryDamage: Map<string, number>
 ): number {
-  const units = Object.values(round.board).filter(c => c?.name && c.name !== '0');
+  const units = boardUnits(round.board);
   if (units.length === 0) return 3;
   const carry = identifyCarry(units, meta, activeComp, carryDamage);
   return meta.champions[carry.name]?.tier ?? 3;
@@ -163,8 +163,8 @@ function checkPostStabilizationRoll(match: MatchSnapshot, context: MatchContext)
     if (gold <= 20) continue;
 
     // No new 3-star unit appeared this round.
-    const new3star = Object.values(r.board).some(c => c?.level >= 3) &&
-      !Object.values(rounds[i - 1]?.board ?? {}).some(c => c?.level >= 3);
+    const new3star = boardUnits(r.board).some(c => c.level >= 3) &&
+      !boardUnits(rounds[i - 1]?.board ?? {}).some(c => c.level >= 3);
     if (new3star) continue;
 
     totalWaste += gold;

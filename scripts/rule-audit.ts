@@ -46,7 +46,7 @@ import '../tests/setup/fetch-polyfill';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import type { DecisionPoint, LedgerEntry, PlacementSource } from '../src/shared/types';
+import type { DecisionPoint, DecisionCategory, Grade, LedgerEntry, PlacementSource } from '../src/shared/types';
 import { reconstructSnapshots } from '../src/ledger/rounds';
 import { findFinalPlacement } from '../src/ledger/placement';
 import { detectSet, loadMeta } from '../src/enrichment/meta-lookup';
@@ -56,6 +56,8 @@ import { buildMatchPlan } from '../src/coach/plan-builder';
 import { standingFor } from '../src/coach/lobby-context';
 import { extractFeatureVector } from '../src/profile/feature-vector';
 import { getAllRules, getRuleMeta } from '../src/coach/rules-loader';
+import { ALL_CATEGORIES, categoryGrades } from '../src/coach/scoring';
+import { gradableCategories } from '../src/coach/coverage';
 import {
   mean, sd, ranks, pearson, spearman, rng, PERMUTATIONS, permutationP,
   bootstrapDiffCI, bh, minimumDetectableEffect,
@@ -105,6 +107,9 @@ interface MatchRecord {
   states: RoundState[];
   firings: Firing[];
   features: Record<string, number | null> | null;
+  // The report's per-category letters for this match (src/coach/scoring.ts),
+  // before any evidence gate — what analyseCategoryGrades tests.
+  categoryGrades?: Partial<Record<DecisionCategory, Grade>>;
   error?: string;
 }
 
@@ -187,6 +192,7 @@ async function extractMatch(file: string): Promise<MatchRecord> {
             ...(standing ? { hpRank: standing.hpRank, levelRank: standing.levelRank, alive: standing.alive } : {}),
           };
         }),
+        categoryGrades: categoryGrades(points, snapshot.rounds.length, gradableCategories(snapshot)),
         firings: points.map(p => ({
           ruleId: p.ruleId ?? `(${p.category})`,
           round: p.round,
@@ -589,7 +595,7 @@ function report(matches: MatchRecord[], excluded: MatchRecord[], a: ReturnType<t
 
 const EVIDENCE_PATH = path.join(ROOT, 'data', 'core', 'rule-evidence.json');
 
-function writeEvidence(matches: MatchRecord[], a: ReturnType<typeof analyseRules>): void {
+function writeEvidence(matches: MatchRecord[], a: ReturnType<typeof analyseRules>, grades: CategoryGradeRow[]): void {
   const r2 = (x: number | null | undefined) => x === null || x === undefined ? null : Math.round(x * 100) / 100;
   const r3 = (x: number | null | undefined) => x === null || x === undefined ? null : Math.round(x * 1000) / 1000;
   const out: Record<string, unknown> = {};
@@ -628,9 +634,77 @@ function writeEvidence(matches: MatchRecord[], a: ReturnType<typeof analyseRules
       method: 'Exploratory association in one player\'s games, not causation. Per rule: mean placement where it fired at or before a cut round vs matches that reached that round without it firing, 95% bootstrap CI, two-sided permutation test, Benjamini-Hochberg across rules. verdict is the full-data result (predictive = q < 0.1 with a worse finish). status is confirmed only when a rule discovered on the older 60% of matches (by date) shows a worse finish again on the newer 40% (one-sided, corrected); otherwise exploratory. See results/rule-audit/report.md.',
     },
     rules: out,
+    categoryGrades: Object.fromEntries(grades.map(g => [g.category, {
+      verdict: g.verdict, n: g.n, rho: r2(g.rho), ci: g.ci ? [r2(g.ci[0]), r2(g.ci[1])] : null,
+    }])),
   };
   fs.writeFileSync(EVIDENCE_PATH, JSON.stringify(file, null, 2) + '\n');
   console.log(`[audit] wrote ${EVIDENCE_PATH}`);
+}
+
+// ─── Category grades ─────────────────────────────────────────────────────────
+//
+// A letter grade is a claim too: "your economy was a C". Per category, does the
+// letter track where the player finished? Spearman's rho between grade (S=0 …
+// D=4) and placement, with a 95% bootstrap interval over matches. 'tracks'
+// needs the interval above zero; 'contradicts' means it sat below zero — the
+// grade was better in games that ended worse, which is what rules that fire
+// more the longer a match lasts produce. The app shows only 'tracks' letters.
+
+const GRADE_INDEX: Record<Grade, number> = { S: 0, A: 1, B: 2, C: 3, D: 4 };
+const GRADE_MIN_N = 20;
+// Matches whose letter differs from the category's most common letter. Below
+// this the category barely varies — mostly S — and a correlation over it is a
+// handful of games, not a measurement.
+const GRADE_MIN_OFF_MODE = 10;
+const GRADE_BOOTSTRAP = 2000;
+
+interface CategoryGradeRow {
+  category: DecisionCategory;
+  n: number;
+  rho: number | null;
+  ci: [number, number] | null;
+  verdict: 'tracks' | 'contradicts' | 'unproven' | 'untestable';
+}
+
+function analyseCategoryGrades(matches: MatchRecord[]): CategoryGradeRow[] {
+  return ALL_CATEGORIES.map((category, ci): CategoryGradeRow => {
+    const pairs = matches
+      .filter(m => m.categoryGrades?.[category] !== undefined)
+      .map(m => [GRADE_INDEX[m.categoryGrades![category]!], m.placement] as [number, number]);
+    const counts = new Map<number, number>();
+    for (const [g] of pairs) counts.set(g, (counts.get(g) ?? 0) + 1);
+    const offMode = pairs.length - Math.max(0, ...counts.values());
+    if (pairs.length < GRADE_MIN_N || offMode < GRADE_MIN_OFF_MODE) return { category, n: pairs.length, rho: null, ci: null, verdict: 'untestable' };
+
+    const rho = spearman(pairs.map(p => p[0]), pairs.map(p => p[1]));
+    const rand = rng(9100 + ci);
+    const boots: number[] = [];
+    for (let b = 0; b < GRADE_BOOTSTRAP; b++) {
+      const sample = pairs.map(() => pairs[Math.floor(rand() * pairs.length)]);
+      const r = spearman(sample.map(p => p[0]), sample.map(p => p[1]));
+      // A resample with no spread in either column has no association to
+      // measure; dropping it instead biased the interval away from zero.
+      boots.push(Number.isFinite(r) ? r : 0);
+    }
+    boots.sort((a, b) => a - b);
+    const interval: [number, number] = [boots[Math.floor(boots.length * 0.025)], boots[Math.floor(boots.length * 0.975)]];
+    const verdict = interval[0] > 0 ? 'tracks' : interval[1] < 0 ? 'contradicts' : 'unproven';
+    return { category, n: pairs.length, rho, ci: interval, verdict };
+  });
+}
+
+function categoryGradeReport(rows: CategoryGradeRow[]): string {
+  const lines = [
+    '## Category grades: does the letter track the result?',
+    '',
+    `Spearman rho between each category's letter (S=0 … D=4) and final placement, 95% bootstrap interval. Positive = worse letter, worse finish. The app shows a category's letter only when its verdict is "tracks".`,
+    '',
+    '| category | n | rho [95% CI] | verdict |',
+    '|---|---|---|---|',
+    ...rows.map(r => `| ${r.category} | ${r.n} | ${r.rho === null ? '—' : `${f2(r.rho)} ${ci2(r.ci)}`} | ${r.verdict} |`),
+  ];
+  return lines.join('\n');
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────
@@ -658,12 +732,13 @@ async function main() {
   const excluded = records.filter(m => exclusionReason(m) !== null);
   const analysis = analyseRules(matches);
   const features = analyseFeatures(matches);
-  const md = report(matches, excluded, analysis, features);
+  const grades = analyseCategoryGrades(matches.filter(m => m.categoryGrades));
+  const md = report(matches, excluded, analysis, features) + '\n\n' + categoryGradeReport(grades) + '\n';
   fs.writeFileSync(path.join(OUT_DIR, 'report.md'), md);
   console.log(md);
   if (process.argv.includes('--write')) {
     if (process.env.TFT_AUDIT_OUT) console.error('[audit] --write ignored: TFT_AUDIT_OUT is set, so this is not the player\'s own corpus');
-    else writeEvidence(matches, analysis);
+    else writeEvidence(matches, analysis, grades);
   }
 }
 

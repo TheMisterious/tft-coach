@@ -62,18 +62,36 @@ function normalizedPenalty(points: DecisionPoint[], totalRounds: number): number
 
 // Overall grade folds in placement — a 1st place with a few moderate notes
 // should still grade higher than an 8th place with the same notes.
+//
+// The placement term alone was too weak: score = placement + penalty let an
+// 8th place with two minor notes land at 10 and read "S". The result now caps
+// the grade outright — the letter can be held down by mistakes, never lifted
+// above what the finish supports.
+const PLACEMENT_CEILING: Array<[maxPlacement: number, best: Grade]> = [
+  [2, 'S'], [4, 'A'], [6, 'B'], [8, 'C'],
+];
+
+const GRADE_ORDER: Grade[] = ['S', 'A', 'B', 'C', 'D'];
+
+function worseOf(a: Grade, b: Grade): Grade {
+  return GRADE_ORDER.indexOf(a) >= GRADE_ORDER.indexOf(b) ? a : b;
+}
+
 export function overallGrade(placement: number, points: DecisionPoint[], totalRounds: number): Grade {
   const score = placement + normalizedPenalty(points, totalRounds);
-  if (score <= 10) return 'S';
-  if (score <= 14) return 'A';
-  if (score <= 18) return 'B';
-  if (score <= 21) return 'C';
-  return 'D';
+  const byScore: Grade =
+    score <= 10 ? 'S' :
+    score <= 14 ? 'A' :
+    score <= 18 ? 'B' :
+    score <= 21 ? 'C' : 'D';
+  const ceiling = PLACEMENT_CEILING.find(([max]) => placement <= max)?.[1] ?? 'C';
+  return worseOf(byScore, ceiling);
 }
 
 // Per-category grades have no placement signal to fold in — they're purely
 // "how many mistakes, how severe, in this one area." No notes in a category
-// = S, same philosophy as report-generator's CLEAN_CATEGORY_STRENGTHS.
+// = S, but only for a category the match could be judged on at all (see
+// categoryGrades' `gradable` and src/coach/coverage.ts).
 function categoryGrade(penalty: number): Grade {
   if (penalty <= 0)   return 'S';
   if (penalty <= 1.5) return 'A';
@@ -103,7 +121,13 @@ export const CATEGORY_LABELS: Record<DecisionCategory, string> = {
   set_mechanic: 'set mechanics',
 };
 
-export function categoryGrades(points: DecisionPoint[], totalRounds: number): Record<DecisionCategory, Grade> {
+// `gradable` leaves out categories the match gave nothing to judge; omitted,
+// every category is graded.
+export function categoryGrades(
+  points: DecisionPoint[],
+  totalRounds: number,
+  gradable: ReadonlySet<DecisionCategory> = new Set(ALL_CATEGORIES),
+): Partial<Record<DecisionCategory, Grade>> {
   const byCategory = new Map<DecisionCategory, DecisionPoint[]>();
   for (const p of points) {
     const list = byCategory.get(p.category) ?? [];
@@ -111,8 +135,9 @@ export function categoryGrades(points: DecisionPoint[], totalRounds: number): Re
     byCategory.set(p.category, list);
   }
 
-  const grades = {} as Record<DecisionCategory, Grade>;
+  const grades: Partial<Record<DecisionCategory, Grade>> = {};
   for (const category of ALL_CATEGORIES) {
+    if (!gradable.has(category)) continue;
     grades[category] = categoryGrade(normalizedPenalty(byCategory.get(category) ?? [], totalRounds));
   }
   return grades;

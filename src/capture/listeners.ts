@@ -18,10 +18,14 @@ let attached = false;
 let onMatchStartedCb: (() => void) | null = null;
 let onMatchEndedCb: (() => void) | null = null;
 let onGameModeChangedCb: ((mode: 'tft' | 'lol' | 'unknown') => void) | null = null;
+let onRoundStartedCb: (() => void) | null = null;
 
 export function setOnMatchStarted(cb: () => void): void { onMatchStartedCb = cb; }
 export function setOnMatchEnded(cb: () => void): void { onMatchEndedCb = cb; }
 export function setOnGameModeChanged(cb: (mode: 'tft' | 'lol' | 'unknown') => void): void { onGameModeChangedCb = cb; }
+// A round actually starting — the one signal that a match is being played,
+// unlike game mode or a running client (both true in the lobby).
+export function setOnRoundStarted(cb: () => void): void { onRoundStartedCb = cb; }
 
 // Prevent the info-update match_end path from double-firing the pipeline.
 let matchEndFiredFromInfo = false;
@@ -185,5 +189,6 @@ function onEvents(payload: { events: Array<{ name: string; data: string }> }): v
     // event.data is sometimes empty, sometimes a plain string, sometimes JSON.
     const parsed = safeParseGep(ev.data, ev.data);
     appendEvent({ ts, kind: 'event', name: ev.name, data: parsed });
+    if (ev.name === 'round_start') onRoundStartedCb?.();
   }
 }

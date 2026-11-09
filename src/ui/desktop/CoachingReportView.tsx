@@ -92,13 +92,21 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
             {/* Header */}
             <header className={styles.header}>
               <div className={styles.headerTop}>
-                <div className={`${styles.gradeCircle} ${styles[`grade-${report.overall_grade}`]}`}>
-                  {report.overall_grade}
+                <div
+                  className={`${styles.gradeCircle} ${styles[`grade-${report.overall_grade ?? 'none'}`]}`}
+                  title={report.overall_grade ? undefined : 'Not graded — this match was only partly recorded'}
+                >
+                  {report.overall_grade ?? '—'}
                 </div>
                 <span className={`${styles.placementLarge} ${placementClass}`}>
                   #{report.overall_placement}
                 </span>
               </div>
+              {report.capture_notes && report.capture_notes.length > 0 && (
+                <ul className={styles.captureNotes}>
+                  {report.capture_notes.map((line, i) => <li key={i}>{line}</li>)}
+                </ul>
+              )}
               <p className={styles.tldr}>{report.tldr}</p>
               {report.priority_fix && (
                 <div className={styles.priorityFix}>
@@ -123,8 +131,16 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
                 {ALL_CATEGORIES.map(category => {
                   const grade = report.category_grades[category];
                   return (
-                    <div key={category} className={styles.categoryTile} title={`${CATEGORY_LABELS[category]}: ${grade}`}>
-                      <span className={`${styles.categoryBadge} ${styles[`grade-${grade}`]}`}>{grade}</span>
+                    <div
+                      key={category}
+                      className={`${styles.categoryTile} ${grade ? '' : styles.ungradedTile}`}
+                      title={grade
+                        ? `${CATEGORY_LABELS[category]}: ${grade}`
+                        : report.ungraded_reasons?.[category] === 'unvalidated'
+                          ? `${CATEGORY_LABELS[category]}: not graded — this grade has not yet been shown to match how games actually end. Its notes below still apply.`
+                          : `${CATEGORY_LABELS[category]}: not graded — nothing in this match's recording to judge it on`}
+                    >
+                      <span className={`${styles.categoryBadge} ${styles[`grade-${grade ?? 'none'}`]}`}>{grade ?? '—'}</span>
                       <span className={styles.categoryLabel}>{CATEGORY_LABELS[category]}</span>
                     </div>
                   );

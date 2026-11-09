@@ -6,7 +6,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { MetaData, HarvestedParticipant, ChampionMeta, TraitBreakpoint } from '../src/shared/types';
-import type { RiotSettings } from '../src/persistence/settings';
+import type { CrawlCredentials } from '../src/enrichment/meta-crawler';
 import { EMPTY_CRAWL_STATE } from '../src/persistence/meta-cache';
 
 vi.mock('../src/enrichment/riot-api', async (importOriginal) => {
@@ -26,13 +26,10 @@ import {
   getChallengerLeague, getGrandmasterLeague, getMasterLeague, getMatchIdsByPuuid, getMatchById,
 } from '../src/enrichment/riot-api';
 
-function makeSettings(overrides: Partial<RiotSettings> = {}): RiotSettings {
+function makeSettings(overrides: Partial<CrawlCredentials> = {}): CrawlCredentials {
   return {
     riotApiKey: 'RGAPI-test',
     platform: 'na1',
-    gameName: 'Test',
-    tagLine: 'NA1',
-    puuid: 'local-puuid',
     ...overrides,
   };
 }
@@ -72,8 +69,8 @@ beforeEach(() => {
 });
 
 describe('runMetaCrawlTick', () => {
-  it('no-ops when the Riot account is not linked', async () => {
-    const settings = makeSettings({ puuid: undefined });
+  it('no-ops without an API key', async () => {
+    const settings = makeSettings({ riotApiKey: '' });
     const result = await runMetaCrawlTick(EMPTY_CRAWL_STATE, settings, makeMeta());
     expect(result.state).toEqual(EMPTY_CRAWL_STATE);
     expect(getChallengerLeague).not.toHaveBeenCalled();

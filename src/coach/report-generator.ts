@@ -21,6 +21,8 @@ export async function generateCoachingReport(brief: MatchBrief): Promise<Coachin
     overall_placement: brief.placement,
     overall_grade: brief.overallGrade,
     category_grades: brief.categoryGrades,
+    ...(brief.ungradedReasons ? { ungraded_reasons: brief.ungradedReasons } : {}),
+    ...(brief.captureNotes?.length ? { capture_notes: brief.captureNotes } : {}),
     tldr: otherNotes ? buildAuditedTldr(brief, notes, otherNotes) : buildTldr(brief, notes),
     priority_fix: buildPriorityFix(brief, notes),
     notes,
@@ -53,8 +55,10 @@ function buildPriorityFix(brief: MatchBrief, notes: CoachingNote[]): PriorityFix
   }
   if (byCategory.size === 0) return undefined;
 
+  // An ungraded category ranks as S here: it never outranks a graded one.
+  const rank = (cat: DecisionCategory) => GRADE_RANK[brief.categoryGrades[cat] ?? 'S'];
   const [category, categoryNotes] = [...byCategory.entries()].sort(([catA, notesA], [catB, notesB]) => {
-    const gradeDiff = GRADE_RANK[brief.categoryGrades[catB]] - GRADE_RANK[brief.categoryGrades[catA]];
+    const gradeDiff = rank(catB) - rank(catA);
     if (gradeDiff !== 0) return gradeDiff;
     return notesB.length - notesA.length;
   })[0];
@@ -177,10 +181,13 @@ function buildStrengths(brief: MatchBrief, notes: CoachingNote[]): string[] {
     }
   }
 
+  // Clean means graded and unflagged — a category the match never let us
+  // judge (see src/coach/coverage.ts) is not a strength.
   const flaggedCategories = new Set(notes.map(n => n.category));
   for (const [category, label] of Object.entries(CLEAN_CATEGORY_STRENGTHS)) {
     if (strengths.length >= 3) break;
-    if (!flaggedCategories.has(category as DecisionCategory)) strengths.push(label);
+    const cat = category as DecisionCategory;
+    if (brief.categoryGrades[cat] !== undefined && !flaggedCategories.has(cat)) strengths.push(label);
   }
 
   if (strengths.length === 0) {

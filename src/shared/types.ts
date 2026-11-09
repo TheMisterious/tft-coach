@@ -120,6 +120,30 @@ export interface LobbyPlayerState {
 // finalPlacement is a placeholder 8, not a result.
 export type PlacementSource = 'gep' | 'riot' | 'rank' | 'none';
 
+// What the ledger actually observed, as opposed to the defaults the
+// reconstruction starts from (level 1, 0 gold, 100 HP, empty board). A checker
+// reading a default it never saw overwritten reports a fabricated fact — a real
+// QA report flagged "empty board slots at level 1" at 6-3 off a ledger that
+// held only post-elimination spectating. See src/coach/coverage.ts for how
+// this gates which categories are graded at all.
+export interface CaptureCoverage {
+  firstRound?: string;
+  lastRound?: string;
+  // The first captured round is past 2-1: the recording began mid-match, so
+  // every checkpoint before it is missing rather than passed.
+  missedStart: boolean;
+  goldSeen: boolean;
+  healthSeen: boolean;
+  // me.xp, or the local player's roster entry when me.xp never fired.
+  levelSeen: boolean;
+  boardSeen: boolean;
+  shopSeen: boolean;
+  augmentsSeen: boolean;
+  // Rounds that began after the local player was eliminated — GEP keeps
+  // streaming the lobby while you spectate. Dropped, never coached.
+  spectatorRoundsDropped: number;
+}
+
 export interface MatchSnapshot {
   pseudoMatchId: string;
   setId: string;                      // "set17"
@@ -133,6 +157,9 @@ export interface MatchSnapshot {
   augments: string[];                 // all picked augments
   // Set 17 — collected god picks across all three god rounds (2-4, 3-4, 4-4)
   godPicks: Array<{ round: string; god: string }>;
+  // Always set by reconstructSnapshots(); absent on hand-built test snapshots,
+  // which are treated as fully observed.
+  capture?: CaptureCoverage;
 }
 
 // ─── Rule engine ─────────────────────────────────────────────────────────────
@@ -361,11 +388,19 @@ export interface PriorityFix {
 
 export interface CoachingReport {
   overall_placement: number;
-  overall_grade: Grade;
+  // null when the recording is too incomplete to grade the match (see
+  // src/coach/coverage.ts). Reports saved before that check always carry one.
+  overall_grade: Grade | null;
   // Per-category grade, computed from ALL decision points the rule engine
   // found in that category for the full match — not just the ones that
   // survived truncation into `notes` below. See src/coach/scoring.ts.
-  category_grades: Record<DecisionCategory, Grade>;
+  // A category is absent when this match gave it nothing to judge: no note
+  // there is not the same as a clean game there.
+  category_grades: Partial<Record<DecisionCategory, Grade>>;
+  ungraded_reasons?: Partial<Record<DecisionCategory, 'no-data' | 'unvalidated'>>;
+  // Plain-language list of what the recording missed, shown above the grades.
+  // Absent when the match was fully captured.
+  capture_notes?: string[];
   tldr: string;
   priority_fix?: PriorityFix;
   // Notes from rules with a measured link to placement (see NoteEvidence).
@@ -401,8 +436,14 @@ export interface MatchBrief {
   // Grades computed from the full, pre-truncation decision-point list (see
   // rule-engine.ts) — deliberately independent of what made it into
   // resolvedNotes/decisionPoints after the MAX_POINTS/MAX_PER_RULE cuts.
-  overallGrade: Grade;
-  categoryGrades: Record<DecisionCategory, Grade>;
+  // Same null/absent meaning as CoachingReport's.
+  overallGrade: Grade | null;
+  categoryGrades: Partial<Record<DecisionCategory, Grade>>;
+  // Why a category has no letter: this match did not record enough to judge
+  // it ('no-data'), or its letter has not been shown to track results
+  // ('unvalidated', see rules-loader.ts categoryGradeValidated).
+  ungradedReasons?: Partial<Record<DecisionCategory, 'no-data' | 'unvalidated'>>;
+  captureNotes?: string[];
 }
 
 // ─── App status ──────────────────────────────────────────────────────────────

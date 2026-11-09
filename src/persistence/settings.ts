@@ -1,8 +1,11 @@
-// localStorage-backed settings for the optional Riot API integration.
-// Bring-your-own-key: each user pastes their own personal Riot API key here.
-// Never bundled into the build, never written to the ledger/goldens — this is
-// the only place the key lives, and it never leaves the local machine except
-// as an Authorization-style header on requests to api.riotgames.com.
+// localStorage-backed settings for the optional Riot account link.
+//
+// The account comes from Riot Sign On (src/enrichment/riot-sign-in.ts): the
+// player signs in on Riot's own page and the coachv backend
+// (server/rso-worker) hands back a session bound to that account. The app
+// never asks for, stores or sends a Riot API key — the production key lives
+// only on the backend. Earlier builds had players paste a personal key here;
+// loadSettings() drops any such key still on disk.
 //
 // Storage layout: tft:settings → JSON RiotSettings
 
@@ -15,21 +18,24 @@ export type RiotPlatform =
   | 'kr' | 'jp1'
   | 'oc1' | 'vn2' | 'sg2' | 'th2' | 'tw2' | 'ph2';
 
-export interface RiotSettings {
-  riotApiKey: string;
-  platform: RiotPlatform;
+// Who signed in, and the backend session that reads their rank and matches.
+export interface LinkedRiotAccount {
+  puuid: string;
   gameName: string;
   tagLine: string;
-  // Cached after the first successful account-v1 resolve, so it doesn't need
-  // re-resolving on every launch.
-  puuid?: string;
+  session: string;
+  expiresAt: number; // epoch ms
+}
+
+export interface RiotSettings {
+  // The server the player plays on — routes rank and match lookups. Riot
+  // sign-in identifies the account, not where it plays.
+  platform: RiotPlatform;
+  account?: LinkedRiotAccount;
 }
 
 const DEFAULTS: RiotSettings = {
-  riotApiKey: '',
   platform: 'na1',
-  gameName: '',
-  tagLine: '',
 };
 
 // Riot routes account-v1 and tft-match-v1 to DIFFERENT continent values for
@@ -72,7 +78,14 @@ export function loadSettings(): RiotSettings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return { ...DEFAULTS };
-    return { ...DEFAULTS, ...(JSON.parse(raw) as Partial<RiotSettings>) };
+    const stored = JSON.parse(raw) as Partial<RiotSettings> & { riotApiKey?: unknown };
+    const settings: RiotSettings = {
+      platform: stored.platform ?? DEFAULTS.platform,
+      ...(stored.account ? { account: stored.account } : {}),
+    };
+    // A personal key pasted into an earlier build: forget it for good.
+    if ('riotApiKey' in stored) saveSettings(settings);
+    return settings;
   } catch (e) {
     console.error('[settings] loadSettings failed:', e);
     return { ...DEFAULTS };
@@ -87,13 +100,13 @@ export function saveSettings(s: RiotSettings): void {
   }
 }
 
-// True once enough is saved to attempt an account resolve.
-export function hasRiotCredentials(s: RiotSettings): boolean {
-  return !!(s.riotApiKey && s.gameName && s.tagLine);
+// True while a signed-in account's session is still valid — the gate for the
+// rank refresh and placement cross-check.
+export function hasLinkedAccount(s: RiotSettings, now = Date.now()): boolean {
+  return !!s.account && s.account.expiresAt > now;
 }
 
-// True once a puuid has been resolved and cached — the only state needed for
-// the rank-refresh / placement-cross-check background calls.
-export function hasLinkedAccount(s: RiotSettings): boolean {
-  return !!(s.riotApiKey && s.puuid);
+// Signed in once, but the session has lapsed: the UI asks to sign in again.
+export function hasExpiredAccount(s: RiotSettings, now = Date.now()): boolean {
+  return !!s.account && s.account.expiresAt <= now;
 }

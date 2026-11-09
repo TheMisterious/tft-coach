@@ -15,6 +15,7 @@
 // principle applied there).
 
 import type { MatchSnapshot, DecisionPoint, RoundSnapshot } from '../../shared/types';
+import { boardUnits } from '../../ledger/merge';
 
 function byGold(gold: number, t: { rich: string; mid: string; broke: string }): string {
   if (gold >= 40) return t.rich;
@@ -122,7 +123,7 @@ function checkNakedLevel(match: MatchSnapshot): DecisionPoint[] {
   const points: DecisionPoint[] = [];
   for (const round of match.rounds) {
     if (!round.xpBought) continue;
-    const twoStars = Object.values(round.board).filter(c => c.level >= 2).length;
+    const twoStars = boardUnits(round.board).filter(c => c.level >= 2).length;
     if (round.goldEnd < 10 && twoStars < 3) {
       points.push({
         ruleId:   'LEVEL_004',

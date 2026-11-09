@@ -79,16 +79,41 @@ function roundSortKey(label: string): number {
   return (stage || 0) * 100 + (round || 0);
 }
 
-// Walk backwards from position `upTo` to find the most recent round_type.stage.
-export function detectRoundLabel(entries: LedgerEntry[], upTo: number): string | null {
-  for (let i = upTo; i >= 0; i--) {
+// GEP sends a round's match_info.round_type in the same tick as its
+// round_start, but in either order: across 2,477 recorded round starts it came
+// just before in 1,986 and just AFTER in 486. Reading only backwards gave
+// those 486 rounds the previous round's label whenever their round_end never
+// arrived (the close is then synthesized from the start label) — 78 duplicate
+// labels in 81 matches, and checkpoint rounds like 3-2 or 4-1 missing, which
+// every fixed-checkpoint rule reads. Look ahead within the tick first.
+const SAME_TICK_MS = 100;
+
+// A gold drop and the shop update for the same purchase arrive within this of
+// each other.
+const PURCHASE_MATCH_MS = 300;
+
+//
+// The look-ahead stops at the round's own round_end — except one round_end in
+// the same tick when this start had to close a still-open round, because that
+// one is the previous round's end arriving late (see the round_end handler).
+export function labelForRoundStart(
+  entries: LedgerEntry[], startIndex: number, fallback: string, previousStillOpen: boolean,
+): string {
+  const startTs = entries[startIndex].ts;
+  let lateEndAllowed = previousStillOpen;
+  for (let i = startIndex + 1; i < entries.length && entries[i].ts - startTs <= SAME_TICK_MS; i++) {
     const e = entries[i];
+    if (e.kind === 'event' && e.name === 'round_start') break;
+    if (e.kind === 'event' && e.name === 'round_end') {
+      if (!lateEndAllowed) break;
+      lateEndAllowed = false;
+    }
     if (e.kind === 'info' && e.feature === 'match_info' && e.key === 'round_type') {
-      const rt = e.value as { stage?: string };
-      if (rt.stage) return rt.stage;
+      const stage = (e.value as { stage?: string })?.stage;
+      if (stage) return stage;
     }
   }
-  return null;
+  return fallback;
 }
 
 // Reconstruct per-round snapshots by replaying all ledger entries in order.
@@ -108,10 +133,27 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   let health  = 100;
   let level   = 1;
 
+  // Which of the defaults above the ledger ever overwrote — see
+  // CaptureCoverage in shared/types.ts. sawMeXp also decides whether the
+  // roster's level may stand in for me.xp (it only does when me.xp is silent).
+  let goldSeen = false, healthSeen = false, levelSeen = false, sawMeXp = false;
+  let boardSeen = false, shopSeen = false;
+  // The local player is out: HP at or below 0, or GEP's match_end. GEP keeps
+  // sending round_start/round_end while you spectate the rest of the lobby,
+  // and before this every one became a "round" of yours with an empty board.
+  let localOut = false;
+  let spectatorRoundsDropped = 0;
+
   let prevGold  = 0;
   let prevShop: string[] = [];
   let rollsThisRound     = 0;
-  let xpBoughtThisRound  = false;
+  // Times this round when gold fell by exactly 4 with no shop purchase beside
+  // it — XP bought. A 4-gold unit bought from the shop drops gold by the same
+  // amount: 689 of 2,948 such drops in the recorded corpus landed within 300ms
+  // of a shop slot turning "Sold", and every one used to count as buying XP.
+  let xpBuyTimes: number[] = [];
+  let soldInShop = 0;
+  let lastShopPurchaseTs = -Infinity;
   let lastRoundOutcome: 'win' | 'loss' | undefined;
   let lastBattleStats: BattleStats | undefined;
   // Fallback own-side damage, accumulated from match_info.local_player_damage.
@@ -178,12 +220,15 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   let roundStartCount    = 0;
   let roundEndCount      = 0;
   let synthesizedCount   = 0;
+  // The latest round_start closed a round whose round_end had not come yet —
+  // see the round_end handler for the late end this anticipates.
+  let closedPreviousAtStart = false;
 
   // GEP frequently skips round_end for ordinary rounds — not just the known
   // CarouselMarket/god-round quirk. Confirmed across two real matches: ~25-30%
   // of round_start events never get a matching round_end before the next
   // round_start fires. Without this, that round's data (HP/gold/board as of
-  // its end, plus rollsThisRound/xpBoughtThisRound accumulated during it) is
+  // its end, plus rollsThisRound/xpBuyTimes accumulated during it) is
   // silently discarded the moment the next round_start resets those counters
   // — a real, permanent loss of what the player did that round, not just a
   // missing label. The running state (health/gold/board/etc.) at the moment
@@ -218,7 +263,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       health,
       level,
       rollsSpent:     rollsThisRound,
-      xpBought:       xpBoughtThisRound,
+      xpBought:       xpBuyTimes.length > 0,
       board:          { ...board },
       bench:          { ...bench },
       benchItems:     [...benchItems],
@@ -411,8 +456,12 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       }
 
       if (feature === 'me') {
-        if (key === 'gold')   { prevGold = gold; gold  = Number(value); }
-        if (key === 'health') { health = Number(value); }
+        if (key === 'gold')   { prevGold = gold; gold  = Number(value); goldSeen = true; }
+        if (key === 'health') {
+          health = Number(value);
+          healthSeen = true;
+          if (health <= 0) localOut = true;
+        }
         // Confirmed via a real ledger: there is no separate "me.level" key —
         // it never fires. Player level lives inside me.xp ({level, current_xp,
         // xp_max}); current_xp/xp_max are broken (always 0, see below) but
@@ -421,12 +470,16 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         // meaning every LEVEL_* checker had been firing false positives.
         if (key === 'xp') {
           const xp = safeParseGep(value, {}) as { level?: number };
-          if (xp.level) level = Number(xp.level);
+          if (xp.level) {
+            level = Number(xp.level);
+            levelSeen = sawMeXp = true;
+          }
         }
-        // Detect XP purchase: gold dropped by 4 with no shop/bench change.
-        // me/xp.current_xp is broken (always 0) — gold delta is the only signal.
-        if (key === 'gold' && prevGold - gold === 4) {
-          xpBoughtThisRound = true;
+        // Detect XP purchase: gold dropped by 4 with no shop purchase beside
+        // it (see xpBuyTimes). me.xp.current_xp is 0 in every Set 17 ledger,
+        // so the gold delta is the only signal there.
+        if (key === 'gold' && prevGold - gold === 4 && e.ts - lastShopPurchaseTs > PURCHASE_MATCH_MS) {
+          xpBuyTimes.push(e.ts);
         }
       }
 
@@ -443,6 +496,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         if (Object.keys(next).length > 0 || Object.keys(board).length === 0) {
           board = next;
         }
+        if (Object.keys(next).length > 0) boardSeen = true;
         // Detect set from the champion id scheme (see shared/set-id.ts).
         for (const cell of Object.values(update)) {
           const detected = setIdFromChampionId(cell?.name);
@@ -514,6 +568,18 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
             isLocal: p?.localplayer === true,
           }));
         if (players.length > 0) lastLobby = players;
+
+        // The same verified level, for a match whose me.xp never fires — the
+        // case behind a report that called a stage-6 player "level 1". And the
+        // local HP, which says whether those rounds are still the player's.
+        const me = players.find(p => p.isLocal);
+        if (me) {
+          if (!sawMeXp && me.level > 0) {
+            level = me.level;
+            levelSeen = true;
+          }
+          if (me.health <= 0) localOut = true;
+        }
       }
 
       if (feature === 'match_stats' && key === 'board_players') {
@@ -541,7 +607,16 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         // refresh) and rounds with no real shop at all (PVE/carousel rounds
         // send an empty {}).
         const hasSlots   = rawSlots.length > 0;
+        if (hasSlots) shopSeen = true;
         const isPurchase = rawSlots.some(slot => slot?.name === 'Sold');
+        // A newly sold slot is a unit bought: un-count a 4-gold drop it explains
+        // (the gold update can land on either side of the shop update).
+        const sold = rawSlots.filter(slot => slot?.name === 'Sold').length;
+        if (sold > soldInShop) {
+          lastShopPurchaseTs = e.ts;
+          xpBuyTimes = xpBuyTimes.filter(t => Math.abs(e.ts - t) > PURCHASE_MATCH_MS);
+        }
+        soldInShop = sold;
         if (hasSlots && prevShop.length > 0 && !isPurchase) {
           rollsThisRound++;
         }
@@ -578,6 +653,21 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     }
 
     if (e.kind === 'event') {
+      if (e.name === 'match_end') localOut = true;
+
+      if (e.name === 'round_start' && localOut) {
+        // Close the round the player was eliminated in (its round_end often
+        // never comes), then record nothing more: from here on it is the rest
+        // of the lobby's game.
+        if (roundStartTs > 0) {
+          pushRoundSnapshot(roundStartLabel, roundType);
+          synthesizedCount++;
+          roundStartTs = 0;
+        }
+        spectatorRoundsDropped++;
+        continue;
+      }
+
       if (e.name === 'round_start') {
         const data = e.data as { game_stage?: string; type?: string } | string;
         const typeStr = typeof data === 'object' ? (data?.type ?? '') : (data ?? '');
@@ -588,6 +678,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
 
         // Previous round never got a round_end — synthesize its close before
         // resetting state for the new round (see pushRoundSnapshot comment).
+        closedPreviousAtStart = roundStartTs > 0;
         if (roundStartTs > 0) {
           pushRoundSnapshot(roundStartLabel, roundType);
           synthesizedCount++;
@@ -595,19 +686,28 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
 
         roundType          = newRoundType;
         roundStartTs       = e.ts;
-        roundStartLabel    = currentRoundLabel;
+        roundStartLabel    = labelForRoundStart(entries, i, currentRoundLabel, closedPreviousAtStart);
         goldAtRoundStart   = gold;
         rollsThisRound     = 0;
-        xpBoughtThisRound  = false;
+        xpBuyTimes         = [];
         prevShop           = [];
         currentGodHpCost   = undefined;
         roundStartCount++;
         console.log(`[rounds] round_start #${roundStartCount}: label=${currentRoundLabel} type=${typeStr || '(empty)'}`);
       }
 
-      if (e.name === 'round_end' && roundStartTs > 0) {
-        const label = detectRoundLabel(entries, i) ?? currentRoundLabel;
-        pushRoundSnapshot(label, roundType);
+      // A round_end in the same tick as a round_start that had to close the
+      // previous round itself is that previous round's end, delivered late
+      // (seen as round_start, round_end, round_type all in one millisecond).
+      // Closing again would end the new round at once under the old label.
+      const lateEndOfPreviousRound = e.name === 'round_end' && closedPreviousAtStart
+        && roundStartTs > 0 && e.ts - roundStartTs <= SAME_TICK_MS;
+      if (e.name === 'round_end') closedPreviousAtStart = false;
+      // Labelled from its own start (labelForRoundStart), not the newest
+      // round_type: the NEXT round's round_type can land just before this
+      // round's round_end in the same tick, which named 5-1 as "5-2".
+      if (e.name === 'round_end' && roundStartTs > 0 && !lateEndOfPreviousRound) {
+        pushRoundSnapshot(roundStartLabel, roundType);
         roundStartTs = 0;
         roundEndCount++;
       }
@@ -652,7 +752,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     }
   }
 
-  console.log(`[rounds] events counted: round_start=${roundStartCount} round_end=${roundEndCount} synthesized=${synthesizedCount} → ${rounds.length} snapshots built`);
+  console.log(`[rounds] events counted: round_start=${roundStartCount} round_end=${roundEndCount} synthesized=${synthesizedCount} spectator=${spectatorRoundsDropped} → ${rounds.length} snapshots built`);
   console.log(`[rounds] setId=${setId} gameMode=${gameMode} pseudoMatchId=${pseudoMatchId || '(none)'}`);
   if (rounds.length > 0) {
     console.log(`[rounds] label range: ${rounds[0].label} → ${rounds[rounds.length - 1].label}`);
@@ -720,6 +820,18 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     finalBoard,
     augments,
     godPicks,
+    capture: {
+      firstRound:   rounds[0]?.label,
+      lastRound:    rounds.at(-1)?.label,
+      missedStart:  rounds.length > 0 && roundSortKey(rounds[0].label) > roundSortKey('2-1'),
+      goldSeen,
+      healthSeen,
+      levelSeen,
+      boardSeen,
+      shopSeen,
+      augmentsSeen: augments.length > 0,
+      spectatorRoundsDropped,
+    },
   };
 }
 

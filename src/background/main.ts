@@ -17,6 +17,7 @@ import { attachListeners,
          setOnMatchEnded,
          resetMatchEndFlag,
          setOnGameModeChanged,
+         setOnRoundStarted,
          injectInfoUpdate }        from '../capture/listeners';
 import { getGameMode,
          resetGameMode,
@@ -28,7 +29,8 @@ import { getCurrentMatchId,
          flushSync,
          waitForFlush,
          forceMatchId,
-         appendToSavedLedger }    from '../ledger/ledger';
+         appendToSavedLedger,
+         getLedgerDir }           from '../ledger/ledger';
 import { reconstructSnapshots }   from '../ledger/rounds';
 import { RIOT_LEDGER_FEATURE }    from '../ledger/placement';
 import { detectSet, loadMeta }    from '../enrichment/meta-lookup';
@@ -37,18 +39,21 @@ import type { MatchHistoryEntry } from '../coach/history-context';
 import { buildBrief }             from '../coach/brief-builder';
 import { generateCoachingReport } from '../coach/report-generator';
 import { buildMatchContext }      from '../coach/match-context';
+import { isUsableCapture }        from '../coach/coverage';
+import { pickLedgersToRecover }   from './recovery';
 import { buildMatchPlan }         from '../coach/plan-builder';
 import { extractFeatureVector }   from '../profile/feature-vector';
 import { extractMatchLabels }     from '../profile/labels';
 import { buildPlayerProfile }     from '../profile/trend-model';
 import { saveMatch, loadMatch, listRecentMatches, loadAllFeatureRecords, savePlayerProfile } from '../persistence/db';
-import { runMetaCrawlTick } from '../enrichment/meta-crawler';
-import { loadMetaCrawlState, saveMetaCrawlState, saveAggregateMetaTable } from '../persistence/meta-cache';
 import { summarizeLedgerCoverage, formatLedgerCoverage, sampleRawValues, formatRawSamples } from '../ledger/diagnostics';
 import { ensureWindowOnScreen } from './window-position';
 import { readHotkeyBinding } from '../shared/hotkey';
-import { loadSettings, hasLinkedAccount, matchContinentForPlatform } from '../persistence/settings';
-import { getLeagueEntriesByPuuid, getMatchIdsByPuuid, getMatchById, formatRiotRank, riotUnitsToBoardState, countBoardItems, RiotApiError } from '../enrichment/riot-api';
+import { registerToggleHotkey, showDesktopWindow } from './desktop-toggle';
+import { loadSettings, hasLinkedAccount } from '../persistence/settings';
+import { formatRiotRank, riotUnitsToBoardState, countBoardItems, type RiotMatch } from '../enrichment/riot-api';
+import { getRank, getLatestMatch, BackendError } from '../enrichment/coachv-backend';
+import { completeRiotSignIn, signInFailureMessage } from '../enrichment/riot-sign-in';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -64,6 +69,9 @@ import { getLeagueEntriesByPuuid, getMatchIdsByPuuid, getMatchById, formatRiotRa
   // (onGameLaunched..onGameClosed bracket). Blocks a second pipeline run —
   // see runCoachingPipeline's entry guard for why this is needed.
   pipelineRanThisSession: false,
+  // The current game session's match is over (the pipeline has been triggered
+  // for it, whatever came of that). Rounds after this are spectating.
+  matchEnded: false,
 };
 
 function computeStatus(): import('../shared/types').AppStatus {
@@ -102,22 +110,28 @@ setOnMatchEnded(() => {
 });
 
 // Wire callbacks so listeners can push state changes without circular imports.
-setOnMatchStarted(() => {
+//
+// "In TFT match" means a match is being played, and only gameplay says so: a
+// round starting, or a match id arriving. It used to be set by anything
+// TFT-flavoured — the League client launching (it is running in the lobby), a
+// game_mode update, and the getInfo() re-read the pipeline itself does at match
+// end — so the status read "In TFT match" in the lobby and stayed there after
+// every match until the client closed. Once this session's report has gone
+// out, the rounds that follow are the lobby being spectated, not a match.
+function markMatchInProgress(reason: string): void {
   const s = (window as any).appState;
+  if (s.matchActive || s.isProcessing || s.matchEnded) return;
   s.matchActive = true;
   s.appStatus   = computeStatus();
-  console.log('[bg] onMatchStarted ->', s.appStatus);
+  console.log('[bg] match in progress (', reason, ') ->', s.appStatus);
   pushStatusToDesktop();
-});
+}
+
+setOnMatchStarted(() => markMatchInProgress('match id'));
+setOnRoundStarted(() => markMatchInProgress('round_start'));
 
 setOnGameModeChanged((mode) => {
-  const s = (window as any).appState;
-  if (mode === 'tft') {
-    s.matchActive = true;
-  }
-  s.appStatus = computeStatus();
-  console.log('[bg] onGameModeChanged ->', mode, s.appStatus);
-  pushStatusToDesktop();
+  console.log('[bg] onGameModeChanged ->', mode);
 });
 
 // ─── Game lifecycle ───────────────────────────────────────────────────────────
@@ -125,8 +139,10 @@ setOnGameModeChanged((mode) => {
 async function onGameLaunched(): Promise<void> {
   const state = (window as any).appState;
   state.gameRunning = true;
-  state.matchActive = true;
+  // Not matchActive: the client is running, which in the lobby is not a match.
+  // markMatchInProgress() sets it when the first round starts.
   state.pipelineRanThisSession = false;
+  state.matchEnded  = false;
   state.appStatus   = computeStatus();
   pushStatusToDesktop();
   // Pre-seed TFT mode immediately. The manifest targets only game 28164 (TFT),
@@ -334,6 +350,7 @@ async function runCoachingPipeline(): Promise<void> {
   }
   state.isProcessing = true;
   state.matchActive  = false;
+  state.matchEnded   = true;
   state.appStatus    = computeStatus();
   pushStatusToDesktop();
 
@@ -394,6 +411,15 @@ async function runCoachingPipeline(): Promise<void> {
       // (extractFinalPlacement's last-resort default) with no real data
       // behind it. A genuine match always reconstructs at least one round.
       console.warn('[bg] ledger has', ledger.length, 'entries but zero reconstructed rounds — likely spectate/lobby noise, not a real match; aborting pipeline for matchId:', matchId);
+      return;
+    }
+    // Rounds alone don't make it the player's match: a ledger that began after
+    // they were eliminated still gets round_start/round_end from the lobby
+    // they're spectating. Those rounds are dropped in reconstruction, and a
+    // capture that never saw the player's gold or board is that same noise —
+    // the source of a QA report that coached "level 1, empty board" at 6-3.
+    if (!isUsableCapture(snapshot)) {
+      console.warn('[bg] capture is not a playable match (coverage:', JSON.stringify(snapshot.capture), ') — aborting pipeline for matchId:', matchId);
       return;
     }
 
@@ -480,11 +506,16 @@ async function runCoachingPipeline(): Promise<void> {
 // rules live now, keeping what the ledger cannot reproduce (datePlayed, the
 // Riot cross-check). Never opens a window — callers decide that. Shared by
 // the Riot placement recovery and the two debug entry points.
-async function rebuildMatchFromLedger(matchId: string, datePlayed: number) {
+// datePlayed defaults to the ledger's last entry — when the match ended.
+// Returns null for a ledger that is not a playable match (spectating noise, a
+// fragment): those must never be saved as one.
+async function rebuildMatchFromLedger(matchId: string, datePlayed?: number) {
   const ledger = await readLedger(matchId);
   if (ledger.length === 0) return null;
 
   const snapshot = reconstructSnapshots(ledger);
+  if (!isUsableCapture(snapshot)) return null;
+  datePlayed ??= ledger.at(-1)!.ts;
   const setId    = detectSet(ledger);
   const meta     = await loadMeta(setId);
   const points   = extractDecisionPoints(snapshot, meta, priorFeatureHistory(matchId));
@@ -508,6 +539,76 @@ async function rebuildMatchFromLedger(matchId: string, datePlayed: number) {
   if (persisted) retrainPlayerProfile();
   return { snapshot, report, persisted };
 }
+
+// ─── Recovering matches that were recorded but never reported ────────────────
+// See recovery.ts. Runs once, shortly after the background window starts, and
+// never during a match. The newest recovered report is handed to the desktop
+// window's history without restoring the window, so it cannot pop up over a
+// game.
+
+const RECOVERY_CHECKED_KEY = 'tft:ledgers-checked';
+const RECOVERY_DELAY_MS = 5000;
+
+function loadCheckedLedgers(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(RECOVERY_CHECKED_KEY) ?? '[]') as string[]); }
+  catch { return new Set(); }
+}
+
+function saveCheckedLedgers(ids: Set<string>): void {
+  try { localStorage.setItem(RECOVERY_CHECKED_KEY, JSON.stringify([...ids].slice(-500))); }
+  catch (e) { console.warn('[bg] recovery: could not remember checked ledgers —', e); }
+}
+
+function listLedgerFiles(): Promise<string[]> {
+  return new Promise(resolve => {
+    if (typeof overwolf.io?.dir !== 'function') { resolve([]); return; }
+    overwolf.io.dir(getLedgerDir(), (result: any) => {
+      resolve(result?.success
+        ? (result.data ?? []).filter((f: any) => f?.type === 'file').map((f: any) => String(f.name))
+        : []);
+    });
+  });
+}
+
+async function recoverUnreportedMatches(): Promise<void> {
+  const state = (window as any).appState;
+  if (state.matchActive || state.isProcessing) return;
+
+  const checked = loadCheckedLedgers();
+  const ids = pickLedgersToRecover(await listLedgerFiles(), id => !!loadMatch(id), checked, Date.now());
+  if (ids.length === 0) return;
+  console.log('[bg] recovery: building reports for', ids.length, 'recorded match(es) with none:', ids.join(', '));
+
+  let newest: { report: any; datePlayed: number } | undefined;
+  for (const id of ids) {
+    checked.add(id);
+    try {
+      const rebuilt = await rebuildMatchFromLedger(id);
+      if (!rebuilt?.persisted) {
+        console.log('[bg] recovery:', id, rebuilt ? 'could not be saved' : 'is not a playable match — skipped');
+        continue;
+      }
+      const datePlayed = loadMatch(id)?.datePlayed ?? 0;
+      console.log('[bg] recovery:', id, 'recovered — placement', rebuilt.snapshot.finalPlacement);
+      if (!newest || datePlayed > newest.datePlayed) newest = { report: rebuilt.report, datePlayed };
+    } catch (e) {
+      console.error('[bg] recovery:', id, 'failed —', e);
+    }
+  }
+  saveCheckedLedgers(checked);
+
+  if (newest) {
+    state.latestReport = newest.report;
+    try {
+      const mw = (overwolf.windows.getMainWindow() as any);
+      if (typeof mw?.receiveReport === 'function') mw.receiveReport(newest.report);
+    } catch (e) {
+      console.warn('[bg] recovery: desktop window not ready —', e);
+    }
+  }
+}
+
+setTimeout(() => { recoverUnreportedMatches(); }, RECOVERY_DELAY_MS);
 
 // ─── Window helpers ───────────────────────────────────────────────────────────
 
@@ -592,34 +693,36 @@ function showInGameToast(message: string): void {
 }
 
 // ─── Optional Riot API enrichment ──────────────────────────────────────────
-// Bring-your-own-key (see src/persistence/settings.ts). Both steps are
-// best-effort: a bad/missing key, rate limit, or network failure here must
-// never affect the core local pipeline above, which already fully succeeded
-// by the time this runs.
+// For a player signed in with Riot (src/enrichment/riot-sign-in.ts), through
+// the coachv backend (src/enrichment/coachv-backend.ts). Both steps are
+// best-effort: no account, an expired session, a rate limit or a network
+// failure here must never affect the core local pipeline above, which already
+// fully succeeded by the time this runs.
+
+const SIGN_IN_EXPIRED_LABEL = 'Riot sign-in expired — sign in again in ⚙';
 
 const RIOT_PLACEMENT_RETRY_DELAYS_MS = [0, 60_000, 180_000];
 
 async function runRiotEnrichment(matchId: string, finalPlacement: number, datePlayed: number): Promise<void> {
   const settings = loadSettings();
   if (!hasLinkedAccount(settings)) return;
-  const { riotApiKey, puuid, platform } = settings;
-  const matchContinent = matchContinentForPlatform(platform);
+  const { platform } = settings;
+  const { puuid, session } = settings.account!;
 
   // Step 9: rank refresh, pushed to the desktop window's StatusBar.
   try {
-    const entries = await getLeagueEntriesByPuuid(puuid!, riotApiKey, platform);
+    const entries = await getRank(session, platform);
     const label = formatRiotRank(entries);
     const mw = (overwolf.windows.getMainWindow() as any);
     if (typeof mw?.receiveRiotRank === 'function') mw.receiveRiotRank(label);
     console.log('[bg] riot step 9: rank refreshed —', label);
   } catch (e) {
     console.warn('[bg] riot step 9: rank refresh failed —', e);
-    // A 401/403 usually means a free personal key's ~24h expiry — surface it
-    // in the status bar instead of only logging, so the user has a reason to
-    // know rank/cross-check silently stopped instead of just not updating.
-    if (e instanceof RiotApiError && (e.status === 401 || e.status === 403)) {
+    // Surface a lapsed session in the status bar instead of only logging, so
+    // the player knows why rank/cross-check stopped updating.
+    if (e instanceof BackendError && e.status === 401) {
       const mw = (overwolf.windows.getMainWindow() as any);
-      if (typeof mw?.receiveRiotRank === 'function') mw.receiveRiotRank('Riot key expired — renew in ⚙', true);
+      if (typeof mw?.receiveRiotRank === 'function') mw.receiveRiotRank(SIGN_IN_EXPIRED_LABEL, true);
     }
   }
 
@@ -638,12 +741,11 @@ async function runRiotEnrichment(matchId: string, finalPlacement: number, datePl
     // Riot publishes a match a minute or two after it ends, and a client closed
     // on elimination gets here sooner than that — so a match whose placement
     // depends on this lookup is retried rather than given up after one call.
-    let match: Awaited<ReturnType<typeof getMatchById>> | null = null;
+    let match: RiotMatch | null = null;
     for (const delayMs of gepHadNone ? RIOT_PLACEMENT_RETRY_DELAYS_MS : [0]) {
       if (delayMs) await new Promise(resolve => setTimeout(resolve, delayMs));
-      const riotMatchId = (await getMatchIdsByPuuid(puuid!, riotApiKey, matchContinent, 1))[0];
-      if (!riotMatchId) continue;
-      const candidate = await getMatchById(riotMatchId, riotApiKey, matchContinent);
+      const candidate = await getLatestMatch(session, platform);
+      if (!candidate) continue;
       // Skip a clearly different match — the previous one (not yet published
       // this one), or a later one the user already queued into.
       const driftMs = Math.abs(candidate.info.game_datetime - datePlayed);
@@ -702,17 +804,29 @@ async function runRiotEnrichment(matchId: string, finalPlacement: number, datePl
 
 // ─── Hotkey listener ──────────────────────────────────────────────────────────
 
-overwolf.hotkeys?.onHotkeyDown?.addListener((result: any) => {
-  if (result.name === 'tft_coach_toggle') {
-    overwolf.windows.obtainDeclaredWindow('desktop', (res: any) => {
-      if (!res.success) return;
-      if (res.window.stateEx === 'normal' || res.window.stateEx === 'maximized') {
-        overwolf.windows.minimize(res.window.id);
-      } else {
-        ensureWindowOnScreen(res.window, () => overwolf.windows.restore(res.window.id));
-      }
-    });
+// See desktop-toggle.ts for why this is a custom hotkey that takes focus.
+registerToggleHotkey();
+
+// ─── Riot sign-in return ────────────────────────────────────────────────────
+// The backend sends the browser to coachv://rso?… once Riot sign-in finishes;
+// Overwolf delivers that link to the running app here (manifest
+// data.url_protocol). The docs name the fields both origin/parameter and
+// source/url, so both are read.
+overwolf.extensions?.onAppLaunchTriggered?.addListener((event: any) => {
+  const origin = event?.origin ?? event?.source;
+  const link = String(event?.parameter ?? event?.url ?? '');
+  if (origin !== 'urlscheme' || !link) return;
+
+  const result = completeRiotSignIn(link);
+  if (!result.ok && result.reason === 'not_ours') return;
+  console.log('[bg] riot sign-in:', result.ok ? `signed in as ${result.account.gameName}#${result.account.tagLine}` : result.reason);
+
+  const mw = (overwolf.windows.getMainWindow() as any);
+  if (typeof mw?.receiveRiotSignIn === 'function') {
+    mw.receiveRiotSignIn(result.ok ? { ok: true } : { ok: false, message: signInFailureMessage(result.reason) });
   }
+  // The player is in their browser; bring them back to where they started.
+  showDesktopWindow();
 });
 
 // Make sure the desktop window exists and is on-screen, but do NOT restore it
@@ -926,29 +1040,8 @@ console.log('[bg] background controller started');
 };
 
 // ─── Meta crawler (see src/enrichment/meta-crawler.ts) ──────────────────────
-// Periodic, resumable, entirely independent of runCoachingPipeline — never
-// blocks or delays match coaching. Ticks are small and bounded (see
-// runMetaCrawlTick), so a tick firing every few minutes naturally spreads a
-// full crawl cycle across many ticks rather than running it in one go.
-const META_CRAWL_TICK_MS = 5 * 60 * 1000; // 5 minutes
-
-async function runMetaCrawlTickSafely(): Promise<void> {
-  const settings = loadSettings();
-  if (!hasLinkedAccount(settings)) return; // reuses the existing Riot-linked gate
-
-  try {
-    const setId = 'set17'; // background crawl has no in-progress match to detectSet() from, so the set is named here
-    const meta = await loadMeta(setId);
-    const state = loadMetaCrawlState();
-    const result = await runMetaCrawlTick(state, settings, meta);
-    saveMetaCrawlState(result.state);
-    if (result.table) {
-      saveAggregateMetaTable(result.table);
-      console.log('[bg] meta crawl cycle complete — matchSampleCount:', result.table.matchSampleCount);
-    }
-  } catch (e) {
-    console.error('[bg] meta crawl tick failed:', e);
-  }
-}
-
-setInterval(runMetaCrawlTickSafely, META_CRAWL_TICK_MS);
+// Not scheduled. It pulled Challenger/GM/Master matches with the player's own
+// pasted API key; with Riot sign-in there is no key on this machine, and a
+// crawl from every install would spend the backend's one production key. It
+// belongs in a scheduled backend job — until then the aggregate meta table is
+// simply absent, which meta-blend.ts already treats as "no meta context".

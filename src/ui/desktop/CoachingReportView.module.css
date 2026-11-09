@@ -87,6 +87,25 @@
 .grade-B { background: #f9e2af; color: #1e1e2e; }
 .grade-C { background: #fab387; color: #1e1e2e; }
 .grade-D { background: #f38ba8; color: #1e1e2e; }
+/* Not graded — the recording gave this nothing to judge (src/coach/coverage.ts). */
+.grade-none { background: transparent; color: #6c7086; border: 1px dashed #45475a; }
+
+.ungradedTile { opacity: 0.6; }
+
+.captureNotes {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border: 1px solid #45475a;
+  border-left: 3px solid #89b4fa;
+  border-radius: 6px;
+  background: #181825;
+  color: #bac2de;
+  font-size: 12px;
+  line-height: 1.5;
+  list-style: none;
+}
+
+.captureNotes li + li { margin-top: 4px; }
 
 .placementLarge {
   font-size: 28px;

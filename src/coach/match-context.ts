@@ -7,7 +7,7 @@
 // their coaching text without ever checking) with an actual detection pass.
 
 import type { MatchSnapshot, MetaData, MatchContext, CompArchetype, BoardState } from '../shared/types';
-import { isNonChampionToken } from '../ledger/merge';
+import { isNonChampionToken, boardUnits } from '../ledger/merge';
 
 export const NEUTRAL_CONTEXT: MatchContext = {
   isRerollComp: false,
@@ -54,8 +54,7 @@ export function computeActiveComp(match: MatchSnapshot): Set<string> {
   const firstSeenIdx = new Map<string, number>();
   const presenceCount: Record<string, number> = {};
   pvpRounds.forEach((round, i) => {
-    for (const cell of Object.values(round.board)) {
-      if (!cell?.name || cell.name === '0') continue;
+    for (const cell of boardUnits(round.board)) {
       if (!firstSeenIdx.has(cell.name)) firstSeenIdx.set(cell.name, i);
       presenceCount[cell.name] = (presenceCount[cell.name] ?? 0) + 1;
     }
@@ -98,8 +97,7 @@ export function computeCarryDamage(match: MatchSnapshot): Map<string, number> {
 // exactly this logic (activeTraitsForRound), moved here unchanged.
 export function computeActiveTraitSet(board: BoardState, meta: MetaData): Set<string> {
   const counts: Record<string, number> = {};
-  for (const cell of Object.values(board)) {
-    if (!cell?.name || cell.name === '0') continue;
+  for (const cell of boardUnits(board)) {
     const traits = meta.champions[cell.name]?.traits ?? [];
     for (const trait of traits) counts[trait] = (counts[trait] ?? 0) + 1;
   }

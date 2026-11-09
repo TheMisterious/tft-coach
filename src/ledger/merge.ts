@@ -35,8 +35,23 @@ export function normalizeBoardSnapshot(
 // Spell-effect/pet tokens (e.g. Shen's clone "TFT17_ShenProp", a generic
 // "TFT17_Summon") get tracked in board_pieces/opponent_board_pieces just like
 // real units but aren't champions — exclude them from every board reader.
+//
+// The original three suffixes missed most of what the recorded corpus actually
+// holds on boards: TFT17_ShenProp (no underscore before "Prop"), Bard's
+// followers, damage trackers, the training dummy, Dark Star's fake unit, a
+// loose "TFTItem", and PvE monsters. Counted as units they inflated board
+// value, filled "empty" slots and two-star counts — one Bard board read as 14
+// units at level 10.
+const TOKEN_PATTERN = /(_Summon|Prop|_Clone|Follower|Tracker|TrainingDummy|FakeUnit)$|^TFTItem$|_PVE_/;
+
 export function isNonChampionToken(name: string): boolean {
-  return /_Summon$|_Prop$|_Clone$/.test(name);
+  return TOKEN_PATTERN.test(name);
+}
+
+// The champion cells of a board — real units only, tokens and empty cells
+// dropped. Every checker that counts or weighs units reads this.
+export function boardUnits(board: BoardState): Cell[] {
+  return Object.values(board).filter(c => c?.name && c.name !== '0' && !isNonChampionToken(c.name));
 }
 
 // Extract champion IDs present on a board (excluding empty/undefined cells).

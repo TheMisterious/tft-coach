@@ -14,7 +14,7 @@
 // no new heuristic constant to tune or get wrong.
 
 import type { MatchSnapshot, DecisionPoint, MetaData } from '../../shared/types';
-import { identifyCarry } from '../../ledger/merge';
+import { identifyCarry, boardUnits } from '../../ledger/merge';
 import { getChampionName } from '../../enrichment/meta-lookup';
 import { computeActiveComp, computeCarryDamage } from '../match-context';
 import { unitItems, isComponent } from './items';
@@ -52,7 +52,7 @@ function checkCarryDamageShare(match: MatchSnapshot, meta: MetaData): DecisionPo
     if (round.type !== 'PVP' || !stageStr || stageStr < STAGE_THRESHOLD) { reset(); continue; }
     if (!round.battleStats?.own?.length) { reset(); continue; }
 
-    const units = Object.values(round.board).filter(c => c?.name && c.name !== '0');
+    const units = boardUnits(round.board);
     if (units.length === 0) { reset(); continue; }
 
     const carry = identifyCarry(units, meta, activeComp, carryDamageByUnit);

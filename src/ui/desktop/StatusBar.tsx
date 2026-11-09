@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import type { AppStatus } from '../../shared/types';
 import { useHotkeyBinding, HOTKEY_NAME, GAME_ID } from '../useHotkeyBinding';
 import { SettingsPanel } from './SettingsPanel';
-import { loadSettings, hasLinkedAccount } from '../../persistence/settings';
-import { getLeagueEntriesByPuuid, formatRiotRank, RiotApiError } from '../../enrichment/riot-api';
+import { loadSettings, hasLinkedAccount, hasExpiredAccount } from '../../persistence/settings';
+import { formatRiotRank } from '../../enrichment/riot-api';
+import { getRank, BackendError } from '../../enrichment/coachv-backend';
+import { RIOT_SIGN_IN_EVENT, type RiotSignInNotice } from '../../enrichment/riot-sign-in';
 
-const KEY_EXPIRED_LABEL = 'Riot key expired — renew in ⚙';
+const SIGN_IN_EXPIRED_LABEL = 'Riot sign-in expired — sign in again in ⚙';
 
 declare const overwolf: any;
 
@@ -33,24 +35,24 @@ export function StatusBar({ status }: { status: AppStatus }) {
   const [rankLabel, setRankLabel] = useState<string | null>(rankCache?.label ?? null);
   const [rankIsError, setRankIsError] = useState(false);
 
-  useEffect(() => {
-    // Exposed so background/main.ts can push a fresh rank (or a key-expired
-    // notice) right after a match finishes, same pattern as
-    // receiveReport/receiveStatusUpdate. A 401/403 mid-session (most common
-    // for a free personal key, which expires every ~24h) previously only
-    // logged a console.warn — invisible unless the user had devtools open —
-    // so rank/cross-check silently stopped working with no indication why.
-    (window as any).receiveRiotRank = (label: string, isError = false) => {
-      rankCache = { label, fetchedAt: Date.now() };
-      setRankLabel(label);
-      setRankIsError(isError);
-    };
-
+  // The signed-in player's rank, through the coachv backend. A 401 means the
+  // sign-in session lapsed — said in the bar rather than only logged, so the
+  // player knows why rank and the placement check stopped.
+  function refreshRank(force = false) {
     const settings = loadSettings();
-    if (!hasLinkedAccount(settings)) return;
-    if (rankCache && Date.now() - rankCache.fetchedAt < RANK_TTL_MS) return;
+    if (hasExpiredAccount(settings)) {
+      setRankLabel(SIGN_IN_EXPIRED_LABEL);
+      setRankIsError(true);
+      return;
+    }
+    if (!hasLinkedAccount(settings)) {
+      rankCache = null;
+      setRankLabel(null);
+      return;
+    }
+    if (!force && rankCache && Date.now() - rankCache.fetchedAt < RANK_TTL_MS) return;
 
-    getLeagueEntriesByPuuid(settings.puuid!, settings.riotApiKey, settings.platform)
+    getRank(settings.account!.session, settings.platform)
       .then(entries => {
         const formatted = formatRiotRank(entries);
         rankCache = { label: formatted, fetchedAt: Date.now() };
@@ -59,12 +61,31 @@ export function StatusBar({ status }: { status: AppStatus }) {
       })
       .catch(e => {
         console.warn('[StatusBar] rank fetch failed:', e);
-        if (e instanceof RiotApiError && (e.status === 401 || e.status === 403)) {
-          rankCache = { label: KEY_EXPIRED_LABEL, fetchedAt: Date.now() };
-          setRankLabel(KEY_EXPIRED_LABEL);
+        if (e instanceof BackendError && e.status === 401) {
+          rankCache = { label: SIGN_IN_EXPIRED_LABEL, fetchedAt: Date.now() };
+          setRankLabel(SIGN_IN_EXPIRED_LABEL);
           setRankIsError(true);
         }
       });
+  }
+
+  useEffect(() => {
+    // Exposed so background/main.ts can push a fresh rank (or an expired
+    // sign-in notice) right after a match finishes, same pattern as
+    // receiveReport/receiveStatusUpdate.
+    (window as any).receiveRiotRank = (label: string, isError = false) => {
+      rankCache = { label, fetchedAt: Date.now() };
+      setRankLabel(label);
+      setRankIsError(isError);
+    };
+    // Riot sign-in finished in the browser; background/main.ts calls this.
+    // StatusBar is always mounted, so it relays to whatever else is open.
+    (window as any).receiveRiotSignIn = (notice: RiotSignInNotice) => {
+      window.dispatchEvent(new CustomEvent(RIOT_SIGN_IN_EVENT, { detail: notice }));
+      refreshRank(true);
+    };
+
+    refreshRank();
   }, []);
 
   useEffect(() => {
@@ -132,7 +153,7 @@ export function StatusBar({ status }: { status: AppStatus }) {
       </button>
       <button
         onClick={() => setSettingsOpen(true)}
-        title="Riot API settings"
+        title="Riot account"
         style={{
           background: 'transparent', border: '1px solid #45475a', borderRadius: 4,
           color: '#9399b2', fontSize: 10, padding: '2px 8px', cursor: 'pointer',
@@ -143,24 +164,8 @@ export function StatusBar({ status }: { status: AppStatus }) {
       {settingsOpen && (
         <SettingsPanel onClose={() => {
           setSettingsOpen(false);
-          // Re-check rank immediately if the user just linked/changed an account.
-          const settings = loadSettings();
-          if (!hasLinkedAccount(settings)) return;
-          getLeagueEntriesByPuuid(settings.puuid!, settings.riotApiKey, settings.platform)
-            .then(entries => {
-              const formatted = formatRiotRank(entries);
-              rankCache = { label: formatted, fetchedAt: Date.now() };
-              setRankLabel(formatted);
-              setRankIsError(false);
-            })
-            .catch(e => {
-              console.warn('[StatusBar] rank fetch failed:', e);
-              if (e instanceof RiotApiError && (e.status === 401 || e.status === 403)) {
-                rankCache = { label: KEY_EXPIRED_LABEL, fetchedAt: Date.now() };
-                setRankLabel(KEY_EXPIRED_LABEL);
-                setRankIsError(true);
-              }
-            });
+          // Signed in, out, or switched server while it was open.
+          refreshRank(true);
         }} />
       )}
     </div>

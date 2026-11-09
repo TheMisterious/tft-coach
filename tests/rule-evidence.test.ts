@@ -10,7 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { generateCoachingReport } from '../src/coach/report-generator';
 import { buildBrief } from '../src/coach/brief-builder';
-import { getAllRules, getRuleEvidence } from '../src/coach/rules-loader';
+import { getAllRules, getRuleEvidence, getRuleMeta } from '../src/coach/rules-loader';
 import { loadMeta } from '../src/enrichment/meta-lookup';
 import type { MatchBrief, CoachingNote, DecisionCategory, DecisionPoint, Grade, MatchSnapshot, RuleVerdict } from '../src/shared/types';
 
@@ -21,7 +21,9 @@ const evidence = require('../data/core/rule-evidence.json') as {
 
 const VERDICTS: RuleVerdict[] = ['predictive', 'inverted', 'unproven', 'always-on', 'rare', 'whole-match', 'never-fired', 'unaudited'];
 const ids = Object.entries(evidence.rules);
-const MEASURED = ids.find(([, e]) => e.verdict === 'predictive')?.[0];
+// A candidate rule is predictive on the old matches yet stays out of reports
+// until newer ones confirm it, so the measured example must not be one.
+const MEASURED = ids.find(([id, e]) => e.verdict === 'predictive' && getRuleMeta(id)?.status !== 'candidate')?.[0];
 const UNPROVEN = ids.find(([, e]) => e.verdict !== 'predictive')?.[0];
 
 const NEUTRAL_GRADES: Record<DecisionCategory, Grade> = {

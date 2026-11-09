@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const OwWebpackPlugin = require('./build/OwWebpackPlugin');
 
 module.exports = (env, argv) => {
@@ -37,6 +38,11 @@ module.exports = (env, argv) => {
       ],
     },
     plugins: [
+      // Origin of the coachv backend (server/rso-worker) — Riot sign-in and the
+      // signed-in player's rank/match reads. Empty leaves sign-in disabled.
+      new webpack.DefinePlugin({
+        __COACHV_BACKEND_URL__: JSON.stringify(process.env.COACHV_BACKEND_URL ?? ''),
+      }),
       new OwWebpackPlugin({
         // copies public/ (manifest.json, HTML, icons) into dist/
         // and packages dist/ into releases/{package.json name}-{version}.opk

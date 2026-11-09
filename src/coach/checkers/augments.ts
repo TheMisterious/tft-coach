@@ -27,6 +27,7 @@ import { getAugmentName } from '../../enrichment/meta-lookup';
 import { NEUTRAL_CONTEXT } from '../match-context';
 import { metaAugmentClause } from '../meta-blend';
 import { isComponent, unitItems } from './items';
+import { boardUnits } from '../../ledger/merge';
 
 const HP_CRISIS_THRESHOLD = 45;
 
@@ -237,7 +238,7 @@ function checkItemAugmentWithoutBuiltCarry(match: MatchSnapshot, meta: MetaData)
   const picked = match.augments.find(a => isItemAugment(a, meta));
   if (!picked) return [];
 
-  const cells = Object.values(match.finalBoard).filter(c => c?.name && c.name !== '0');
+  const cells = boardUnits(match.finalBoard);
   const maxItems = Math.max(0, ...cells.map(c => unitItems(c).filter(id => !isComponent(id, meta)).length));
   if (maxItems >= 2) return [];
 

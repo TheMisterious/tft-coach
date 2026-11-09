@@ -15,7 +15,8 @@ import path from 'path';
 const ROOTS = ['src', 'data'].map(d => path.resolve(__dirname, '..', d));
 
 // The three lead bytes a UTF-8 sequence turns into when misread as cp1252/latin-1.
-const MOJIBAKE = /[\u00e2\u00c3\u00ef][\u20ac\u0192\u201a\u00a2\u00a9\u00ab\u00bb]/;
+// \u201d is the 0x94 of box-drawing characters: "\u2500" comes out as "\u00e2\u201d\u20ac".
+const MOJIBAKE = /[\u00e2\u00c3\u00ef][\u20ac\u0192\u201a\u201d\u00a2\u00a9\u00ab\u00bb]/;
 
 function sourceFiles(dir: string): string[] {
   const out: string[] = [];

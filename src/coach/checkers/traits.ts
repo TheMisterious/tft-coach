@@ -63,9 +63,9 @@ export function checkTraitBreakpoints(match: MatchSnapshot, meta: MetaData): Dec
           recommended: `Adding one more ${trait} unit${fillerHint} would activate the ${nextTier}-tier bonus`,
           reasonMetrics: { trait, current: count, nextTier, rounds: consecutiveMap[trait] },
           coaching_text: byContext(round, {
-            low:  `You've been one unit short of ${trait} ${nextTier} for ${consecutiveMap[trait]} rounds and you're already low on HP — missing this breakpoint is costing you fight wins that are directly accelerating your elimination. Pick up the cheapest ${trait} unit${fillerHint} from the next shop even if it sits on bench.`,
-            mid:  `${trait} has been stuck at ${count}/${nextTier} for ${consecutiveMap[trait]} consecutive fights. One additional unit${fillerHint} activates the ${nextTier}-tier bonus for every remaining fight — at ${round.health} HP the power swing is worth the bench slot.`,
-            high: `${trait} has been one unit short of the ${nextTier}-tier for ${consecutiveMap[trait]} rounds. You have the HP to absorb losses, but completing the breakpoint now is free efficiency — scout for the cheapest ${trait} unit${fillerHint} and pick it up when shop permits.`,
+            low:  `You've been one unit short of ${trait} ${nextTier} for ${consecutiveMap[trait]} rounds, at low HP. At this HP every fight counts, so the next ${trait} unit${fillerHint} is usually worth a board slot, unless the unit it would replace does more than the bonus.`,
+            mid:  `${trait} has been at ${count}/${nextTier} for ${consecutiveMap[trait]} consecutive fights. One more unit${fillerHint} on the board activates the ${nextTier}-tier bonus; at ${round.health} HP that is usually worth a board slot, unless the unit it would replace matters more.`,
+            high: `${trait} has been one unit short of the ${nextTier}-tier for ${consecutiveMap[trait]} rounds. You have the HP to absorb losses, so this is worth watching rather than urgent: the cheapest ${trait} unit${fillerHint} is usually worth picking up when the shop offers one and a board slot is free.`,
           }),
         });
         consecutiveMap[trait] = 0;

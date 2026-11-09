@@ -130,10 +130,10 @@ function checkRepeatedOpponentCarry(match: MatchSnapshot, meta: MetaData): Decis
         const suggestion = pos ? suggestCounterPosition(round, meta, pos.col, activeComp, carryDamage) : null;
 
         const moveClause = suggestion?.frontlineName
-          ? `Move ${suggestion.frontlineName} to your ${suggestion.blockSpot} to intercept it`
-          : `Move a frontline unit to your ${suggestion?.blockSpot ?? 'front row in the same column'} to intercept it — you don't have a curated tank-role unit on this board to name specifically`;
+          ? `Moving ${suggestion.frontlineName} to your ${suggestion.blockSpot} would put it in that unit's path`
+          : `Moving a frontline unit to your ${suggestion?.blockSpot ?? 'front row in the same column'} would put it in that unit's path (no curated tank-role unit on this board to name)`;
         const carrySafetyClause = suggestion?.carryName
-          ? ` Keep ${suggestion.carryName} in your ${suggestion.safeSpot}, away from that column.`
+          ? ` ${suggestion.carryName} is usually safer in your ${suggestion.safeSpot}, away from that column.`
           : '';
 
         points.push({
@@ -143,10 +143,10 @@ function checkRepeatedOpponentCarry(match: MatchSnapshot, meta: MetaData): Decis
           severity: 'minor',
           observed: `Opponent's ${carryName} was in ${spotName} for ${seenCarries[key].count} fights`,
           recommended: suggestion?.frontlineName
-            ? `Move ${suggestion.frontlineName} to your ${suggestion.blockSpot} to block ${carryName}`
-            : `Counter-position against ${carryName} — move your frontline to your ${suggestion?.blockSpot ?? 'front row in the same column'}`,
+            ? `Consider moving ${suggestion.frontlineName} to your ${suggestion.blockSpot} to block ${carryName}`
+            : `Consider counter-positioning against ${carryName} with a frontline unit in your ${suggestion?.blockSpot ?? 'front row in the same column'}`,
           reasonMetrics: { carry: carryName, hex, fights: seenCarries[key].count, carryDetection: topDamageUnit ? 'damage' : 'items' },
-          coaching_text: `You've fought the same opponent${opponentLabel} with their ${carryName} planted in ${spotName} for ${seenCarries[key].count} fights in a row without adjusting your positioning. ${moveClause}.${carrySafetyClause} Scouting the lobby before each round is what makes this adjustment possible — it's a free win-rate improvement that costs nothing.`,
+          coaching_text: `You've fought the same opponent${opponentLabel} with their ${carryName} planted in ${spotName} for ${seenCarries[key].count} fights in a row. ${moveClause}.${carrySafetyClause} Scouting the next opponent before each fight is what makes this adjustment possible.`,
           hexPosition: pos ?? undefined,
           boardSnapshot: buildBoardSnapshot(round.board, round.opponentBoard, meta),
           recommendedPosition: suggestion?.blockPosition,
@@ -219,9 +219,9 @@ function checkNoFrontline(match: MatchSnapshot, meta: MetaData): DecisionPoint[]
           category: 'positioning',
           severity: 'moderate',
           observed: `No unit holding the front line for ${consecutiveNoTank} consecutive stage-4 PvP rounds (since ${firstRound})`,
-          recommended: `Move a unit to the front row to absorb damage and give your carry time to deal damage.${hint}`,
+          recommended: `A unit in the front row usually buys the carry time to deal damage.${hint}`,
           reasonMetrics: { consecutiveRounds: consecutiveNoTank, firstRound },
-          coaching_text: `Your board has had nobody standing in the front row for ${consecutiveNoTank} stage-4 fights in a row. Without a frontline, enemy carries reach your backline on the first step — your carry deals zero damage before dying. Even a 1-cost tank holding zero items buys 3–5 seconds of combat time, which is often enough for a carry ability to fire.${hint}`,
+          coaching_text: `Your board has had nobody standing in the front row for ${consecutiveNoTank} stage-4 fights in a row. Without a frontline, enemy units reach your backline almost at once, and the carry often dies before it gets much damage out. Even a cheap unit with no items usually buys a few seconds, often enough for a carry ability to fire.${hint}`,
           boardSnapshot: buildBoardSnapshot(round.board, round.opponentBoard, meta),
         });
         // Reset so a player who never fixes this gets flagged again every 2

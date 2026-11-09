@@ -98,9 +98,9 @@ function checkOverRollBadOdds(match: MatchSnapshot, meta: MetaData, context: Mat
       category: 'rolling',
       severity: 'critical',
       observed: `Spent ${goldRolled}g rolling at level ${round.level} for ${cost}-cost units (${odds}% odds per slot)`,
-      recommended: `Level to ${targetLevel} first — odds jump to ${oddsAt(targetLevel, cost)}% per slot`,
+      recommended: `Unless you were rerolling this cost on purpose, leveling to ${targetLevel} before rolling is the usual line — odds rise to ${oddsAt(targetLevel, cost)}% per slot`,
       reasonMetrics: { goldRolled, level: round.level, cost, odds, targetLevel },
-      coaching_text: `You spent ${goldRolled}g rolling at level ${round.level}, but ${cost}-cost units only appear ${odds}% of the time per shop slot at that level. That is extremely inefficient — you expect to see roughly ${(5 * odds / 100 * (goldRolled / 2)).toFixed(1)} copies from ${goldRolled / 2} rolls. Leveling to ${targetLevel} first would give ${oddsAt(targetLevel, cost)}% odds per slot, making each roll dramatically more likely to hit.` + pivotContextClause(context.plan, round.label),
+      coaching_text: `You spent ${goldRolled}g rolling at level ${round.level}, but ${cost}-cost units only appear ${odds}% of the time per shop slot at that level. At those odds ${goldRolled / 2} rolls show roughly ${(5 * odds / 100 * (goldRolled / 2)).toFixed(1)} of them. Leveling to ${targetLevel} first gives ${oddsAt(targetLevel, cost)}% per slot, so the usual line levels before rolling for this cost, unless the rolls were really for cheaper units.` + pivotContextClause(context.plan, round.label),
     });
   }
   return points;
@@ -127,9 +127,9 @@ function checkUnderRollCrisis(match: MatchSnapshot): DecisionPoint[] {
     category: 'rolling',
     severity: 'critical',
     observed: `${at41.health} HP entering stage 4, only ${rollSpend}g spent rolling at 4-1/4-2`,
-    recommended: 'At <40 HP entering stage 4, spend 20–40g rolling down to 2-star your carry and stabilise',
+    recommended: 'Below 40 HP entering stage 4 with no 2-star carry, a 20–40g roll-down is the usual way to stabilise, unless a bigger level or roll was already planned for the next round',
     reasonMetrics: { hp: at41.health, rollSpend, goldAvailable: at41.goldEnd },
-    coaching_text: `You entered stage 4 at ${at41.health} HP and spent only ${rollSpend}g stabilising across rounds 4-1 and 4-2. With ${at41.goldEnd}g available and no itemised 2-star carry, the correct play was to roll down immediately. Each fight you lose at this HP brings you closer to elimination — board strength, not econ, should have been the priority here.`,
+    coaching_text: `You entered stage 4 at ${at41.health} HP and spent ${rollSpend}g rolling across 4-1 and 4-2, with ${at41.goldEnd}g available and no itemised 2-star carry. At this HP each lost fight brings elimination closer, so board strength usually comes before econ here and a roll-down is the common answer. Holding can still be right if the gold was for a level or roll a round later; the stage 4 observations show what followed.`,
   }];
 }
 
@@ -179,9 +179,9 @@ function checkPostStabilizationRoll(match: MatchSnapshot, context: MatchContext)
     category: 'rolling',
     severity: 'moderate',
     observed: `${totalWaste}g spent rolling across ${wasteRounds} round(s) after board stabilisation with no 3-star result`,
-    recommended: 'After the carry is 2-starred, save gold toward level 9 rather than continuing to roll',
+    recommended: 'Once the board has two itemised 2-stars, the usual line saves toward the next level instead of rolling, unless you are going for a 3-star',
     reasonMetrics: { totalWaste, wasteRounds, stabilisedRound: rounds[stabilisedIdx].label },
-    coaching_text: `After your board stabilised you spent ${totalWaste}g rolling across ${wasteRounds} round(s) without completing a 3-star. Once the carry is 2-starred, additional rolls have diminishing returns — that gold was better saved toward pushing level 9 (which adds 15% 5-cost odds) or competing for a contested unit more efficiently at a higher level.`,
+    coaching_text: `After your board stabilised you spent ${totalWaste}g rolling across ${wasteRounds} round(s) without completing a 3-star. Once the carry is 2-starred, more rolls at the same level return less, so the usual line saves toward the next level (level 9 adds 15% 5-cost odds) unless a 3-star is the plan. If you were rolling for one, how many copies were left in the pool decides whether it was in reach.`,
   }];
 }
 
@@ -217,9 +217,9 @@ function checkFast8RollDiscipline(match: MatchSnapshot, context: MatchContext): 
       category: 'rolling',
       severity: 'moderate',
       observed: `Spent ${goldRolled}g rolling at level 6 while on a healthy ${round.streakCount}-loss streak`,
-      recommended: 'On a deliberate loss streak toward Fast 8, hold rolls at level 6 — bank the gold for the level-8 push instead',
+      recommended: 'If the loss streak was a deliberate fast-8 setup, holding rolls at level 6 keeps the gold for the level 8 push',
       reasonMetrics: { goldRolled, streakCount: round.streakCount, level: round.level },
-      coaching_text: `You spent ${goldRolled}g rolling at level 6 while ${round.streakCount} rounds into a loss streak. A loss streak at healthy HP is usually a deliberate Fast-8 setup — the streak funds the level-8 push, and rolling that gold away at level 6 undercuts the exact plan already in motion. Hold rolls here and commit the gold to leveling instead.`,
+      coaching_text: `You spent ${goldRolled}g rolling at level 6 while ${round.streakCount} rounds into a loss streak. A loss streak at healthy HP is often a deliberate fast-8 setup, where the streak funds the level 8 push and rolling at level 6 spends that gold early. If that was the plan, holding rolls here is the usual line; if the streak was not planned, these rolls may have been an attempt to end it, which is a different decision.`,
     });
   }
 
@@ -258,9 +258,9 @@ function checkSlowRollFloorViolation(match: MatchSnapshot, context: MatchContext
         category: 'rolling',
         severity: 'minor',
         observed: `Held below the 50g interest cap for ${streak} consecutive rounds (since ${streakStart}) while running ${compName}`,
-        recommended: 'Slow-roll discipline means staying above 50g and spending only the excess each round — rebuild the buffer before rolling more',
+        recommended: 'A slow roll usually stays above 50g and spends only the excess each round; below 50g for several rounds is usually either a full roll-down or a rebuild',
         reasonMetrics: { streak, streakStartRound: streakStart, goldEnd: round.goldEnd },
-        coaching_text: `You were below the 50g interest cap for ${streak} consecutive rounds (starting ${streakStart}) while playing ${compName}. A real slow roll stays above 50g, spending only the excess above the cap each round — dipping below it for multiple rounds running loses interest income without actually committing to a full rolldown. Rebuild the buffer to 50g+ before rolling further.`,
+        coaching_text: `You were below the 50g interest cap for ${streak} consecutive rounds (starting ${streakStart}) while playing ${compName}. A slow roll usually stays above 50g and spends only the excess each round. Several rounds below it give up interest without the full roll-down that would justify it, so the usual answer is to commit to one or rebuild to 50g, unless HP forced the spend.`,
       });
       streak = 0;
     }

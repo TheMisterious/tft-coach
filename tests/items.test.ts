@@ -91,7 +91,7 @@ describe('ITEM_005 — component conversion opportunity', () => {
     expect(hit).toBeTruthy();
     expect(hit!.severity).toBe('moderate');
     expect(hit!.recommended).toContain('Bramble Vest');
-    expect(hit!.recommended).toContain('matches what your board needed');
+    expect(hit!.recommended).toContain('matched what the board needed');
   });
 
   it('fires minor severity when held components do not match the round need', () => {

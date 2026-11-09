@@ -60,9 +60,9 @@ function checkBenchClutter(match: MatchSnapshot, meta: MetaData): DecisionPoint[
         category: 'comp',
         severity: 'minor',
         observed: `${offComp.length} off-comp units on bench for ${streak} consecutive rounds (since ${streakStart})`,
-        recommended: `Sell bench units not in your active comp — that's ~${goldLocked}g that could fund interest threshold management or extra rolls`,
+        recommended: `Unless they are pivot options you still plan to use, selling bench units outside your comp frees ~${goldLocked}g for interest, a key unit or rolls`,
         reasonMetrics: { clutterCount: offComp.length, rounds: streak, goldLocked },
-        coaching_text: `You've held ${offComp.length} bench units outside your active composition for ${streak} rounds in a row. Those units represent ~${goldLocked}g of locked sell value. Selling them would let you push an interest bracket, buy a key unit, or roll for upgrades. If you're holding them as pivot options, that window typically closes by stage 4 — sell anything you haven't deployed in 2+ rounds.`,
+        coaching_text: `You've held ${offComp.length} bench units outside your active composition for ${streak} rounds in a row. Those units represent ~${goldLocked}g of locked sell value. Selling them would let you push an interest bracket, buy a key unit, or roll for upgrades. If you are holding them as pivot options, that window usually closes around stage 4, so units unused for several rounds are usually worth selling.`,
       });
       streak = 0;
     }

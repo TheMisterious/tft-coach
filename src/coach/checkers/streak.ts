@@ -39,7 +39,7 @@ function checkWinStreakBreak(match: MatchSnapshot): DecisionPoint[] {
       category: 'streak',
       severity: prev.streakCount >= 5 ? 'critical' : 'moderate',
       observed: `${prev.streakCount}-win streak broken at ${curr.label}`,
-      recommended: 'Keep your board strong enough to maintain win streaks — check item placement and positioning before high-value fights',
+      recommended: 'A long win streak is usually worth protecting; item placement and positioning are the usual things to check before the next fights',
       reasonMetrics: { streakLength: prev.streakCount, bonus, hp: curr.health },
       coaching_text: `Your ${prev.streakCount}-game win streak ended at ${curr.label}. At streak length ${prev.streakCount} you were earning +${bonus}g per round; losing it drops that to +0g. Win streaks also apply tempo pressure on opponents — losing one gives the lobby a chance to stabilise against you. Check item placement, trait activations, and positioning from that fight to identify what broke it.`,
     });
@@ -89,9 +89,9 @@ function checkLossStreakWaste(match: MatchSnapshot): DecisionPoint[] {
       category: 'streak',
       severity: 'moderate',
       observed: `Spent ${spend}g trying to break a ${curr.streakCount}-loss streak at ${curr.label} — still lost`,
-      recommended: 'Commit to the loss streak or spend enough to guarantee a win; half-measures waste both gold and streak value',
+      recommended: 'On a loss streak, a spend is usually either big enough to win the next fight or held back — one in between can keep the losses and still cost the gold',
       reasonMetrics: { spend, streakCount: curr.streakCount, hp: curr.health },
-      coaching_text: `You spent ${spend}g at ${curr.label} while on a ${curr.streakCount}-loss streak, but the next fight was still a loss. That gold gave up the streak bonus without producing a win. A 5-game loss streak pays +2g/round — if you can't convert a spend into a guaranteed win, committing to the streak and banking gold is the correct play.`,
+      coaching_text: `You spent ${spend}g at ${curr.label} while on a ${curr.streakCount}-loss streak, but the next fight was still a loss. The streak continued, so the spend bought neither the win nor the interest that gold would have earned. A 5-loss streak pays +2g per round; when a spend is unlikely to win the next fight, the usual line holds the gold and keeps the streak.`,
     });
   }
   return points;
@@ -114,8 +114,8 @@ function checkNeverHighStreak(match: MatchSnapshot): DecisionPoint[] {
     category: 'streak',
     severity: 'minor',
     observed: `Longest streak this game was ${maxStreak} (${streakType}) — never reached the +2g tier (5 streak)`,
-    recommended: 'Commit to win or loss streaks to reach 5+ and earn +2g/round; avoid breaking streaks at 2-4',
+    recommended: 'Whether to streak depends on the board and HP you have; when a streak is going, reaching 5 lifts the bonus to +2g per round',
     reasonMetrics: { maxStreak, streakType },
-    coaching_text: `Your longest streak this game was ${maxStreak} ${streakType === 'win' ? 'wins' : 'losses'} in a row — just short of the 5-streak threshold where you start earning +2g per round. Players who maintain 5+ streaks earn 8–12g extra over a typical game compared to those who cap at 4. Try committing more firmly to a streak direction early rather than flip-flopping.`,
+    coaching_text: `Your longest streak this game was ${maxStreak} ${streakType === 'win' ? 'wins' : 'losses'} in a row — just short of the 5-streak threshold where you start earning +2g per round. Streaking is a choice that depends on the board you are offered and your HP, so this is worth weighing early in a game rather than a target in itself.`,
   }];
 }

@@ -99,7 +99,7 @@ function checkCarryDamageShare(match: MatchSnapshot, meta: MetaData): DecisionPo
         category: 'combat',
         severity: 'moderate',
         observed: `Itemized carry ${carryName} was outdamaged by ${last.leaderName} in ${streak.length} consecutive stage-4+ fights (${roundsList})`,
-        recommended: `Check ${carryName}'s positioning and target access — a fully-itemized carry should usually lead your team's real damage output`,
+        recommended: `${carryName}'s positioning and target access are the usual things to check — a fully-itemized carry usually leads your team's real damage output`,
         reasonMetrics: {
           carry: carryName,
           consecutiveRounds: streak.length,

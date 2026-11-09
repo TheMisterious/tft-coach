@@ -144,7 +144,7 @@ function checkMissedInterest(
           boardChampionIds(round.bench).some(id => rerollCarryIds.has(id));
         const sellHint = benchHasRerollCarry ? '' : ' (or sell a bench unit)';
         const rerollNote = benchHasRerollCarry
-          ? ` Your bench copies are reroll fodder for this comp — don't sell into them just to cross a bracket.`
+          ? ` Your bench copies are reroll fodder for this comp, so selling them just to cross a bracket is usually not worth it.`
           : '';
 
         points.push({
@@ -165,12 +165,12 @@ function checkMissedInterest(
           // carries this rule's teaching priority as a tiebreaker.
           severity: stageOf(round.label) <= 3 ? 'moderate' : 'minor',
           observed: `Ended ${round.label} at ${gold}g — ${gap}g below the ${tier}g interest tier`,
-          recommended: `Hold ${gap}g more${sellHint} to cross the ${tier}g bracket and earn +1 interest`,
+          recommended: `Unless the spend bought something the board needed that round, holding ${gap}g more${sellHint} crosses the ${tier}g bracket for +1 interest per round`,
           reasonMetrics: { goldEnd: gold, tier, gap },
           coaching_text: byHp(round, {
-            low:  `At ${round.label} you were ${gap}g short of the ${tier}g bracket — and already at ${round.health} HP. You cannot afford to lose fights AND give up interest income simultaneously. Immediately cross the ${tier}g line before spending anything else; that +1g per round is the cheapest form of comeback available to you.${rerollNote}`,
-            mid:  `At ${round.label} you ended on ${gold}g — just ${gap}g short of the ${tier}g interest bracket. That single gold costs you +1 interest every round from here. At ${round.health} HP sub-bracket endings like this compound: you lose both income and the HP cushion to play for econ.${rerollNote}`,
-            high: `At ${round.label} you ended on ${gold}g — ${gap}g below the ${tier}g bracket. At ${round.health} HP you have the luxury of playing the interest game properly; ending ${gap}g short is a pure inefficiency. Hold ${gap}g more before spending and this never costs you.${rerollNote}`,
+            low:  `At ${round.label} you were ${gap}g short of the ${tier}g bracket, at ${round.health} HP. This low, winning fights usually matters more than interest, so the question is whether that spend made the board stronger. If it did not, stopping on the ${tier}g line would have kept +1g per round.${rerollNote}`,
+            mid:  `At ${round.label} you ended on ${gold}g, ${gap}g short of the ${tier}g interest bracket: 1g less interest every round until you cross it. At ${round.health} HP there is still room to play for econ, so a near-miss like this is usually worth avoiding unless the gold went into an upgrade.${rerollNote}`,
+            high: `At ${round.label} you ended on ${gold}g, ${gap}g below the ${tier}g bracket. At ${round.health} HP you have room to play for interest, and holding ${gap}g more would have earned +1g per round from here. Consider stopping on the bracket unless the spend hit something you needed.${rerollNote}`,
           }) + pivotContextClause(context.plan, round.label),
         });
         break;
@@ -256,8 +256,8 @@ function checkEarlyRolling(match: MatchSnapshot, context: MatchContext): Decisio
     category: 'econ',
     severity: 'critical',
     observed: `Spent ${goldSpent}g rolling before stage 3-1`,
-    recommended: 'In most games, save gold until Stage 4 — early rolls destroy the interest snowball',
+    recommended: 'Outside a reroll comp, gold is usually held through stage 2 so interest can build, unless the rolls were saving a losing board',
     reasonMetrics: { goldSpent },
-    coaching_text: `You spent ${goldSpent}g rolling shops before Stage 3. This wasn't a detected reroll strategy, so that gold was better held: every 2g rolled below an interest bracket costs you +1 gold per round for the rest of the game. Pre-3-1 rolls compound into 8–20g of lost income by Stage 5.`,
+    coaching_text: `You spent ${goldSpent}g rolling shops before stage 3, and no reroll comp was detected. Each 10g spent under the 50g cap is 1g less interest per round until it is earned back, so early rolls are usually kept for steadying a board that keeps losing or finishing a pair you are building around. If neither was happening here, holding that gold is the usual line.`,
   }];
 }

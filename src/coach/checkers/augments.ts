@@ -114,11 +114,11 @@ function checkEconAugmentOnCrisis(match: MatchSnapshot, meta: MetaData, context:
         category: 'augments',
         severity: round.health < 30 ? 'critical' : 'moderate',
         observed: `Picked economy augment ${shortName} at ${round.health} HP`,
-        recommended: 'Below 45 HP, prioritise combat or item augments — econ augments pay off over time, but you may not have time',
+        recommended: 'Below 45 HP, a combat or item augment is the usual pick when one is offered — econ augments pay off over rounds you may not have',
         reasonMetrics: { augment: shortName, hp: round.health },
         coaching_text: byHp(round, {
-          low: `At only ${round.health} HP you chose ${shortName}, an economy augment. Economy augments compound over many rounds — but at ${round.health} HP you are likely to be eliminated before that income materialises. A combat augment here would have added immediate board strength when you needed it most.${tempoNote}`,
-          mid: `You picked ${shortName} (econ augment) at ${round.health} HP — below the safe threshold. Econ augments are correct when you're healthy and econ'ing; at ${round.health} HP the priority shifts toward stabilising your board with a combat or item augment.${tempoNote}`,
+          low: `At only ${round.health} HP you chose ${shortName}, an economy augment. Economy augments pay off over many rounds, and at ${round.health} HP there may not be many left. If a combat or item augment was on offer, it would have added board strength right away.${tempoNote}`,
+          mid: `You picked ${shortName} (econ augment) at ${round.health} HP, under the 45 HP mark this rule watches. Econ augments suit a healthy board that is playing for gold; at ${round.health} HP the usual priority is stabilising the board, so a combat or item augment, if one was offered, is the common pick.${tempoNote}`,
         }) + metaAugmentClause(meta, aug),
       });
     }
@@ -206,9 +206,9 @@ function checkCarryAugmentUnrealised(match: MatchSnapshot, meta: MetaData): Deci
         category: 'augments',
         severity: 'moderate',
         observed: `Picked ${augName} but ${champ.name} was not on the final board`,
-        recommended: `Build toward ${champ.name} after picking a carry-designating augment, or don't take it if ${champ.name} isn't reachable this game`,
+        recommended: `A carry augment for ${champ.name} usually pays off only when ${champ.name} is reachable this game, so it is worth either building toward or passing on`,
         reasonMetrics: { augment: augName, champion: champ.name },
-        coaching_text: `You picked ${augName}, which specifically boosts ${champ.name} — but ${champ.name} never made your final board. That augment's entire value was left on the table; a generic augment would have helped regardless of your final comp.` + metaAugmentClause(meta, augId),
+        coaching_text: `You picked ${augName}, which specifically boosts ${champ.name} — but ${champ.name} never made your final board, so the augment added little to the board you finished with. Unless the plan changed for a good reason, a carry augment is usually taken when that carry is already likely.` + metaAugmentClause(meta, augId),
       });
       continue;
     }
@@ -222,7 +222,7 @@ function checkCarryAugmentUnrealised(match: MatchSnapshot, meta: MetaData): Deci
       category: 'augments',
       severity: 'minor',
       observed: `Picked ${augName} but ${champ.name} finished with only ${completedItems} completed item(s)`,
-      recommended: `Prioritise items on ${champ.name} once you've committed to a carry-designating augment`,
+      recommended: `After a carry augment for ${champ.name}, items on ${champ.name} are usually what make it pay off`,
       reasonMetrics: { augment: augName, champion: champ.name, completedItems },
       coaching_text: `You picked ${augName}, built around ${champ.name}, but ${champ.name} finished the game with only ${completedItems} completed item(s). The augment's power spike needs ${champ.name} itemised to pay off — without items, you're only getting a fraction of what you drafted for.` + metaAugmentClause(meta, augId),
     });
@@ -249,7 +249,7 @@ function checkItemAugmentWithoutBuiltCarry(match: MatchSnapshot, meta: MetaData)
     category: 'augments',
     severity: 'moderate',
     observed: `Picked item-shaping augment ${augName} but no unit on the final board had 2+ completed items`,
-    recommended: `Item-shaping augments like ${augName} need a built carry to pay off — commit items to one unit early`,
+    recommended: `Item-shaping augments like ${augName} usually need one unit holding 2+ completed items to pay off`,
     reasonMetrics: { augment: augName, maxItems },
     coaching_text: `You picked ${augName}, an item-shaping augment — those only pay off once a unit is actually itemised around them. Your best-built unit finished with just ${maxItems} completed item(s), so the augment's bonus went mostly unused.` + metaAugmentClause(meta, picked),
   }];

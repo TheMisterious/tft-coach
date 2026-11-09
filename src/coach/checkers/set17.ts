@@ -42,9 +42,9 @@ function checkGodAlignment(match: MatchSnapshot): DecisionPoint[] {
     category: 'set_mechanic',
     severity: 'critical',
     observed: `No God alignment achieved — three different gods chosen: ${picksFormatted}`,
-    recommended: 'Picking the same God at least twice unlocks the God Blessing at round 4-7 — the game\'s biggest mid-game power spike',
+    recommended: 'Picking the same God twice unlocks the God Blessing at 4-7; switching is usually worth it only for an offering that wins the next fights',
     reasonMetrics: { maxCount, picks: godRoundsDone.length },
-    coaching_text: `You chose a different God at each of the three God rounds (${picksFormatted}) and never aligned with any god. Alignment — picking the same god twice — unlocks the God Blessing at round 4-7, which is the single highest-impact mid-game event in Set 17. Even when a different god's offering looks appealing in the moment, the compounding value of the Blessing almost always outweighs the immediate gain from switching.`,
+    coaching_text: `You chose a different God at each of the three God rounds (${picksFormatted}) and never aligned with any god. Alignment — picking the same god twice — unlocks the God Blessing at round 4-7, one of Set 17's largest mid-game power spikes. A different god's offering can be worth taking when it wins fights you would otherwise lose, but the Blessing usually outweighs a one-round gain.`,
   }];
 }
 
@@ -64,9 +64,9 @@ function checkEvelynnHpRisk(match: MatchSnapshot): DecisionPoint[] {
       category: 'set_mechanic',
       severity: 'critical',
       observed: `Chose an Evelynn offering (-${round.godOfferingHpCost} HP) at ${round.health} HP`,
-      recommended: 'Below 40 HP, Evelynn HP-cost offerings are too dangerous — choose a safer offering or a different God',
+      recommended: 'Below 40 HP, an Evelynn HP-cost offering leaves little room for a bad fight; a safer offering is the usual choice unless its power wins the next fights outright',
       reasonMetrics: { hp: round.health, hpCost: round.godOfferingHpCost },
-      coaching_text: `At ${round.health} HP you accepted an Evelynn offering that costs ${round.godOfferingHpCost} HP. Stage 4 fights deal 7–18 damage per loss — at ${round.health - round.godOfferingHpCost} HP after the offering, one bad fight can eliminate you. Evelynn is designed for players who are ahead on HP and can afford to trade it for power. At sub-40 HP, the risk-reward is inverted.`,
+      coaching_text: `At ${round.health} HP you accepted an Evelynn offering that costs ${round.godOfferingHpCost} HP. Stage 4 fights deal 7–18 damage per loss — at ${round.health - round.godOfferingHpCost} HP after the offering, one bad fight can eliminate you. Evelynn is designed for players who are ahead on HP and can afford to trade it for power. Below 40 HP that trade usually runs the other way.`,
     });
   }
   return points;
@@ -104,8 +104,8 @@ function checkAlignmentLockedOut(match: MatchSnapshot): DecisionPoint[] {
     category: 'set_mechanic',
     severity: 'moderate',
     observed: `Not aligned after stage 3-4 — picks so far: ${picksFormatted}`,
-    recommended: `At round 4-4 (your last chance), pick ${bestGod} to achieve alignment and unlock the 4-7 Blessing`,
+    recommended: `Round 4-4 is the last chance to align: picking ${bestGod} there unlocks the 4-7 Blessing`,
     reasonMetrics: { maxCount, picksAfter34: after34.length },
-    coaching_text: `After two God rounds (${picksFormatted}) you still haven't picked the same god twice. Round 4-4 is your absolute last chance to align — choose ${bestGod} at that round to unlock the God Blessing at 4-7. If you switch gods again at 4-4, you forfeit the Blessing entirely for this game.`,
+    coaching_text: `After two God rounds (${picksFormatted}) you still haven't picked the same god twice. Round 4-4 is the last chance to align: picking ${bestGod} there unlocks the God Blessing at 4-7, and any other god at 4-4 gives up the Blessing for this game. That trade is usually worth it only for an offering that wins the next fights.`,
   }];
 }

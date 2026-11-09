@@ -110,9 +110,9 @@ function checkSlamTiming(match: MatchSnapshot, meta: MetaData): DecisionPoint[] 
           category: 'items',
           severity: 'moderate',
           observed: `${benchComps.length} unbuilt component(s) held for 3+ consecutive rounds`,
-          recommended: 'Slam components into serviceable items — any completed item outperforms raw components on the bench',
+          recommended: 'Unless you are holding for a specific item soon, slamming components into a serviceable item is the usual line — a completed item fights, a component on the bench does not',
           reasonMetrics: { components: benchComps.length, consecutiveRounds: consecutiveHolding },
-          coaching_text: `You kept ${benchComps.length} unbuilt components on your bench for at least 3 rounds in a row. Every fight you played with those components unslammed was a fight where your board was weaker than it needed to be. Slam items on any reasonable holder — even an imperfect completed item provides more combat power than components waiting for the "perfect" recipient.`,
+          coaching_text: `You kept ${benchComps.length} unbuilt components on your bench for at least 3 rounds in a row, so those fights were played without them. An imperfect completed item on a reasonable holder usually adds more than components waiting for the ideal recipient. Holding can be right when a specific item or carry is a round or two away; the item observations show what you built afterwards.`,
         });
       }
     } else {
@@ -143,9 +143,9 @@ function checkCarryItemsOnTank(match: MatchSnapshot, meta: MetaData): DecisionPo
       category: 'items',
       severity: 'moderate',
       observed: `Tank unit ${champMeta.name} is holding ${damageItems.length} damage item(s): ${damageItemNames.join(', ')}`,
-      recommended: `Move damage items to a carry unit — ${champMeta.name} benefits from defensive items instead`,
+      recommended: `Unless ${champMeta.name} was playing as a damage unit this game, damage items usually do more on a carry and defensive items on ${champMeta.name}`,
       reasonMetrics: { unit: champMeta.name, damageItemCount: damageItems.length },
-      coaching_text: `${champMeta.name} is a tank-role unit but finished the game holding ${damageItems.length} damage items. Damage items on tanks provide almost no value — the unit does not have the attack speed, ability power, or crit interactions to leverage them. Those items on a carry unit would multiply damage output significantly.`,
+      coaching_text: `${champMeta.name} is tagged as a tank-role unit but finished the game holding ${damageItems.length} damage items. Tanks usually lack the attack speed, ability power or crit to turn damage items into much, so these items usually do more on a carry. If ${champMeta.name} was your damage unit this game (some traits and augments make that work), this does not apply.`,
     });
   }
   return points;
@@ -178,9 +178,9 @@ function checkUnderItemisedCarry(match: MatchSnapshot, meta: MetaData, context: 
     recommended: 'By 4-1, stages 2 and 3 and their item drops are over — a main carry usually holds 2 completed items by here',
     reasonMetrics: { carry: carryName, itemCount },
     coaching_text: byHp(r41.health, {
-      low:  `${carryName} entered stage 4 with only ${itemCount} completed item(s) — and you're already at ${r41.health} HP. This is the worst combination: a weak board AND a low-HP position. Every fight from here where your carry underperforms accelerates elimination. Slam any available components immediately onto ${carryName}, even off-BiS items.`,
-      mid:  `Your carry (${carryName}) entered stage 4 with only ${itemCount} item(s) at ${r41.health} HP. Two component rounds have already occurred — the carry should have at least 2 completed items by now. An under-itemised carry in stage 4 dramatically reduces your win rate and HP stability.`,
-      high: `${carryName} entered stage 4 with only ${itemCount} completed item(s). You're at ${r41.health} HP so you have room to recover, but the itemisation gap is still costing you — a fully-itemised carry would close out fights faster and preserve that health lead into the late game.`,
+      low:  `${carryName} entered stage 4 with only ${itemCount} completed item(s), at ${r41.health} HP. At this HP each lost fight brings elimination closer, so the usual answer is to slam what components you have onto ${carryName}, even off-BiS, unless a better holder is about to arrive.`,
+      mid:  `Your carry (${carryName}) entered stage 4 with only ${itemCount} completed item(s) at ${r41.health} HP. By 4-1 a main carry usually holds 2, because stages 2 and 3 have dropped enough components. If ${carryName} was not the carry you were building toward, the items may be on the unit you meant instead.`,
+      high: `${carryName} entered stage 4 with only ${itemCount} completed item(s). At ${r41.health} HP you have room to recover, and a fully itemised carry usually closes fights faster. Consider slamming the next components onto ${carryName}, unless you were holding them for a carry you had not hit yet.`,
     }) + pivotContextClause(context.plan, '4-1'),
   }];
 }
@@ -206,13 +206,13 @@ function checkItemSpread(match: MatchSnapshot, meta: MetaData): DecisionPoint[] 
     category: 'items',
     severity: 'minor',
     observed: `Items spread across ${unitsWithItems} units at 4-2 — no unit holds 2+ items`,
-    recommended: 'Concentrate 2–3 items on your primary carry for multiplicative stat interactions',
+    recommended: 'Items usually do more stacked 2–3 on one carry, unless the comp spreads its damage across several units',
     reasonMetrics: { unitsWithItems, maxItems },
-    coaching_text: `At round 4-2 you had items spread across ${unitsWithItems} different units with none holding more than ${maxItems}. Item multiplicative interactions (crit + IE + JG, AP + Rabadons + JG) require concentration on one unit. One fully-itemised carry almost always outperforms four units with one item each.`,
+    coaching_text: `At round 4-2 you had items spread across ${unitsWithItems} different units with none holding more than ${maxItems}. Many items multiply each other (crit with Infinity Edge and Jeweled Gauntlet, AP with Rabadon's), which only happens on one unit, so a single itemised carry usually does more than four units with one item each. Some comps do split damage across several units; if yours did, this matters less.`,
   }];
 }
 
-// â”€â”€ ITEM_005 — component conversion opportunity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── ITEM_005 — component conversion opportunity ─────────────────────────────
 // Real recipe/stat data only (data/core/item-data.json, fetched from Community
 // Dragon — see scripts/fetch-ddragon.js). No BiS list, no per-champion curation:
 // this looks at exactly what components the player held and what real
@@ -371,12 +371,12 @@ function buildConversionPoint(
       severity: fits ? 'moderate' : 'minor',
       observed: `Held ${compNames} unbuilt for 3+ consecutive rounds${crisisSuffix}`,
       recommended: fits
-        ? `Combine into ${resultName} (${statText}) — matches what your board needed right then`
-        : `Combine into ${resultName} (${statText}) — real value, just not the kind this round's situation called for`,
+        ? `Combining these into ${resultName} (${statText}) would have matched what the board needed right then, unless they were saved for a specific item`
+        : `Combining these into ${resultName} (${statText}) adds real stats, though not the kind this round's situation called for`,
       reasonMetrics: { components: compNames, result: resultName, consecutiveRounds },
       coaching_text: (fits
-        ? `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Combined, those build ${resultName} (${statText}) — exactly the kind of stats your board needed at that point. Sitting on the raw components instead of slamming them cost you that value for multiple fights.`
-        : `You held ${compNames} unbuilt for 3+ consecutive rounds. Combined, those build ${resultName} (${statText}) — real value left on the bench, though it isn't what this specific round's situation called for. Still better to slam it than let the components sit idle.`
+        ? `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Combined, those build ${resultName} (${statText}), the kind of stats your board needed at that point, so those fights were played without them. Holding can be right when a better item for your carry is a round away.`
+        : `You held ${compNames} unbuilt for 3+ consecutive rounds. Combined, those build ${resultName} (${statText}). It is not what this round's situation called for, but a completed item usually does more than components on the bench, unless you were holding them for a specific recipe.`
       ) + pivotContextClause(context.plan, round.label),
     };
   }
@@ -390,9 +390,9 @@ function buildConversionPoint(
     category: 'items',
     severity: fitsAny ? 'moderate' : 'minor',
     observed: `Held ${compNames} unbuilt for 3+ consecutive rounds${crisisSuffix}`,
-    recommended: `Combine any two into ${optionText} — you can only build one from these at a time`,
+    recommended: `Any two of these combine into ${optionText} — one build uses two of the three, so pick whichever fits the board`,
     reasonMetrics: { components: compNames, results: options.map(o => o.resultName).join(', '), consecutiveRounds },
-    coaching_text: `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Any two of them combine into a real completed item — ${optionText} — but slamming one uses up two of the three, so pick whichever matches what your board needs. Sitting on all of them unbuilt instead of slamming any pair cost you that value for multiple fights.` + pivotContextClause(context.plan, round.label),
+    coaching_text: `You held ${compNames} unbuilt for 3+ consecutive rounds${inCrisis ? `, right as you were in an HP crisis at ${round.health} HP` : ''}. Any two of them combine into a real completed item — ${optionText} — but slamming one uses up two of the three, so pick whichever matches what your board needs. Holding all of them for several fights meant playing without any of those items, which is usually worth avoiding unless a specific recipe was close.` + pivotContextClause(context.plan, round.label),
   };
 }
 

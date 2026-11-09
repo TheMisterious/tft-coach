@@ -127,7 +127,7 @@ function checkBoardCostSum(match: MatchSnapshot, meta: MetaData): DecisionPoint[
       ? ''
       : hpLostThisStage > 0
         ? ` You went on to lose ${hpLostThisStage} HP over the course of stage ${stageStr} (${round.health} → ${nextStageRound!.health}) — consistent with a board that was under-strength for the fights it had to play.`
-        : ` Your HP actually held steady this stage (${round.health} → ${nextStageRound!.health}) despite the deficit, so this is a power gap worth closing before it costs you a fight, not yet a confirmed loss.`;
+        : ` Your HP actually held steady this stage (${round.health} → ${nextStageRound!.health}) despite the deficit, so this is a power gap worth closing before it starts losing fights, not yet a confirmed loss.`;
 
     points.push({
       ruleId:   'BOARD_001',

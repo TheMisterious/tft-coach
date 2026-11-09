@@ -33,17 +33,9 @@ import { getCurrentMatchId,
          getLedgerDir }           from '../ledger/ledger';
 import { reconstructSnapshots }   from '../ledger/rounds';
 import { RIOT_LEDGER_FEATURE }    from '../ledger/placement';
-import { detectSet, loadMeta }    from '../enrichment/meta-lookup';
-import { extractDecisionPoints }  from '../coach/rule-engine';
 import type { MatchHistoryEntry } from '../coach/history-context';
-import { buildBrief }             from '../coach/brief-builder';
-import { generateCoachingReport } from '../coach/report-generator';
-import { buildMatchContext }      from '../coach/match-context';
-import { isUsableCapture }        from '../coach/coverage';
 import { pickLedgersToRecover }   from './recovery';
-import { buildMatchPlan }         from '../coach/plan-builder';
-import { extractFeatureVector }   from '../profile/feature-vector';
-import { extractMatchLabels }     from '../profile/labels';
+import { readMatch, coachMatch }  from './pipeline';
 import { buildPlayerProfile }     from '../profile/trend-model';
 import { saveMatch, loadMatch, listRecentMatches, loadAllFeatureRecords, savePlayerProfile } from '../persistence/db';
 import { summarizeLedgerCoverage, formatLedgerCoverage, sampleRawValues, formatRawSamples } from '../ledger/diagnostics';
@@ -266,24 +258,8 @@ function pollRunningGame(): void {
 pollRunningGame();
 
 // ─── Player Trends (see src/profile/) ───────────────────────────────────────
-// Set-invariant behavioral feature extraction + incremental retrain, run
-// right after every saveMatch. context is recomputed here rather than
-// threaded out of extractDecisionPoints (which builds an equivalent context
-// internally but doesn't return it) — consistent with this codebase's
-// existing tolerance for cheap redundant recomputation of pure functions
-// (checkers/combat.ts and positioning.ts both already independently call
-// computeActiveComp rather than sharing one computed value).
-function computeTrendData(
-  snapshot: import('../shared/types').MatchSnapshot,
-  meta: import('../shared/types').MetaData,
-  points: import('../shared/types').DecisionPoint[]
-): { featureVector: import('../shared/types').FeatureVector; matchLabels: import('../shared/types').MatchLabels } {
-  const context = { ...buildMatchContext(snapshot, meta), plan: buildMatchPlan(snapshot, meta) };
-  return {
-    featureVector: extractFeatureVector(snapshot, points, context, meta),
-    matchLabels:   extractMatchLabels(snapshot, context),
-  };
-}
+// Set-invariant behavioral feature extraction (pipeline.ts) + incremental
+// retrain, run right after every saveMatch.
 
 // Rebuilds the whole-history PlayerProfile from every match's persisted
 // featureVector/matchLabels — the "retrain" step. Cheap at this project's
@@ -392,64 +368,34 @@ async function runCoachingPipeline(): Promise<void> {
     // 1. Load ledger from disk.
     const ledger   = await readLedger(matchId);
     console.log('[bg] pipeline step 1: ledger loaded — entries:', ledger.length);
-    if (ledger.length === 0) {
-      console.warn('[bg] empty ledger for match:', matchId, '— aborting pipeline');
-      return;
-    }
 
-    // 2. Reconstruct per-round snapshots.
-    const snapshot = reconstructSnapshots(ledger);
+    // 2. Reconstruct per-round snapshots, and stop on anything that is not
+    // the player's own match (see UnusableReason in pipeline.ts).
+    const read = readMatch(ledger);
+    if (read.unusable) {
+      console.warn('[bg] no match to coach —', read.unusable, '— entries:', ledger.length,
+        'rounds:', read.snapshot?.rounds.length ?? 0, 'coverage:', JSON.stringify(read.snapshot?.capture ?? null),
+        '— aborting pipeline for matchId:', matchId);
+      return;
+    }
+    const { snapshot } = read;
     console.log('[bg] pipeline step 2: snapshots reconstructed — rounds:', snapshot.rounds.length, 'placement:', snapshot.finalPlacement);
-    if (snapshot.rounds.length === 0) {
-      // A non-empty ledger with zero real rounds means GEP delivered a few
-      // stray info-updates but no round_start/round_end pair ever fired —
-      // e.g. staying in the post-game lobby to spectate other players can
-      // re-trigger onMatchStartedCb (any pseudo_match_id sighting counts,
-      // see listeners.ts) and then onGameClosed's safety net when you finally
-      // leave, with nothing but spectate noise buffered under a phantom
-      // matchId. Without this guard that produces a fake "8th place" report
-      // (extractFinalPlacement's last-resort default) with no real data
-      // behind it. A genuine match always reconstructs at least one round.
-      console.warn('[bg] ledger has', ledger.length, 'entries but zero reconstructed rounds — likely spectate/lobby noise, not a real match; aborting pipeline for matchId:', matchId);
-      return;
-    }
-    // Rounds alone don't make it the player's match: a ledger that began after
-    // they were eliminated still gets round_start/round_end from the lobby
-    // they're spectating. Those rounds are dropped in reconstruction, and a
-    // capture that never saw the player's gold or board is that same noise —
-    // the source of a QA report that coached "level 1, empty board" at 6-3.
-    if (!isUsableCapture(snapshot)) {
-      console.warn('[bg] capture is not a playable match (coverage:', JSON.stringify(snapshot.capture), ') — aborting pipeline for matchId:', matchId);
-      return;
-    }
 
     // Past this point we're committed to producing a real report for this
     // session — block any later trigger (see the entry guard above).
     state.pipelineRanThisSession = true;
 
-    // 3. Load meta data for this set.
-    const setId    = detectSet(ledger);
-    console.log('[bg] pipeline step 3a: set detected —', setId);
-    const meta     = await loadMeta(setId);
-    console.log('[bg] pipeline step 3b: meta loaded — champions:', Object.keys(meta.champions ?? {}).length);
-
-    // 4. Run rule engine.
-    const points   = extractDecisionPoints(snapshot, meta, priorFeatureHistory());
-    console.log('[bg] pipeline step 4: rule engine done — decision points:', points.length);
-
-    // 5. Build the compact report brief.
-    const brief    = buildBrief(snapshot, points, meta);
-    console.log('[bg] pipeline step 5: brief built — resolvedNotes:', brief.resolvedNotes?.length, 'pendingPoints:', brief.decisionPoints?.length);
-
-    // 6. Generate the report summary.
+    // 3-6. Set data, rule engine, brief, report and trend data.
     showInGameToast('Generating coaching report…');
-    const report   = await generateCoachingReport(brief);
-    console.log('[bg] pipeline step 6: report generated — grade:', report.overall_grade, 'notes:', report.notes?.length);
+    const { setId, meta, points, brief, report, featureVector, matchLabels } =
+      await coachMatch(ledger, snapshot, priorFeatureHistory());
+    console.log('[bg] pipeline steps 3-6: coached — set:', setId, 'champions:', Object.keys(meta.champions ?? {}).length,
+      'decision points:', points.length, 'resolvedNotes:', brief.resolvedNotes?.length,
+      'grade:', report.overall_grade, 'notes:', report.notes?.length);
 
     // 7. Persist to localStorage (src/persistence/db.ts).
     const lastRound  = snapshot.rounds.at(-1)?.label ?? 'unknown';
     const datePlayed = Date.now();
-    const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
     const persisted = saveMatch({
       pseudoMatchId:  matchId,
       datePlayed,
@@ -511,18 +457,13 @@ async function runCoachingPipeline(): Promise<void> {
 // fragment): those must never be saved as one.
 async function rebuildMatchFromLedger(matchId: string, datePlayed?: number) {
   const ledger = await readLedger(matchId);
-  if (ledger.length === 0) return null;
+  const read = readMatch(ledger);
+  if (read.unusable) return null;
+  const { snapshot } = read;
 
-  const snapshot = reconstructSnapshots(ledger);
-  if (!isUsableCapture(snapshot)) return null;
   datePlayed ??= ledger.at(-1)!.ts;
-  const setId    = detectSet(ledger);
-  const meta     = await loadMeta(setId);
-  const points   = extractDecisionPoints(snapshot, meta, priorFeatureHistory(matchId));
-  const brief    = buildBrief(snapshot, points, meta);
-  const report   = await generateCoachingReport(brief);
-
-  const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
+  const { setId, brief, report, featureVector, matchLabels } =
+    await coachMatch(ledger, snapshot, priorFeatureHistory(matchId));
   const persisted = saveMatch({
     ...(loadMatch(matchId) ?? {}),
     pseudoMatchId:   matchId,
@@ -1016,19 +957,14 @@ console.log('[bg] background controller started');
     if (record.featureVector && record.matchLabels) { skipped++; continue; } // already backfilled
 
     const ledger = await readLedger(s.pseudo_match_id);
-    if (ledger.length === 0) { skipped++; continue; }
+    const read = readMatch(ledger);
+    if (read.unusable) { skipped++; continue; }
 
-    const snapshot = reconstructSnapshots(ledger);
-    if (snapshot.rounds.length === 0) { skipped++; continue; }
-
-    const setId = detectSet(ledger);
-    const meta  = await loadMeta(setId);
     // No history passed deliberately: this loop backfills featureVector/
-    // matchLabels for old matches and throws the points away. A history clause
+    // matchLabels for old matches and throws the report away. A history clause
     // here would be computed and discarded, and worse, each backfilled match
     // would see a different slice of history depending on loop order.
-    const points = extractDecisionPoints(snapshot, meta);
-    const { featureVector, matchLabels } = computeTrendData(snapshot, meta, points);
+    const { featureVector, matchLabels } = await coachMatch(ledger, read.snapshot);
 
     saveMatch({ ...record, featureVector, matchLabels });
     processed++;

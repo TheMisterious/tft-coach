@@ -8,11 +8,8 @@
 
 import { readFileSync } from 'fs';
 import path from 'path';
-import type { LedgerEntry, MatchBrief } from '../src/shared/types';
-import { reconstructSnapshots } from '../src/ledger/rounds';
-import { detectSet, loadMeta } from '../src/enrichment/meta-lookup';
-import { extractDecisionPoints } from '../src/coach/rule-engine';
-import { buildBrief } from '../src/coach/brief-builder';
+import type { LedgerEntry } from '../src/shared/types';
+import { readMatch, coachMatch } from '../src/background/pipeline';
 
 export function loadLedgerFromFile(filePath: string): LedgerEntry[] {
   const raw = readFileSync(filePath, 'utf-8');
@@ -28,18 +25,19 @@ export function loadLedgerFromFile(filePath: string): LedgerEntry[] {
   return entries;
 }
 
+// The same pipeline the app runs after match_end (src/background/pipeline.ts),
+// minus the match history the app passes from storage. A ledger the app would
+// refuse to coach throws, naming why, instead of producing a report it never
+// would.
 export async function replayLedger(filePath: string) {
-  const ledger   = loadLedgerFromFile(filePath);
-  const snapshot = reconstructSnapshots(ledger);
-  const setId    = detectSet(ledger);
+  const ledger = loadLedgerFromFile(filePath);
+  const read   = readMatch(ledger);
+  if (read.unusable) throw new Error(`${path.basename(filePath)} is not a match the app would coach: ${read.unusable}`);
 
   // In tests, loadMeta fetches from the local data/ folder via Node's file: protocol.
   // Make sure the working directory is the project root when running tests.
-  const meta   = await loadMeta(setId);
-  const points = extractDecisionPoints(snapshot, meta);
-  const brief  = buildBrief(snapshot, points, meta);
-
-  return { ledger, snapshot, points, brief, meta };
+  const coached = await coachMatch(ledger, read.snapshot);
+  return { ledger, snapshot: read.snapshot, ...coached };
 }
 
 // ─── CLI runner ───────────────────────────────────────────────────────────────

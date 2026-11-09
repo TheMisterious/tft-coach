@@ -183,7 +183,7 @@ function onGameClosed(): void {
     state.matchActive = false;
     state.appStatus   = computeStatus();
     pushStatusToDesktop();
-    runCoachingPipeline();
+    runCoachingPipeline().finally(() => setTimeout(() => { refreshReportsForNewVersion(); }, RECOVERY_DELAY_MS));
     return;
   }
 
@@ -191,6 +191,7 @@ function onGameClosed(): void {
   state.appStatus   = computeStatus();
   console.log('[bg] game closed ->', state.appStatus);
   pushStatusToDesktop();
+  setTimeout(() => { refreshReportsForNewVersion(); }, RECOVERY_DELAY_MS);
 }
 
 // TFT's Overwolf class ID. The manifest targets this game exclusively, but
@@ -540,9 +541,13 @@ async function recoverUnreportedMatches(): Promise<void> {
 }
 
 // After an update, rebuild every saved report with the code now running (see
-// matchesToRebuild in recovery.ts). Skipped during a match, and the version is
-// only recorded once the pass finishes, so an interrupted pass runs again on
-// the next launch. A match whose ledger is gone keeps its old report.
+// matchesToRebuild in recovery.ts). Never while the game is running: Overwolf
+// starts coachv when the game launches, five seconds in is the loading screen
+// (no round has started, so matchActive is still false), and rebuilding every
+// saved match there would compete with the game. It runs on a launch without
+// the game, or after the game closes. The version is only recorded once the
+// pass finishes, so an interrupted pass runs again. A match whose ledger is
+// gone keeps its old report.
 function currentAppVersion(): Promise<string | null> {
   return new Promise(resolve => {
     try {
@@ -555,6 +560,7 @@ function currentAppVersion(): Promise<string | null> {
 
 async function refreshReportsForNewVersion(): Promise<void> {
   const state = (window as any).appState;
+  if (state.gameRunning || state.matchActive || state.isProcessing) return;
   const version = await currentAppVersion();
   const ids = matchesToRebuild(listRecentMatches(200), localStorage.getItem(REPORTS_VERSION_KEY), version);
   if (ids.length === 0) return;
@@ -562,8 +568,8 @@ async function refreshReportsForNewVersion(): Promise<void> {
 
   let newest: { report: any; datePlayed: number } | undefined;
   for (const id of ids) {
-    if (state.matchActive || state.isProcessing) {
-      console.log('[bg] report rebuild paused for a match — the rest run next launch');
+    if (state.gameRunning || state.matchActive || state.isProcessing) {
+      console.log('[bg] report rebuild paused for the game — the rest run once it closes');
       return;
     }
     try {

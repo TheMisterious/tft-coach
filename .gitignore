@@ -26,3 +26,6 @@ tests/goldens/*.jsonl
 # the Riot match cache (results/riot-meta-cache). Regenerable, never shipped.
 /results/*
 !/results/.gitkeep
+
+# Local-only work that is never published.
+/research/

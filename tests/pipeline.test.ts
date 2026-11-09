@@ -52,6 +52,38 @@ describe('readMatch', () => {
     expect(read.unusable).toBeUndefined();
     expect(read.snapshot?.rounds.map(r => r.label)).toEqual(['2-1', '2-2']);
   });
+
+  // GEP replays the previous game's last values when coachv attaches. A real
+  // 6th place on 2026-11-09 opened with HP 0 and rank 7 from the game before,
+  // and every round was dropped as spectating.
+  const PREVIOUS_GAME_LEFTOVERS: LedgerEntry[] = [
+    info('match_info', 'match_state', { in_progress: false }),
+    info('roster', 'player_status', { Me: { health: 0, xp: 8, rank: 7, localplayer: true } }),
+    info('me', 'health', 0),
+    info('me', 'rank', 7),
+  ];
+
+  it("keeps a match whose recording opens on the previous game's knockout", () => {
+    const read = readMatch([...PREVIOUS_GAME_LEFTOVERS, event('match_start'), info('me', 'health', 100), ...MATCH]);
+    expect(read.unusable).toBeUndefined();
+    expect(read.snapshot?.rounds.map(r => r.label)).toEqual(['2-1', '2-2']);
+  });
+
+  it("doesn't take the previous game's rank as this match's placement", () => {
+    const read = readMatch([...PREVIOUS_GAME_LEFTOVERS, event('match_start'), ...MATCH]);
+    expect(read.snapshot?.placementSource).toBe('none');
+  });
+
+  it('still drops rounds after the player is knocked out', () => {
+    const read = readMatch([
+      event('match_start'), ...MATCH,
+      info('me', 'health', -3),
+      info('match_info', 'round_type', { stage: '2-3', type: 'PVP' }),
+      event('round_start', 'PVP'),
+      event('round_end'),
+    ]);
+    expect(read.snapshot?.rounds.map(r => r.label)).toEqual(['2-1', '2-2']);
+  });
 });
 
 describe('coachMatch', () => {

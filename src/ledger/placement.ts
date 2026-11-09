@@ -17,12 +17,24 @@
 import type { LedgerEntry, PlacementSource } from '../shared/types';
 import { safeParseGep } from '../capture/safe-parse';
 
-export function findFinalPlacement(entries: LedgerEntry[]): { placement: number; source: Exclude<PlacementSource, 'none'> } | null {
+export function findFinalPlacement(allEntries: LedgerEntry[]): { placement: number; source: Exclude<PlacementSource, 'none'> } | null {
+  // GEP replays the previous game's last values when coachv attaches (a rank
+  // of 7 before a match that ended 6th), so only what follows this match's
+  // match_start can be its placement.
+  const entries = sinceMatchStart(allEntries);
   const gep = lastValid(entries, 'me', 'placement', 'gep');
   if (gep) return gep;
   const rank = lastValid(entries, 'me', 'rank', 'rank');
   if (!rank) return null;
   return { placement: applySameRoundTiebreak(entries, rank.placement), source: 'rank' };
+}
+
+function sinceMatchStart(entries: LedgerEntry[]): LedgerEntry[] {
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const e = entries[i];
+    if (e.kind === 'event' && e.name === 'match_start') return entries.slice(i);
+  }
+  return entries;
 }
 
 interface RosterPlayer { health?: number; rank?: number; localplayer?: boolean }

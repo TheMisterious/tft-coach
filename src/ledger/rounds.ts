@@ -141,6 +141,14 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   // The local player is out: HP at or below 0, or GEP's match_end. GEP keeps
   // sending round_start/round_end while you spectate the rest of the lobby,
   // and before this every one became a "round" of yours with an empty board.
+  //
+  // Only this match's HP counts. When coachv attaches, GEP replays the last
+  // values it holds, which can be the previous game's end (me.health 0, rank
+  // 7): a 6th place on 2026-11-09 had every one of its 28 rounds dropped as
+  // spectating because of them. HP never comes back from 0 within a match, so
+  // match_start, or a positive HP before this match's first round, clears the
+  // flag. A recording that starts after the player went out keeps HP at or
+  // below 0 and stays out.
   let localOut = false;
   let spectatorRoundsDropped = 0;
 
@@ -465,6 +473,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
           health = Number(value);
           healthSeen = true;
           if (health <= 0) localOut = true;
+          else if (roundStartCount === 0) localOut = false;
         }
         // Confirmed via a real ledger: there is no separate "me.level" key —
         // it never fires. Player level lives inside me.xp ({level, current_xp,
@@ -583,6 +592,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
             levelSeen = true;
           }
           if (me.health <= 0) localOut = true;
+          else if (roundStartCount === 0) localOut = false;
         }
       }
 
@@ -657,6 +667,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     }
 
     if (e.kind === 'event') {
+      if (e.name === 'match_start') localOut = false;
       if (e.name === 'match_end') localOut = true;
 
       if (e.name === 'round_start' && localOut) {

@@ -109,6 +109,35 @@ export interface RoundSnapshot {
   // Undefined only before the first roster update of the match. See
   // LobbyPlayerState for what the fields really mean.
   lobby?: LobbyPlayerState[];
+  // Every shop GEP sent during this round, in order: the round's opening shop
+  // and one per paid roll (a purchase only marks a slot "Sold" and is not a
+  // new shop). `shop` above is the last of them. GEP sends a shop on every
+  // change (median 3.8 per round across 103 recorded matches), so this is
+  // what the player was actually offered, not only the end-of-round state.
+  // Absent on snapshots built before shops were kept.
+  shopsSeen?: string[][];
+  // Champion ids bought from the shop this round, in order, read from the
+  // slot that turned "Sold". Absent on older snapshots.
+  bought?: string[];
+  // Display names of the boards the player looked at between round_start and
+  // battle_start (match_info.board_spectate), their own left out: deliberate
+  // scouting in the planning phase, not the camera following the fight.
+  // Absent when the match never sent board_spectate at all.
+  scouted?: string[];
+  // Item choices offered this round (match_info.item_select, four options)
+  // and the one taken (picked_item). Absent when none was offered.
+  itemOffers?: ItemOffer[];
+  // Every player's result this round, keyed by display name, from
+  // match_info.round_outcome. Absent on rounds with no outcome or on older
+  // snapshots.
+  lobbyOutcomes?: Record<string, 'win' | 'loss'>;
+}
+
+// One item choice: what was offered and what was taken. `picked` is absent
+// when the ledger ended before the pick, or GEP never sent it.
+export interface ItemOffer {
+  offered: string[];
+  picked?: string;
 }
 
 // One lobby member's public state, from roster.player_status. GEP keys that
@@ -124,6 +153,9 @@ export interface LobbyPlayerState {
   health: number;
   level: number;
   isLocal: boolean;
+  // GEP's live rank: 0 while the player is in, their final placement once
+  // they are out. Absent on snapshots built before it was kept.
+  rank?: number;
 }
 
 // Where finalPlacement came from — see src/ledger/placement.ts. 'none' means
@@ -149,6 +181,10 @@ export interface CaptureCoverage {
   boardSeen: boolean;
   shopSeen: boolean;
   augmentsSeen: boolean;
+  // match_info.board_spectate arrived at least once: the scouting readings
+  // can tell "never scouted" from "the feed was not sent". Absent on older
+  // captures (read as not seen).
+  scoutingSeen?: boolean;
   // Rounds that began after the local player was eliminated — GEP keeps
   // streaming the lobby while you spectate. Dropped, never coached.
   spectatorRoundsDropped: number;

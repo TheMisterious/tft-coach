@@ -3,7 +3,7 @@
 // KNOWN BUG: Stage 5-7 sometimes skips match_info events (Overwolf open issue).
 // Fallback: the stage from the latest match_info.round_type (labelForRoundStart).
 
-import type { LedgerEntry, RoundSnapshot, RoundType, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats, LobbyPlayerState, PlacementSource } from '../shared/types';
+import type { LedgerEntry, RoundSnapshot, RoundType, MatchSnapshot, BoardState, PlayerState, BattleStats, CombatUnitStats, LobbyPlayerState, PlacementSource, ItemOffer } from '../shared/types';
 import { safeParseGep } from '../capture/safe-parse';
 import { normalizeBoardSnapshot, boardChampionIds } from './merge';
 import { findFinalPlacement } from './placement';
@@ -182,6 +182,29 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
   let benchItemsFromPieces: string[] = [];
   let lastOpponentName: string | undefined;
 
+  // Every shop of the round (opening shop plus one per roll) and what was
+  // bought from it. prevRawSlots keeps the "Sold" markers the filtered `shop`
+  // drops, so a purchase can be named from the slot that just turned "Sold".
+  // It carries across rounds on purpose: a buy in the first second of a round
+  // closes against the last shop GEP sent, whichever round that was in.
+  let shopsSeen: string[][] = [];
+  let boughtThisRound: string[] = [];
+  let prevRawSlots: Array<string | undefined> = [];
+  // Boards looked at between round_start and battle_start. GEP sends
+  // board_spectate for the camera too (the fight opponent during the fight,
+  // the player's own board after it), so only the planning phase counts, and
+  // the player's own name never does.
+  let planningPhase = false;
+  let scoutedThisRound = new Set<string>();
+  let sawSpectate = false;
+  let summonerName: string | undefined;
+  // Item choices (match_info.item_select) and the pick (picked_item). The
+  // pick can land a millisecond after the next round_start, so the last
+  // unanswered offer is kept by reference and filled in wherever it arrives.
+  let itemOffersThisRound: ItemOffer[] = [];
+  let lastUnpickedOffer: ItemOffer | undefined;
+  let lastLobbyOutcomes: Record<string, 'win' | 'loss'> | undefined;
+
   let streakCount = 0;
   let streakType: 'win' | 'loss' | 'none' = 'none';
   let localPlayerName: string | undefined;
@@ -305,6 +328,11 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       battleStats:        lastBattleStats ?? localDamageAsBattleStats(),
       opponentName:       lastOpponentName,
       lobby:              lastLobby ? [...lastLobby] : undefined,
+      shopsSeen:          shopsSeen.map(s => [...s]),
+      bought:             [...boughtThisRound],
+      ...(sawSpectate ? { scouted: [...scoutedThisRound] } : {}),
+      ...(itemOffersThisRound.length > 0 ? { itemOffers: [...itemOffersThisRound] } : {}),
+      ...(lastLobbyOutcomes ? { lobbyOutcomes: { ...lastLobbyOutcomes } } : {}),
     });
     lastRoundOutcome = undefined;
     lastBattleStats  = undefined;
@@ -312,6 +340,13 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     opponentBoardThisRound = false;
     bestLocalDamage      = undefined;
     bestLocalDamageTotal = 0;
+    // Reset here rather than at round_start: the next round's opening shop
+    // can arrive before its round_start event and belongs to that round.
+    shopsSeen = [];
+    boughtThisRound = [];
+    scoutedThisRound = new Set();
+    itemOffersThisRound = [];
+    lastLobbyOutcomes = undefined;
   }
 
   for (let i = 0; i < entries.length; i++) {
@@ -364,13 +399,24 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
           // creep-round outcomes no longer touch the real PvP streak.
           if (roundType === 'PVP') {
             const players = value as Record<string, { outcome?: string } | string>;
+            const readOutcome = (raw: { outcome?: string } | string | undefined): 'win' | 'loss' | undefined => {
+              const normalized = (typeof raw === 'string' ? raw : (raw?.outcome ?? '')).toLowerCase();
+              return normalized === 'victory' ? 'win'
+                   : normalized === 'defeat'  ? 'loss'
+                   : normalized === 'win' || normalized === 'loss' ? normalized
+                   : undefined;
+            };
+            // The same payload names every player's result: who won and who
+            // lost across the lobby this round (src/coach/lobby-map.ts).
+            const all: Record<string, 'win' | 'loss'> = {};
+            for (const [name, raw] of Object.entries(players ?? {})) {
+              const o = readOutcome(raw);
+              if (name && o) all[name] = o;
+            }
+            if (Object.keys(all).length > 0) lastLobbyOutcomes = all;
+
             const mine = localPlayerName ? players[localPlayerName] : undefined;
-            const rawOutcome = typeof mine === 'string' ? mine : (mine?.outcome ?? '');
-            const normalized = rawOutcome.toLowerCase();
-            const outcome = normalized === 'victory' ? 'win'
-                          : normalized === 'defeat'  ? 'loss'
-                          : normalized === 'win' || normalized === 'loss' ? normalized
-                          : undefined;
+            const outcome = readOutcome(mine);
 
             lastRoundOutcome = outcome;
 
@@ -440,6 +486,30 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
           if (opp.name) lastOpponentName = opp.name;
         }
 
+        // The board on screen, by its owner's display name (the same names
+        // the roster uses). Sent about once a second while the camera is on
+        // a board, the player's own included; see planningPhase.
+        if (key === 'board_spectate') {
+          sawSpectate = true;
+          const name = typeof value === 'string' ? value : '';
+          const own = name !== '' && (name === localPlayerName || name === summonerName);
+          if (planningPhase && name && !own) scoutedThisRound.add(name);
+        }
+
+        // Four items to choose one from (an anvil, a carousel-style pick).
+        // The pick arrives as the picked_item event.
+        if (key === 'item_select') {
+          const slots = safeParseGep(value, {}) as Record<string, { name?: unknown } | undefined>;
+          const offered = Object.values(slots)
+            .map(s => s?.name)
+            .filter((n): n is string => typeof n === 'string' && n !== '');
+          if (offered.length > 0) {
+            const offer: ItemOffer = { offered };
+            itemOffersThisRound.push(offer);
+            lastUnpickedOffer = offer;
+          }
+        }
+
         // Set 17 only — Realm of Gods. Confirmed via a real recorded match (see
         // src/ledger/diagnostics.ts __debugRawSamples): GEP does NOT expose a
         // "realm_of_gods" feature or a "god_chosen" key. It sends the two
@@ -484,6 +554,9 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       }
 
       if (feature === 'me') {
+        // The local player's own display name, for telling their board from
+        // a scouted one before the roster has named them.
+        if (key === 'summoner_name' && typeof value === 'string' && value) summonerName = value;
         if (key === 'gold')   { prevGold = gold; gold  = Number(value); goldSeen = true; }
         if (key === 'health') {
           health = Number(value);
@@ -588,7 +661,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       // `xp` is the player's LEVEL, not experience — verified round-for-round
       // against me.xp.level across all six goldens. Stored as `level`.
       if (feature === 'roster' && key === 'player_status') {
-        const roster = safeParseGep(value, {}) as Record<string, { health?: number; xp?: number; localplayer?: boolean }>;
+        const roster = safeParseGep(value, {}) as Record<string, { health?: number; xp?: number; localplayer?: boolean; rank?: number }>;
         const players: LobbyPlayerState[] = Object.entries(roster)
           .filter(([name]) => !!name)
           .map(([name, p]) => ({
@@ -596,6 +669,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
             health:  Number(p?.health ?? 0),
             level:   Number(p?.xp ?? 0),
             isLocal: p?.localplayer === true,
+            rank:    Number(p?.rank ?? 0) || 0,
           }));
         if (players.length > 0) lastLobby = players;
 
@@ -651,6 +725,19 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         if (hasSlots && prevShop.length > 0 && !isPurchase) {
           rollsThisRound++;
         }
+        // The unit bought is whatever the newly "Sold" slot held a moment
+        // ago. A slot already "Sold" in the previous update names nothing.
+        const names = rawSlots.map(slot => slot?.name);
+        if (isPurchase) {
+          names.forEach((name, i) => {
+            const before = prevRawSlots[i];
+            if (name === 'Sold' && before && before !== 'Sold') boughtThisRound.push(before);
+          });
+        } else if (hasSlots && newShop.length > 0) {
+          const last = shopsSeen[shopsSeen.length - 1];
+          if (!last || last.length !== newShop.length || last.some((n, i) => n !== newShop[i])) shopsSeen.push(newShop);
+        }
+        if (hasSlots) prevRawSlots = names;
         prevShop = shop;
         shop = newShop;
       }
@@ -686,6 +773,15 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
     if (e.kind === 'event') {
       if (e.name === 'match_start') localOut = false;
       if (e.name === 'match_end') localOut = true;
+      // Planning ends when the fight starts; scouting after that is the camera.
+      if (e.name === 'battle_start') planningPhase = false;
+      if (e.name === 'picked_item') {
+        const picked = typeof e.data === 'string' ? e.data : '';
+        if (picked) {
+          if (lastUnpickedOffer) { lastUnpickedOffer.picked = picked; lastUnpickedOffer = undefined; }
+          else itemOffersThisRound.push({ offered: [], picked });
+        }
+      }
 
       if (e.name === 'round_start' && localOut) {
         // Close the round the player was eliminated in (its round_end often
@@ -723,6 +819,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         rollsThisRound     = 0;
         xpBuyTimes         = [];
         prevShop           = [];
+        planningPhase      = true;
         currentGodHpCost   = undefined;
         roundStartCount++;
         console.log(`[rounds] round_start #${roundStartCount}: label=${currentRoundLabel} type=${typeStr || '(empty)'}`);
@@ -862,6 +959,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
       boardSeen,
       shopSeen,
       augmentsSeen: augments.length > 0,
+      scoutingSeen: sawSpectate,
       spectatorRoundsDropped,
     },
   };

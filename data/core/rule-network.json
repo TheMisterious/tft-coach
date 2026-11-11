@@ -1,6 +1,6 @@
 {
   "_comment": "TFT rule network, the part that holds in any set: the game's mechanics in general terms, the strategy principles that follow from them, and the checkpoint readings that show where a game stood, joined by typed edges. Each set adds data/sets/{set}/rule-network.season.json with the numbers (stage damage and the rest), its own mechanics, and wording that quotes them; src/coach/rule-network.ts merges the two. 'basis': riot = a Riot-published number; sums = arithmetic on Riot numbers; benchmark = a large-sample statistic; heuristic = expert rule of thumb; audit = measured in this player's games (data/core/rule-evidence.json). Principles are conditional: 'advice' is the usual answer, 'unless' when it is not.",
-  "version": 2,
+  "version": 3,
   "researched": "2026-11-09",
   "edgeTypes": {
     "rests_on": "The rule follows from this mechanic or principle.",
@@ -322,7 +322,9 @@
         "bunnymuffins-heuristics",
         "metabot-benchmarks"
       ],
-      "engineRules": []
+      "engineRules": [
+        "LOBBY_003"
+      ]
     },
     {
       "id": "P.COMMIT_TO_A_STREAK",
@@ -488,7 +490,9 @@
         "tftsense-midgame",
         "bunnymuffins-heuristics"
       ],
-      "engineRules": []
+      "engineRules": [
+        "SHOP_001"
+      ]
     },
     {
       "id": "P.STOP_AT_A_NUMBER",
@@ -726,6 +730,40 @@
       "engineRules": [
         "LOBBY_001",
         "LOBBY_002"
+      ]
+    },
+    {
+      "id": "P.SCOUT_BEFORE_SPENDING",
+      "kind": "principle",
+      "domain": "positioning",
+      "basis": "heuristic",
+      "name": "Scout before you spend",
+      "statement": "The other boards decide what a roll is worth and where the carry is safe: who else is on your units, who you fight next, and where their damage comes from. The recording counts the boards you looked at before each fight.",
+      "advice": "From stage 3, look at the other boards before a roll-down and before each fight.",
+      "unless": "The round leaves no time, or nothing you could see would change the spend.",
+      "sources": [
+        "metabot-scouting",
+        "metabot-positioning"
+      ],
+      "engineRules": [
+        "SCOUT_001"
+      ]
+    },
+    {
+      "id": "P.COMPONENTS_FOR_THE_CARRY",
+      "kind": "principle",
+      "domain": "items",
+      "basis": "heuristic",
+      "name": "Take the components your carry builds",
+      "statement": "An item choice is a component for one unit. The carry's two or three items decide most of its damage, so while it has slots open its usual components come first.",
+      "advice": "With a carry chosen and slots open, take the component its usual items need.",
+      "unless": "The board needs a tank item more right now, or the carry is about to change.",
+      "sources": [
+        "mobalytics-items",
+        "tftsense-fundamentals"
+      ],
+      "engineRules": [
+        "ITEM_006"
       ]
     },
     {
@@ -1349,6 +1387,36 @@
       "to": "S.BELOW_FLOOR",
       "type": "leads_to",
       "why": "Fights against stronger boards are lost more often, and each loss costs the stage's damage."
+    },
+    {
+      "from": "P.SCOUT_BEFORE_SPENDING",
+      "to": "M.SHARED_POOL",
+      "type": "rests_on",
+      "why": "Who else draws your units is only known by looking at their boards."
+    },
+    {
+      "from": "P.SCOUT_BEFORE_SPENDING",
+      "to": "P.AVOID_CONTEST",
+      "type": "enables",
+      "why": "Contest is read from the boards you looked at."
+    },
+    {
+      "from": "P.SCOUT_BEFORE_SPENDING",
+      "to": "P.COUNTER_POSITION",
+      "type": "enables",
+      "why": "Counter-positioning needs the next board in view."
+    },
+    {
+      "from": "P.COMPONENTS_FOR_THE_CARRY",
+      "to": "M.ITEMS",
+      "type": "rests_on",
+      "why": "Two components make the item the carry needs."
+    },
+    {
+      "from": "P.COMPONENTS_FOR_THE_CARRY",
+      "to": "P.ITEMS_ON_CARRY",
+      "type": "refines",
+      "why": "The component choice is where concentrating items on the carry starts."
     }
   ]
 }

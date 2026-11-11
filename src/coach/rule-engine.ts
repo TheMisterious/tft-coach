@@ -16,6 +16,9 @@ import { checkAugments }         from './checkers/augments';
 import { checkPositioning }      from './checkers/positioning';
 import { checkCombat }           from './checkers/combat';
 import { checkLobby }            from './checkers/lobby';
+import { checkShop }             from './checkers/shop';
+import { checkScouting }         from './checkers/scouting';
+import { checkOffers }           from './checkers/offers';
 import { getRuleTier, getRuleMeta, getMvpRules } from './rules-loader';
 import { buildMatchContext }     from './match-context';
 import { buildMatchPlan }        from './plan-builder';
@@ -66,7 +69,10 @@ const MVP_RANK: Map<string, number> = new Map(getMvpRules().map((id, i) => [id, 
 // missing table with a default and reports the result as fact (board.ts
 // prices an unknown champion at 2). An allow-list, so a new checker stays off
 // for an uncurated set until someone decides it belongs here.
-const SET_AGNOSTIC_CHECKERS = new Set(['econ', 'hp', 'leveling', 'streak', 'lobby']);
+// scouting reads only the board_spectate feed and the roster: its contest
+// reading filters by the champion table when there is one and counts nothing
+// without it.
+const SET_AGNOSTIC_CHECKERS = new Set(['econ', 'hp', 'leveling', 'streak', 'lobby', 'scouting']);
 
 export function extractDecisionPoints(
   match: MatchSnapshot,
@@ -105,6 +111,9 @@ export function extractDecisionPoints(
     ['positioning',() => checkPositioning(match, meta)],
     ['combat',     () => checkCombat(match, meta)],
     ['lobby',      () => checkLobby(match, meta)],
+    ['shop',       () => checkShop(match, meta)],
+    ['scouting',   () => checkScouting(match, meta)],
+    ['offers',     () => checkOffers(match, meta, context)],
   ];
 
   const runnable = meta.setDataMissing

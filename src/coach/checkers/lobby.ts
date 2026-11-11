@@ -46,7 +46,65 @@ export function checkLobby(match: MatchSnapshot, meta?: MetaData): DecisionPoint
     ...checkLevelBehindLobby(match),
     ...checkHealthBehindLobby(match),
     ...checkBehindAtRolldownWindow(match, meta),
+    ...checkLowestWithBank(match),
   ];
+}
+
+// LOBBY_003 — CANDIDATE (defined 2026-11-11, status in data/core/rules.core.json).
+//
+// Placement is relative: the player with the lowest HP goes out first, and
+// gold held then buys nothing. This fires on a stage 4+ player round the
+// player ENTERED as the strictly lowest HP of four or more still in (the
+// roster read before the fight, so the fight's own damage does not decide the
+// rank), with 30g+ banked, at most one roll and no XP that round, and the
+// fight lost. Once per run of such rounds. Thresholds were fixed before the
+// rule was run against any match; it stays out of reports until games
+// recorded after that date confirm it.
+const LOWEST_STAGE = 4;
+const LOWEST_MIN_ALIVE = 4;
+const LOWEST_BANK = 30;
+const LOWEST_MAX_ROLLS = 1;
+
+function checkLowestWithBank(match: MatchSnapshot): DecisionPoint[] {
+  const points: DecisionPoint[] = [];
+  const rounds = match.rounds;
+  let inRun = false;
+
+  for (let i = 1; i < rounds.length; i++) {
+    const r = rounds[i];
+    if (r.type !== 'PVP' || Number(r.label.split('-')[0]) < LOWEST_STAGE) { inRun = false; continue; }
+    const entering = rounds[i - 1];
+    const standing = standingFor(entering);
+    if (!standing || standing.alive < LOWEST_MIN_ALIVE) { inRun = false; continue; }
+
+    // Ties share the better rank, so a rank equal to the count alive is the
+    // one player below everyone else.
+    const lowest = standing.hpRank === standing.alive;
+    const banked = r.goldStart >= LOWEST_BANK && r.rollsSpent <= LOWEST_MAX_ROLLS && !r.xpBought;
+    const lostFight = r.outcome ? r.outcome === 'loss' : r.health < entering.health;
+    if (!(lowest && banked && lostFight)) { inRun = false; continue; }
+    if (inRun) continue;
+    inRun = true;
+
+    points.push({
+      ruleId:   'LOBBY_003',
+      round:    r.label,
+      category: 'hp',
+      severity: 'moderate',
+      observed: `Entered ${r.label} as the lowest HP of the ${standing.alive} players still in (${standing.health} against a median of ${standing.medianOpponentHealth}), held ${r.goldStart}g, rolled ${r.rollsSpent === 0 ? 'nothing' : 'once'} and bought no XP, and lost the fight (${entering.health} → ${r.health})`,
+      recommended: 'As the lowest HP in the lobby, the usual line is to spend the bank on the next fights before anything else, unless nothing in the pool can change them or the players just above you are about to go out',
+      reasonMetrics: {
+        health: standing.health, medianOpponentHealth: standing.medianOpponentHealth, alive: standing.alive,
+        gold: r.goldStart, rolls: r.rollsSpent, hpAfter: r.health,
+      },
+      coaching_text:
+        `Going into ${r.label} you were the lowest HP of the ${standing.alive} players still in: ${standing.health} against a median of ${standing.medianOpponentHealth}, so you were the one placed to go out first. ` +
+        `You held ${r.goldStart}g, rolled ${r.rollsSpent === 0 ? 'nothing' : 'once'}, bought no XP, and lost the fight (${entering.health} → ${r.health}). ` +
+        `Gold held when you are knocked out buys nothing, and interest has only a round or two left to pay from here, so the usual line is to spend what the next fight needs now. ` +
+        `Holding can still be right when nothing in the pool would change the fight, or when the players just above you are about to go out before you; the lobby table shows where they stood.`,
+    });
+  }
+  return points;
 }
 
 // ROLL_006 — CANDIDATE (defined 2026-10-14, status in data/core/rules.core.json).

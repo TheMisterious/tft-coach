@@ -248,6 +248,58 @@
       "patch_sensitivity": "low",
       "status": "candidate",
       "defined_on": "2026-10-14"
+    },
+    {
+      "unique_id": "SHOP_001",
+      "human_readable_name": "Upgrade Copy Shown and Passed While Losing",
+      "category": "rolling",
+      "subcategory": "shop_reading",
+      "short_summary": "In a stage 3-5 player round after losing 2 of the last 3 fights, a shop GEP sent showed a third copy of a unit the player held as a pair; it was not bought, the pair was still a pair at round end, and the round ended with gold to cover its price.",
+      "source_tier": "candidate",
+      "severity": "medium",
+      "confidence": "low",
+      "patch_sensitivity": "low",
+      "status": "candidate",
+      "defined_on": "2026-11-11"
+    },
+    {
+      "unique_id": "SCOUT_001",
+      "human_readable_name": "No Scouting Through Stages 3-4 While Contested or Losing",
+      "category": "positioning",
+      "subcategory": "scouting",
+      "short_summary": "With the board_spectate feed present for 4+ stage 3-4 player rounds, the player looked at no other board before any of them, while a unit of their committed comp was on 2+ opponents' boards or 3+ of those fights were lost.",
+      "source_tier": "candidate",
+      "severity": "medium",
+      "confidence": "low",
+      "patch_sensitivity": "low",
+      "status": "candidate",
+      "defined_on": "2026-11-11"
+    },
+    {
+      "unique_id": "LOBBY_003",
+      "human_readable_name": "Lowest HP in the Lobby With Gold Banked",
+      "category": "hp",
+      "subcategory": "lobby_tempo",
+      "short_summary": "A stage 4+ player round entered as the strictly lowest HP of 4+ players still in, with 30g+ banked, at most one roll, no XP bought, and the fight lost.",
+      "source_tier": "candidate",
+      "severity": "medium",
+      "confidence": "low",
+      "patch_sensitivity": "low",
+      "status": "candidate",
+      "defined_on": "2026-11-11"
+    },
+    {
+      "unique_id": "ITEM_006",
+      "human_readable_name": "Item Choice Passed on the Carry's Priority Component",
+      "category": "items",
+      "subcategory": "item_selection",
+      "short_summary": "An item choice (match_info.item_select) offered a component on the carry's components_priority list (data/sets/set{N}/carry-bis.json, from top-4 boards) while that carry held fewer than 3 completed items, and a different component was taken.",
+      "source_tier": "candidate",
+      "severity": "medium",
+      "confidence": "low",
+      "patch_sensitivity": "medium",
+      "status": "candidate",
+      "defined_on": "2026-11-11"
     }
   ]
 }

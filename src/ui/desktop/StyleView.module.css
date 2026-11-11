@@ -1,0 +1,38 @@
+.root { margin-bottom: 24px; }
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #6c7086;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #1e1e2e;
+}
+
+.hint {
+  font-size: 12px;
+  color: #6c7086;
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.sub {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #a6adc8;
+  margin: 10px 0 4px;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #cdd6f4;
+}
+
+.diff li { color: #f9e2af; }

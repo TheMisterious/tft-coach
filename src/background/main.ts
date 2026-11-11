@@ -32,6 +32,7 @@ import { getCurrentMatchId,
          getLedgerDir }           from '../ledger/ledger';
 import { reconstructSnapshots }   from '../ledger/rounds';
 import type { MatchHistoryEntry } from '../coach/history-context';
+import { FEATURE_SCHEMA_VERSION } from '../shared/types';
 import { pickLedgersToRecover, matchesToRebuild, REPORTS_VERSION_KEY } from './recovery';
 import { readMatch, coachMatch }  from './pipeline';
 import { buildPlayerProfile }     from '../profile/trend-model';
@@ -884,7 +885,9 @@ console.log('[bg] background controller started');
   for (const s of summaries) {
     const record = loadMatch(s.pseudo_match_id);
     if (!record) { skipped++; continue; }
-    if (record.featureVector && record.matchLabels) { skipped++; continue; } // already backfilled
+    // Already on the current schema. A record from an older schema (db.ts
+    // skips those when training) is reprocessed like one with no vector.
+    if (record.featureVector?.schemaVersion === FEATURE_SCHEMA_VERSION && record.matchLabels) { skipped++; continue; }
 
     const ledger = await readLedger(s.pseudo_match_id);
     const read = readMatch(ledger);

@@ -66,9 +66,12 @@ export async function coachMatch(
   const setId  = detectSet(ledger);
   const meta   = await loadMeta(setId);
   const points = extractDecisionPoints(snapshot, meta, history);
-  const brief  = buildBrief(snapshot, points, meta);
+  // This match's own feature vector goes into the brief too, beside the
+  // history, for the "your usual game" read (src/coach/style-context.ts).
+  const trend  = computeTrendData(snapshot, meta, points);
+  const brief  = buildBrief(snapshot, points, meta, { history, featureVector: trend.featureVector });
   const report = await generateCoachingReport(brief);
-  return { setId, meta, points, brief, report, ...computeTrendData(snapshot, meta, points) };
+  return { setId, meta, points, brief, report, ...trend };
 }
 
 // The per-match featureVector + matchLabels persisted alongside each saved

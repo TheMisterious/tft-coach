@@ -104,7 +104,7 @@ describe('saveMatch — history cap and blob eviction', () => {
 
 function makeFeatureVector(overrides: Partial<FeatureVector> = {}): FeatureVector {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     econBankingPhaseRatio: 0.5, econPhaseSwitchCount: 0, interestMissedRoundCount: 0,
     overcapRoundCount: 0, preStage3RollGold: 0,
     rolldownLatencyRounds: null, postStabilizationOverrollGold: 0, level6RollDuringLossStreakGold: 0,
@@ -115,6 +115,8 @@ function makeFeatureVector(overrides: Partial<FeatureVector> = {}): FeatureVecto
     carryDamageLeadRate: null, avgCarryDamageShareOfTeam: null,
     hpCrisisRoundRatio: 0, hpAtStage3Entry: null, hpAtStage4Entry: null, hpAtStage5Entry: null, hpRecoverySlope: null,
     isRerollComp: 0, isFastTempo: 0, isSlowRoll: 0,
+    scoutedRoundRatio: 0.2, contestedCoreMaxHolders: 1, boardValueVsOpponentsRatio: 0.9,
+    pairCopiesPassedCount: 0, lowestHpWithBankRounds: 0, itemOfferPriorityMissCount: 0, rolldownWindowRollGold: 20,
     totalRounds: 25,
     ...overrides,
   };
@@ -136,7 +138,7 @@ describe('loadAllFeatureRecords / savePlayerProfile / loadPlayerProfile', () => 
   });
 
   it('skips and counts records with a stale schemaVersion instead of including them', () => {
-    const staleFv = { ...makeFeatureVector(), schemaVersion: 0 as unknown as 1 };
+    const staleFv = { ...makeFeatureVector(), schemaVersion: 0 as unknown as 2 };
     saveMatch(makeRecord('stale', { featureVector: staleFv, matchLabels: makeLabels() }));
     saveMatch(makeRecord('current', { featureVector: makeFeatureVector(), matchLabels: makeLabels() }));
 

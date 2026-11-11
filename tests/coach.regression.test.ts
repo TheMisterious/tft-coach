@@ -103,7 +103,7 @@ describe('golden match smoke tests', () => {
         const context = { ...buildMatchContext(snapshot, meta), plan: buildMatchPlan(snapshot, meta) };
         const fv = extractFeatureVector(snapshot, points, context, meta);
 
-        expect(fv.schemaVersion).toBe(1);
+        expect(fv.schemaVersion).toBe(2);
         for (const [key, value] of Object.entries(fv)) {
           if (value === null) continue; // several fields are legitimately nullable
           expect(Number.isNaN(value as number)).toBe(false);

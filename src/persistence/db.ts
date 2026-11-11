@@ -9,15 +9,14 @@
 //                          in shared/types.ts for why)
 
 import type { MatchRecord, MatchSummary, FeatureVector, MatchLabels, PlayerProfile } from '../shared/types';
+// Records from an older schema are skipped rather than fed into the model
+// with misaligned columns; see loadAllFeatureRecords below.
+import { FEATURE_SCHEMA_VERSION } from '../shared/types';
 
 const INDEX_KEY   = 'tft:index';
 const MAX_MATCHES = 200;
 const matchKey    = (id: string) => `tft:match:${id}`;
 const PROFILE_KEY = 'tft:profile';
-// Must match FeatureVector.schemaVersion (shared/types.ts) — records from an
-// older schema are skipped rather than fed into the model with misaligned
-// columns; see loadAllFeatureRecords below.
-const FEATURE_SCHEMA_VERSION = 1;
 
 function readIndex(): MatchSummary[] {
   try {

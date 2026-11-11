@@ -277,6 +277,10 @@ export interface DecisionPoint {
   // Set by src/coach/decision-trace.ts on checkpoint notes: what the player did
   // in the window before the checkpoint.
   contributing?: ContributingDecisions;
+  // Set by src/coach/history-context.ts: how many of the player's recent
+  // matches showed the same behaviour. A rule at or above its habit rate is
+  // preferred for the priority fix.
+  habit?: { count: number; sample: number };
 }
 
 // ─── Coaching report ────────────────────────────────────────────────────────
@@ -326,6 +330,7 @@ export interface CoachingNote {
   // view treats a report with no evidence on any note as unpartitioned.
   evidence?: NoteEvidence;
   contributing?: ContributingDecisions;
+  habit?: { count: number; sample: number };
   what_happened: string;
   what_should_have_happened: string;
   why: string;
@@ -431,6 +436,9 @@ export interface PriorityFix {
   // "economy") shows its real scope instead of reading as one repeated note.
   // Omitted when there's only the one note `action`/`why` already covers.
   patterns?: string[];
+  // How often the chosen note's behaviour showed in the player's recent
+  // matches, when history was available (src/coach/history-context.ts).
+  habit?: string;
 }
 
 export interface CoachingReport {
@@ -474,6 +482,9 @@ export interface CoachingReport {
   // The whole spot at each planning round (src/coach/decision-windows.ts).
   // Absent on older reports.
   decisions?: DecisionWindow[];
+  // The player's usual game and where this one differed
+  // (src/coach/style-context.ts). Absent below five recorded matches.
+  style?: StyleRead;
 }
 
 // ─── Fights (src/coach/fights.ts) ───────────────────────────────────────────
@@ -679,6 +690,7 @@ export interface MatchBrief {
   fights?: FightRow[];
   lobby?: LobbyRead;
   decisions?: DecisionWindow[];
+  style?: StyleRead;
   // Grades computed from the full, pre-truncation decision-point list (see
   // rule-engine.ts) — deliberately independent of what made it into
   // resolvedNotes/decisionPoints after the MAX_POINTS/MAX_PER_RULE cuts.
@@ -711,8 +723,14 @@ export type AppStatus =
 // set changeover invalidates only the labels, never the trained model's
 // input schema. See src/profile/ for extraction + the model itself.
 
+// Bumped on any FeatureVector field add/remove/rename: src/persistence/db.ts
+// skips records on another version rather than misaligning columns, and the
+// desktop window's backfill reprocesses them. 2 (2026-11-11) added the
+// scouting, lobby and shop readings.
+export const FEATURE_SCHEMA_VERSION = 2 as const;
+
 export interface FeatureVector {
-  schemaVersion: 1; // bump on any field add/remove/rename — src/profile/trend-model.ts skips mismatched records rather than misaligning columns
+  schemaVersion: typeof FEATURE_SCHEMA_VERSION;
 
   // Econ curve shape
   econBankingPhaseRatio: number;       // 0-1, fraction of rounds classified 'banking' (see plan-builder.ts's roundMode)
@@ -761,7 +779,50 @@ export interface FeatureVector {
   isFastTempo: 0 | 1;
   isSlowRoll: 0 | 1;
 
+  // Scouting, the lobby and the shops (schema 2). All read from what the
+  // recording holds per round (RoundSnapshot.scouted, shopsSeen, bought,
+  // itemOffers, lobby) and from src/coach/lobby-map.ts.
+  scoutedRoundRatio: number | null;          // 0-1: stage>=3 PvP rounds with the board_spectate feed in which another board was looked at before the fight; null when the feed never came
+  contestedCoreMaxHolders: number;           // most opponents (stages 3-4, boards GEP sent) fielding one unit of the committed comp; 0 with no roster or no contest
+  boardValueVsOpponentsRatio: number | null; // mean own/opponent board value over stage 3-4 fights with the opponent's board known; null if none
+  pairCopiesPassedCount: number;             // SHOP_001 firings
+  lowestHpWithBankRounds: number;            // LOBBY_003 firings
+  itemOfferPriorityMissCount: number;        // ITEM_006 firings
+  rolldownWindowRollGold: number;            // gold rolled at 3-2, 4-1 and 4-2 together
+
   totalRounds: number;
+}
+
+// ─── Player style (src/profile/style.ts) ─────────────────────────────────────
+// The player's usual game, averaged over their recent recorded matches:
+// which tempo they play, where their HP usually sits, how they spend, scout
+// and contest. Averages of what was done, never a verdict on it. The coach
+// reads it to say where this match differed from the player's usual
+// (src/coach/style-context.ts).
+
+export interface StyleTrait {
+  key: keyof FeatureVector;
+  label: string;
+  mean: number;
+  n: number;          // matches the value was known in
+  text: string;       // "52 HP", "18%", "14g"
+}
+
+export interface PlayerStyle {
+  computedAt: number;
+  sampleSize: number;
+  // Matches on each tempo over the window.
+  tempo: { reroll: number; fastTempo: number; slowRoll: number; standard: number };
+  traits: StyleTrait[];
+  // The trait pairs the player finishes on most, with how they placed on them.
+  favouriteLines: Array<{ line: string; games: number; avgPlacement: number }>;
+  summary: string[];
+}
+
+export interface StyleRead {
+  sampleSize: number;
+  usual: string[];      // the player's usual game
+  thisGame: string[];   // where this match differed from it
 }
 
 // Set-specific vocabulary — narrative annotation only, never a model input.

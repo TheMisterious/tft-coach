@@ -5,6 +5,7 @@
 import type { MatchBrief, CoachingReport, CoachingNote, DecisionPoint, DecisionCategory, PriorityFix, Grade, Severity } from '../shared/types';
 import { CATEGORY_LABELS } from './scoring';
 import { getRuleEvidence } from './rules-loader';
+import { isHabit } from './history-context';
 
 export async function generateCoachingReport(brief: MatchBrief): Promise<CoachingReport> {
   const allNotes = [...brief.resolvedNotes, ...brief.decisionPoints.map(toCoachingNote)]
@@ -38,6 +39,7 @@ export async function generateCoachingReport(brief: MatchBrief): Promise<Coachin
     ...(brief.fights?.length ? { fights: brief.fights } : {}),
     ...(brief.lobby ? { lobby: brief.lobby } : {}),
     ...(brief.decisions?.length ? { decisions: brief.decisions } : {}),
+    ...(brief.style ? { style: brief.style } : {}),
   };
 }
 
@@ -68,7 +70,12 @@ function buildPriorityFix(brief: MatchBrief, notes: CoachingNote[]): PriorityFix
     return notesB.length - notesA.length;
   })[0];
 
-  const topNote = [...categoryNotes].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity])[0];
+  // A habit outranks severity: the note that recurs across the player's
+  // recent matches is the one practising changes, whatever this match's
+  // single worst round was. Severity breaks the tie as before.
+  const habitual = (n: CoachingNote) => !!n.habit && isHabit(n.habit);
+  const topNote = [...categoryNotes].sort((a, b) =>
+    Number(habitual(b)) - Number(habitual(a)) || SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity])[0];
 
   return {
     category,
@@ -76,6 +83,10 @@ function buildPriorityFix(brief: MatchBrief, notes: CoachingNote[]): PriorityFix
     action: topNote.what_should_have_happened,
     why: topNote.why,
     patterns: buildPatterns(categoryNotes, topNote),
+    ...(topNote.habit ? {
+      habit: `This also happened in ${topNote.habit.count} of your previous ${topNote.habit.sample} matches` +
+        (habitual(topNote) ? ', so of everything in this report it is the pattern most worth practising.' : '.'),
+    } : {}),
   };
 }
 
@@ -111,6 +122,7 @@ function toCoachingNote(dp: DecisionPoint): CoachingNote {
     tier: dp.tier,
     evidence: getRuleEvidence(dp.ruleId),
     ...(dp.contributing ? { contributing: dp.contributing } : {}),
+    ...(dp.habit ? { habit: dp.habit } : {}),
     what_happened: dp.observed,
     what_should_have_happened: dp.recommended,
     why: dp.coaching_text ?? buildWhy(dp.reasonMetrics, dp.recommended),

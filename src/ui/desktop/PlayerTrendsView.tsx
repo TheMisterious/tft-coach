@@ -51,6 +51,13 @@ const FEATURE_LABELS: Partial<Record<keyof FeatureVector, string>> = {
   isRerollComp: 'Playing a reroll comp',
   isFastTempo: 'Fast-tempo leveling',
   isSlowRoll: 'Slow-rolling',
+  scoutedRoundRatio: 'Stage 3+ rounds with a scout before the fight',
+  contestedCoreMaxHolders: 'Opponents on your most contested unit',
+  boardValueVsOpponentsRatio: 'Your board value against the boards you met',
+  pairCopiesPassedCount: 'Pair upgrades shown and passed while losing',
+  lowestHpWithBankRounds: 'Rounds entered as lowest HP with a bank',
+  itemOfferPriorityMissCount: "Item choices passed on the carry's component",
+  rolldownWindowRollGold: 'Gold rolled at 3-2, 4-1 and 4-2',
   totalRounds: 'Match length (rounds)',
 };
 

@@ -37,6 +37,8 @@ const FEATURE_KEYS: Array<keyof FeatureVector> = [
   'carryDamageLeadRate', 'avgCarryDamageShareOfTeam',
   'hpCrisisRoundRatio', 'hpAtStage3Entry', 'hpAtStage4Entry', 'hpAtStage5Entry', 'hpRecoverySlope',
   'isRerollComp', 'isFastTempo', 'isSlowRoll',
+  'scoutedRoundRatio', 'contestedCoreMaxHolders', 'boardValueVsOpponentsRatio',
+  'pairCopiesPassedCount', 'lowestHpWithBankRounds', 'itemOfferPriorityMissCount', 'rolldownWindowRollGold',
   'totalRounds',
 ];
 

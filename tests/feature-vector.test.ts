@@ -302,9 +302,9 @@ describe('extractFeatureVector — situational flags and totals', () => {
     expect(fv.isSlowRoll).toBe(1);
   });
 
-  it('sets totalRounds to the match round count and schemaVersion to 1', () => {
+  it('sets totalRounds to the match round count and schemaVersion to 2', () => {
     const fv = extractFeatureVector(makeMatch([makeRound({}), makeRound({})]), [], makeContext(), makeMeta());
     expect(fv.totalRounds).toBe(2);
-    expect(fv.schemaVersion).toBe(1);
+    expect(fv.schemaVersion).toBe(2);
   });
 });

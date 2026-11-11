@@ -11,7 +11,7 @@ import type { FeatureVector, MatchLabels } from '../src/shared/types';
 
 function makeFeatureVector(overrides: Partial<FeatureVector> = {}): FeatureVector {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     econBankingPhaseRatio: 0.5, econPhaseSwitchCount: 2, interestMissedRoundCount: 1,
     overcapRoundCount: 1, preStage3RollGold: 0,
     rolldownLatencyRounds: null, postStabilizationOverrollGold: 0, level6RollDuringLossStreakGold: 0,
@@ -22,6 +22,8 @@ function makeFeatureVector(overrides: Partial<FeatureVector> = {}): FeatureVecto
     carryDamageLeadRate: 0.5, avgCarryDamageShareOfTeam: 0.4,
     hpCrisisRoundRatio: 0.1, hpAtStage3Entry: 80, hpAtStage4Entry: 60, hpAtStage5Entry: 40, hpRecoverySlope: 1,
     isRerollComp: 0, isFastTempo: 0, isSlowRoll: 0,
+    scoutedRoundRatio: 0.2, contestedCoreMaxHolders: 1, boardValueVsOpponentsRatio: 0.9,
+    pairCopiesPassedCount: 0, lowestHpWithBankRounds: 0, itemOfferPriorityMissCount: 0, rolldownWindowRollGold: 20,
     totalRounds: 25,
     ...overrides,
   };

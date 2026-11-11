@@ -17,11 +17,15 @@ import type {
   MatchContext,
   FeatureVector,
   Cell,
+  LobbyRead,
 } from '../shared/types';
+import { FEATURE_SCHEMA_VERSION } from '../shared/types';
 import { identifyCarry, boardItemIds, boardUnits } from '../ledger/merge';
 import { unitItems, isComponent } from '../coach/checkers/items';
 import { resolveHexCell, HEX_ROWS } from '../shared/hex-grid';
 import { computeCarryDamage } from '../coach/match-context';
+import { readLobby } from '../coach/lobby-map';
+import { readFights } from '../coach/fights';
 
 function stageOf(label: string): number {
   return Number(label.split('-')[0]) || 0;
@@ -303,6 +307,29 @@ function computeHpTrajectoryStats(rounds: RoundSnapshot[], context: MatchContext
   };
 }
 
+// Stage>=3 player rounds that had the board_spectate feed, and the share with
+// a scout before the fight (RoundSnapshot.scouted). null when the match never
+// sent the feed, so "never scouted" and "no feed" stay apart.
+function computeScoutedRoundRatio(rounds: RoundSnapshot[]): number | null {
+  const withFeed = rounds.filter(r => r.type === 'PVP' && stageOf(r.label) >= 3 && r.scouted !== undefined);
+  if (withFeed.length === 0) return null;
+  return withFeed.filter(r => r.scouted!.length > 0).length / withFeed.length;
+}
+
+// Opponents (stages 3-4, boards GEP sent) fielding each committed unit, as
+// src/coach/lobby-map.ts reads them.
+function holderCounts(lobby: LobbyRead): number[] {
+  const byUnit = new Map<string, Set<string>>();
+  for (const o of lobby.opponents) for (const c of o.contested) {
+    const stage = stageOf(c.round);
+    if (stage < 3 || stage > 4) continue;
+    byUnit.set(c.id, (byUnit.get(c.id) ?? new Set()).add(o.name));
+  }
+  return [...byUnit.values()].map(s => s.size);
+}
+
+const ROLLDOWN_WINDOWS = ['3-2', '4-1', '4-2'];
+
 export function extractFeatureVector(
   match: MatchSnapshot,
   points: DecisionPoint[],
@@ -312,6 +339,8 @@ export function extractFeatureVector(
   const rounds = match.rounds;
   const activeComp = context.activeComp;
   const carryDamage = computeCarryDamage(match);
+  const lobby = readLobby(match, meta);
+  const knownFights = readFights(match, meta).filter(f => (f.stage === 3 || f.stage === 4) && f.opp);
 
   const { bankingRatio, phaseSwitchCount } = computeEconCurveStats(rounds);
   const { maxWinStreak, maxLossStreak, streakConversionRate } = computeStreakStats(rounds);
@@ -319,7 +348,7 @@ export function extractFeatureVector(
   const hpStats = computeHpTrajectoryStats(rounds, context);
 
   return {
-    schemaVersion: 1,
+    schemaVersion: FEATURE_SCHEMA_VERSION,
 
     econBankingPhaseRatio: bankingRatio,
     econPhaseSwitchCount: phaseSwitchCount,
@@ -360,6 +389,16 @@ export function extractFeatureVector(
     isRerollComp: context.isRerollComp ? 1 : 0,
     isFastTempo: context.isFastTempo ? 1 : 0,
     isSlowRoll: context.plan?.econStyle === 'slow_roll' ? 1 : 0,
+
+    scoutedRoundRatio: computeScoutedRoundRatio(rounds),
+    contestedCoreMaxHolders: lobby ? Math.max(0, ...holderCounts(lobby)) : 0,
+    boardValueVsOpponentsRatio: knownFights.length > 0
+      ? knownFights.reduce((s, f) => s + f.own.value / Math.max(1, f.opp!.value), 0) / knownFights.length
+      : null,
+    pairCopiesPassedCount: points.filter(p => p.ruleId === 'SHOP_001').length,
+    lowestHpWithBankRounds: points.filter(p => p.ruleId === 'LOBBY_003').length,
+    itemOfferPriorityMissCount: points.filter(p => p.ruleId === 'ITEM_006').length,
+    rolldownWindowRollGold: rounds.filter(r => ROLLDOWN_WINDOWS.includes(r.label)).reduce((s, r) => s + r.rollsSpent * 2, 0),
 
     totalRounds: rounds.length,
   };

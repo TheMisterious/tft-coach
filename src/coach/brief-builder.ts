@@ -5,7 +5,9 @@
 // rule engine and placed in resolvedNotes. The reporter only needs to fill in
 // the remaining unresolved points and generate tldr, grade, and strengths.
 
-import type { MatchSnapshot, DecisionPoint, DecisionCategory, MatchBrief, CoachingNote, MetaData, RoundTrajectoryPoint } from '../shared/types';
+import type { MatchSnapshot, DecisionPoint, DecisionCategory, MatchBrief, CoachingNote, MetaData, RoundTrajectoryPoint, FeatureVector } from '../shared/types';
+import type { MatchHistoryEntry } from './history-context';
+import { readStyleForMatch } from './style-context';
 import { getChampionName, getItemName } from '../enrichment/meta-lookup';
 import { overallGrade, categoryGrades, capRepeats, ALL_CATEGORIES } from './scoring';
 import { buildMatchPlan } from './plan-builder';
@@ -53,12 +55,18 @@ function commonPatternLine(ruleId: string, count: number): string {
   return `${name}: ${count} time${count === 1 ? '' : 's'} this game. ${how}, so it says little about this one.`;
 }
 
+// `player`: the prior matches' feature vectors (oldest first, this match
+// left out) and this match's own, for the "your usual game" read. Omitted by
+// tests and by the first matches of a fresh install, in which case there is
+// no style on the brief.
 export function buildBrief(
   match: MatchSnapshot,
   allPoints: DecisionPoint[],
-  meta: MetaData
+  meta: MetaData,
+  player: { history?: MatchHistoryEntry[]; featureVector?: FeatureVector } = {},
 ): MatchBrief {
   const { reportable: points, commonPatterns } = partitionForReport(allPoints);
+  const style = readStyleForMatch(player.history ?? [], player.featureVector);
 
   // Cap repeat firings of the same rule before truncation. Without this, a
   // rule that legitimately fires many times in one match (e.g. ECON_001 "1g
@@ -121,6 +129,7 @@ export function buildBrief(
     fights:          readFights(match, meta).map(({ ownShares: _shares, ...row }) => row),
     ...(lobby ? { lobby } : {}),
     decisions:       readDecisionWindows(match, meta, undefined, lobby),
+    ...(style ? { style } : {}),
     // Graded from the FULL point list (pre-truncation, always-on rules
     // included) and normalized by round count — see src/coach/scoring.ts.
     // Always-on rules stay in on purpose: the S-D thresholds were set with them
@@ -186,6 +195,7 @@ function toCoachingNote(dp: DecisionPoint): CoachingNote {
     tier:                      dp.tier,
     evidence:                  getRuleEvidence(dp.ruleId),
     ...(dp.contributing ? { contributing: dp.contributing } : {}),
+    ...(dp.habit ? { habit: dp.habit } : {}),
     what_happened:             dp.observed,
     what_should_have_happened: dp.recommended,
     why:                       dp.coaching_text!,

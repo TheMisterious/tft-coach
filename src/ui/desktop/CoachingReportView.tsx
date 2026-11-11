@@ -8,6 +8,7 @@ import { GameStoryView } from './GameStoryView';
 import { FightsView } from './FightsView';
 import { DecisionWindowsView } from './DecisionWindowsView';
 import { LobbyView } from './LobbyView';
+import { StyleView } from './StyleView';
 import { EmptyState } from './EmptyState';
 import styles from './CoachingReportView.module.css';
 
@@ -122,6 +123,9 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
                   </span>
                   <p className={styles.priorityFixAction}>{report.priority_fix.action}</p>
                   <p className={styles.priorityFixWhy}>{report.priority_fix.why}</p>
+                  {report.priority_fix.habit && (
+                    <p className={styles.priorityFixWhy}>{report.priority_fix.habit}</p>
+                  )}
                   {report.priority_fix.patterns && report.priority_fix.patterns.length > 0 && (
                     <ul className={styles.priorityFixPatterns}>
                       {report.priority_fix.patterns.map((pattern, i) => (
@@ -156,6 +160,8 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
             </header>
 
             <GamePlanSummary plan={report.plan} />
+
+            {report.style && <StyleView style={report.style} />}
 
             {report.game_story && <GameStoryView story={report.game_story} />}
 

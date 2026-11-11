@@ -11,7 +11,7 @@ import type { DecisionPoint, FeatureVector } from '../src/shared/types';
 
 function vector(overrides: Partial<FeatureVector> = {}): FeatureVector {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     econBankingPhaseRatio: 0,
     econPhaseSwitchCount: 0,
     interestMissedRoundCount: 0,

@@ -27,8 +27,8 @@ export function EmptyState({ hasHistory }: Props) {
       </div>
       {!hasSeenIntro && !hasHistory && (
         <div className={styles.subtext}>
-          Everything runs locally — no live scouting, no opponent tracking, just
-          a report once your match is over.
+          Everything runs locally — nothing during the game, just a report
+          once your match is over.
         </div>
       )}
       <div className={styles.steps}>

@@ -28,7 +28,7 @@ import type {
 import { getRuleEvidence, getRuleMeta, getAllRules } from './rules-loader';
 import { pairsHeld } from './upgrades';
 import { standingFor, ordinal } from './lobby-context';
-import { getChampionName } from '../enrichment/meta-lookup';
+import { getChampionName, prevalenceClause } from '../enrichment/meta-lookup';
 import { readFights, describeBoard, isComponent, type Fight } from './fights';
 import { boardUnits } from '../ledger/merge';
 
@@ -444,9 +444,11 @@ const DETECTORS: Record<DetectorId, Detector> = {
       if (copy && !seen.has(r.opponentName)) seen.set(r.opponentName, `${r.label}, ${Number(copy.level) || 1}★`);
     }
     if (seen.size < 2) return [];
+    // The set's Riot records say how usual that is for this unit
+    // (MetaData.metaUnits); nothing is added when the set has none.
     return [{
       rounds: [...seen.values()].map(v => v.split(',')[0]),
-      facts: [`${getChampionName(carry, meta)}, your top damage unit, was on the boards of ${seen.size} opponents you fought: ${[...seen].map(([name, at]) => `${name} (${at})`).join('; ')}.`],
+      facts: [`${getChampionName(carry, meta)}, your top damage unit, was on the boards of ${seen.size} opponents you fought: ${[...seen].map(([name, at]) => `${name} (${at})`).join('; ')}.${prevalenceClause(carry, meta)}`],
     }];
   },
 };

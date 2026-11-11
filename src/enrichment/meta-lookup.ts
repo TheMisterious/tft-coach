@@ -2,7 +2,7 @@
 // All strategic knowledge lives in those JSON files — swapping sets requires
 // only creating a new folder, never changing TypeScript code.
 
-import type { AugmentEffect, LedgerEntry, MetaData, CarryBisEntry, TraitBreakpoint, EconBenchmark, ChampionMeta, AugmentModifiers, AugmentItemOverride, AugmentFrontlineExemption, CompArchetype, ItemData } from '../shared/types';
+import type { AugmentEffect, LedgerEntry, MetaData, MetaUnits, CarryBisEntry, TraitBreakpoint, EconBenchmark, ChampionMeta, AugmentModifiers, AugmentItemOverride, AugmentFrontlineExemption, CompArchetype, ItemData } from '../shared/types';
 import { loadAggregateMetaTable } from '../persistence/meta-cache';
 import { setIdFromChampionId, UNKNOWN_SET_ID } from '../shared/set-id';
 
@@ -72,7 +72,7 @@ async function hasSetData(setId: string): Promise<boolean> {
 async function loadMetaFiles(setId: string): Promise<MetaData> {
   const base = `/data/sets/${setId}`;
   console.log('[meta] loading set data from:', base);
-  const [carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiersRaw, comps, augmentUnitGrants, augmentEffects] = await Promise.all([
+  const [carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiersRaw, comps, augmentUnitGrants, augmentEffects, riotMetaSource] = await Promise.all([
     fetchJson<Record<string, CarryBisEntry>>(`${base}/carry-bis.json`, {}),
     fetchJson<TraitBreakpoint[]>(`${base}/trait-breakpoints.json`, []),
     fetchJson<EconBenchmark[]>(`${base}/econ-benchmarks.json`, []),
@@ -86,7 +86,9 @@ async function loadMetaFiles(setId: string): Promise<MetaData> {
     fetchJson<CompArchetype[]>(`${base}/comps.json`, []),
     fetchJson<Record<string, string>>(`${base}/augment-unit-grants.json`, {}),
     fetchJson<Record<string, AugmentEffect>>(`${base}/augment-effects.json`, {}),
+    fetchJson<RiotMetaSource | null>(`${base}/riot-meta.source.json`, null),
   ]);
+  const metaUnits = toMetaUnits(riotMetaSource);
   // Merge over defaults — a set without an augment-modifiers.json file (or a
   // file missing a bucket) falls back to "no overrides" for that bucket rather
   // than crashing every checker that reads meta.augmentModifiers.*.
@@ -97,7 +99,45 @@ async function loadMetaFiles(setId: string): Promise<MetaData> {
   // missing localStorage global, same as every other persistence accessor).
   const metaTierTable = loadAggregateMetaTable();
   console.log(`[meta] loaded — champions:${Object.keys(champions ?? {}).length} carryBis:${Object.keys(carryBis ?? {}).length} traits:${(traitBreakpoints as unknown[])?.length ?? 0} econBenchmarks:${(econBenchmarks as unknown[])?.length ?? 0} items:${Object.keys(items ?? {}).length} itemData:${Object.keys(itemData ?? {}).length} augments:${Object.keys(augments ?? {}).length} augmentNames:${Object.keys(augmentNames ?? {}).length} augmentModifiers:${Object.keys(augmentModifiers.itemBisOverrides).length} comps:${comps?.length ?? 0} augmentUnitGrants:${Object.keys(augmentUnitGrants ?? {}).length} augmentEffects:${Object.keys(augmentEffects ?? {}).length} metaTierTable:${metaTierTable ? metaTierTable.matchSampleCount : 'none'}`);
-  return { carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiers, comps, augmentUnitGrants, augmentEffects, metaTierTable };
+  return { carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiers, comps, augmentUnitGrants, augmentEffects, metaTierTable, ...(metaUnits ? { metaUnits } : {}) };
+}
+
+// The provenance file scripts/fetch-riot-meta.ts writes beside the derived
+// roles: its roleEvidence is one tally per champion over every board read.
+interface RiotMetaSource {
+  source?: string;
+  boards?: number;
+  roleEvidence?: Record<string, { appearances?: number; itemized?: number; topFour?: number }>;
+}
+
+export function toMetaUnits(raw: RiotMetaSource | null | undefined): MetaUnits | undefined {
+  if (!raw || typeof raw.boards !== 'number' || raw.boards <= 0 || !raw.roleEvidence) return undefined;
+  const units: MetaUnits['units'] = {};
+  for (const [id, t] of Object.entries(raw.roleEvidence)) {
+    if (typeof t?.appearances !== 'number') continue;
+    units[id] = { appearances: t.appearances, itemized: t.itemized ?? 0, ...(typeof t.topFour === 'number' ? { topFour: t.topFour } : {}) };
+  }
+  return { source: raw.source ?? 'Riot match records', boards: raw.boards, units };
+}
+
+/**
+ * A champion's share of top players' final boards in Riot's records for this
+ * set, or undefined when the set's folder holds no such records or the unit
+ * never appeared in them (Set 18 records Lux's forms as the base unit only).
+ */
+export function unitPrevalence(championId: string, meta: MetaData): { share: number; boards: number; source: string } | undefined {
+  const m = meta.metaUnits;
+  if (!m || !m.boards) return undefined;
+  const u = m.units[championId];
+  if (!u) return undefined;
+  return { share: u.appearances / m.boards, boards: m.boards, source: m.source };
+}
+
+/** "on 23% of top players' boards in Riot's records", or '' when unknown. */
+export function prevalenceClause(championId: string, meta: MetaData): string {
+  const p = unitPrevalence(championId, meta);
+  if (!p) return '';
+  return ` In Riot's records of ${p.boards.toLocaleString('en-US')} top-player boards it is on ${Math.round(p.share * 100)}%.`;
 }
 
 // Friendly display name for a champion id (e.g. "TFT17_AurelionSol" -> "Aurelion Sol").

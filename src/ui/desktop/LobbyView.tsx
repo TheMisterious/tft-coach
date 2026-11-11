@@ -54,7 +54,7 @@ function Checkpoint({ c }: { c: LobbyCheckpoint }) {
       <span>{c.playersBelow} below you{c.closestBelow !== undefined ? ` (nearest ${c.closestBelow} HP under)` : ''}</span>
       {c.leaders.length > 0 && <span>Winning most: {c.leaders.join(', ')}</span>}
       {c.contestedCore.length > 0 && (
-        <span>Contested: {c.contestedCore.map(u => `${u.name} (${u.by.length})`).join(', ')}</span>
+        <span>Contested: {c.contestedCore.map(u => `${u.name} (${u.by.length}${u.share !== undefined ? `, on ${Math.round(u.share * 100)}% of top boards` : ''})`).join(', ')}</span>
       )}
     </div>
   );

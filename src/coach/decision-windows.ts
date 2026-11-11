@@ -18,7 +18,7 @@ import { loadRuleNetwork, lossesLeft, type RuleNetwork } from './rule-network';
 import { readFights, readBoard, describeBoard, outclassed, isComponent, stageOf } from './fights';
 import { pairsHeld, upgradeCopiesAcrossShops } from './upgrades';
 import { standingFor } from './lobby-context';
-import { getChampionName } from '../enrichment/meta-lookup';
+import { getChampionName, unitPrevalence } from '../enrichment/meta-lookup';
 import { readLobby } from './lobby-map';
 import { boardUnits } from '../ledger/merge';
 
@@ -84,8 +84,17 @@ function readState(match: MatchSnapshot, i: number, meta: MetaData, net: RuleNet
     : `lost ${losses} of the last ${plural(before.length, 'player fight')}${outclassedCount ? ` (their board was clearly stronger in ${outclassedCount})` : ''}`;
 
   const contested = (lobby?.opponents ?? []).flatMap(o => o.contested.filter(c => roundNumber(c.round) <= roundNumber(r.label)).map(c => ({ ...c, by: o.name })));
-  const byUnit = new Map<string, Set<string>>();
-  for (const c of contested) byUnit.set(c.name, (byUnit.get(c.name) ?? new Set()).add(c.by));
+  const byUnit = new Map<string, { name: string; by: Set<string> }>();
+  for (const c of contested) {
+    const e = byUnit.get(c.id) ?? { name: c.name, by: new Set<string>() };
+    e.by.add(c.by);
+    byUnit.set(c.id, e);
+  }
+  // With the set's Riot records, say how usual contest is for the unit.
+  const describe = (id: string, e: { name: string; by: Set<string> }) => {
+    const p = unitPrevalence(id, meta);
+    return `${e.name} (${plural(e.by.size, 'opponent')}${p ? `, on ${Math.round(p.share * 100)}% of top-player boards` : ''})`;
+  };
 
   return {
     hp,
@@ -103,7 +112,7 @@ function readState(match: MatchSnapshot, i: number, meta: MetaData, net: RuleNet
     pairs,
     recentFights,
     recentLosses: losses,
-    contested: [...byUnit].sort((a, b) => b[1].size - a[1].size).map(([name, by]) => `${name} (${plural(by.size, 'opponent')})`),
+    contested: [...byUnit].sort((a, b) => b[1].by.size - a[1].by.size).map(([id, e]) => describe(id, e)),
   };
 }
 

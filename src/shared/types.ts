@@ -570,8 +570,9 @@ export interface LobbyCheckpoint {
   closestBelow?: number;
   // Opponents with the most wins over the last three recorded player rounds.
   leaders: string[];
-  // Your committed units seen on others' boards up to this round.
-  contestedCore: Array<{ id: string; name: string; by: string[] }>;
+  // Your committed units seen on others' boards up to this round, with the
+  // unit's share of top players' boards when the set's records hold it.
+  contestedCore: Array<{ id: string; name: string; by: string[]; share?: number }>;
 }
 
 export interface LobbyScouting {
@@ -1029,6 +1030,18 @@ export interface AugmentModifiers {
   frontlineExemptions: Record<string, AugmentFrontlineExemption>;
 }
 
+// How often each champion appears on top players' final boards, from Riot's
+// match records (data/sets/set{N}/riot-meta.source.json, written by
+// scripts/fetch-riot-meta.ts at development time; the app calls no Riot
+// API). The coach reads it as a contest prior: a unit on a quarter of top
+// boards is one others will be on too. Champion prevalence only, never an
+// augment statistic.
+export interface MetaUnits {
+  source: string;
+  boards: number;
+  units: Record<string, { appearances: number; itemized: number; topFour?: number }>;
+}
+
 export interface MetaData {
   carryBis: Record<string, CarryBisEntry>;
   traitBreakpoints: TraitBreakpoint[];
@@ -1078,6 +1091,10 @@ export interface MetaData {
   // Optional: absent on any MetaData built without it (older data, or a test
   // literal) means "nothing derived", not a crash.
   augmentEffects?: Record<string, AugmentEffect>;
+  // Champion prevalence on top players' boards (see MetaUnits). Absent for a
+  // set whose folder has no riot-meta.source.json; every reader treats that
+  // as "no prior known", not a crash.
+  metaUnits?: MetaUnits;
   // True when data/sets/<setId>/ does not exist (e.g. set18 before its folder
   // is curated): every set-specific table above is empty, and the rule engine
   // runs only its set-agnostic checkers. See meta-lookup.ts's loadMeta.

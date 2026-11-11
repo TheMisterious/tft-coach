@@ -60,7 +60,11 @@ export interface DeriveOutput {
     patches: string[];
     unmappedChampions: Record<string, number>;
     unknownItems: Record<string, number>;
-    roleEvidence: Record<string, { appearances: number; itemized: number; offense: number; tank: number }>;
+    // Per champion: boards it appeared on, boards it held 2+ combat items on,
+    // offensive and defensive item counts among those, and top-4 boards it
+    // appeared on. The app reads appearances over boards as the unit's
+    // prevalence (MetaData.metaUnits, src/enrichment/meta-lookup.ts).
+    roleEvidence: Record<string, { appearances: number; itemized: number; offense: number; tank: number; topFour: number }>;
   };
 }
 
@@ -134,6 +138,7 @@ interface UnitTally {
   itemized: number;
   offense: number;
   tank: number;
+  topFour: number;
   topFourItemCounts: Map<string, number>;
   topFourItemizedBoards: number;
 }
@@ -147,7 +152,7 @@ export function deriveSetMeta(input: DeriveInput): DeriveOutput {
   const tallies = new Map<string, UnitTally>();
   const tally = (id: string) => {
     let t = tallies.get(id);
-    if (!t) tallies.set(id, t = { appearances: 0, itemized: 0, offense: 0, tank: 0, topFourItemCounts: new Map(), topFourItemizedBoards: 0 });
+    if (!t) tallies.set(id, t = { appearances: 0, itemized: 0, offense: 0, tank: 0, topFour: 0, topFourItemCounts: new Map(), topFourItemizedBoards: 0 });
     return t;
   };
   const unmappedChampions: Record<string, number> = {};
@@ -174,6 +179,7 @@ export function deriveSetMeta(input: DeriveInput): DeriveOutput {
         }
         const t = tally(id);
         t.appearances++;
+        if (topFour) t.topFour++;
 
         const combat: string[] = [];
         for (const raw of unit.itemNames ?? []) {
@@ -209,7 +215,7 @@ export function deriveSetMeta(input: DeriveInput): DeriveOutput {
   const roles: Record<string, DerivedRole> = {};
   const roleEvidence: DeriveOutput['stats']['roleEvidence'] = {};
   for (const [id, t] of tallies) {
-    roleEvidence[id] = { appearances: t.appearances, itemized: t.itemized, offense: t.offense, tank: t.tank };
+    roleEvidence[id] = { appearances: t.appearances, itemized: t.itemized, offense: t.offense, tank: t.tank, topFour: t.topFour };
     if (t.appearances < MIN_APPEARANCES) continue;
     const itemizedShare = t.itemized / t.appearances;
     const tagged = t.offense + t.tank;

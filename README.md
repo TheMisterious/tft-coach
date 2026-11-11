@@ -26,10 +26,26 @@ gold, board, shop, augments, ...) while you play. coachv:
    `data/core/rule-evidence.json`); the report leads with the ones that hold
    up, and the text states what happened and the usual answer, not a verdict
    (`tests/coaching-prose.test.ts` enforces the wording).
-4. **Resolves** raw IDs (`TFT17_Teemo`, `TFT_Item_RabadonsDeathcap`, ...) to
+4. **Reads the whole picture** around those rules: the other seven players
+   across the match (`src/coach/lobby-map.ts` — HP and level each round,
+   their results, the boards of theirs the game sent, which of your units
+   they fielded, whether you scouted them), every planning round as one spot
+   (`src/coach/decision-windows.ts` — losses left, bank, level against the
+   lobby, pairs, the last three fights, contest, what you did there and the
+   usual lines from that spot with their conditions), and your usual game
+   over your last 20 recorded matches (`src/profile/style.ts`) so the report
+   can say where this one differed.
+5. **Resolves** raw IDs (`TFT17_Teemo`, `TFT_Item_RabadonsDeathcap`, ...) to
    friendly names and builds a compact brief.
-5. **Renders** the report in the desktop window. In game, the only thing shown
+6. **Renders** the report in the desktop window. In game, the only thing shown
    is a "report ready" notification once the match is over.
+
+The reconstruction keeps more of a round than its end state: every shop the
+game sent (one per roll), what was bought, the boards looked at before the
+fight (`match_info.board_spectate` in the planning phase), the item choices
+offered and taken, and every player's result. Rules written on those feeds
+are candidates (status `candidate` in `data/core/rules.core.json`) until
+matches recorded after they were written confirm them.
 
 There is currently no LLM in the loop — `src/coach/report-generator.ts` is a
 deterministic template filler over the rule engine's output. The name is a
@@ -137,12 +153,26 @@ npx ts-node tests/replay-harness.ts tests/goldens/your-match.jsonl
 
 ## Known limitations
 
-- **Most rules are unproven.** Of 45 rules, only `HP_002` and `HP_003` are
-  confirmed on held-out games (74 recorded matches, one player; the smallest
-  effect that sample can detect is about 1.6 placements). The rest show as
+- **Most rules are unproven.** Of 49 rules, only `HP_002` and `HP_003` are
+  confirmed on held-out games (77 recorded matches, one player; the smallest
+  effect that sample can detect is about 1.5 placements). The rest show as
   observations, and category letter grades are shown only for the categories
-  whose grades track placement (econ, HP, board). More recorded games are what
-  moves this — re-run `scripts/rule-audit.ts` as they accumulate.
+  whose grades track placement (econ, HP, board). Seven rules are candidates
+  that wait for matches recorded after they were written: `ECON_005`,
+  `ROLL_006` (2026-10-14), `BOARD_004` (2026-11-09), and `SHOP_001`,
+  `SCOUT_001`, `LOBBY_003`, `ITEM_006` (2026-11-11). More recorded games are
+  what moves this — re-run `scripts/rule-audit.ts` as they accumulate.
+- **The lobby, decision-window and style reads are not audited.** They
+  describe the match (facts and conditional lines) rather than flag it, so
+  the audit has nothing to window on. Their wording follows the same
+  standard as the rules: observations and the usual answer, never a verdict.
+- **Scouting is read from `board_spectate`,** which the Set 17 recordings
+  send about once a second and the Set 18 recordings send far less often.
+  A match that never sent it gets no scouting reading at all.
+- **Champion prevalence** (`riot-meta.source.json`, read as
+  `MetaData.metaUnits`) exists only for sets that have been through
+  `npm run fetch:riot-meta`; Set 17 has none. Re-running it also fills the
+  new `topFour` tally per champion.
 - **Set 18 (the live set)** runs on carried-over thresholds. Its
   `rules.season.json` holds Set 17's season rules minus the Realm of the Gods
   ones, and none has been re-verified against Set 18 balance

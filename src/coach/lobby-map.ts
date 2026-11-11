@@ -20,7 +20,7 @@ import { boardUnits } from '../ledger/merge';
 import { computeActiveComp } from './match-context';
 import { standingFor } from './lobby-context';
 import { readBoard, isComponent, stageOf } from './fights';
-import { getChampionName, isNonItemId } from '../enrichment/meta-lookup';
+import { getChampionName, isNonItemId, unitPrevalence } from '../enrichment/meta-lookup';
 
 const CHECKPOINTS = ['3-1', '4-1', '5-1'];
 // Wins over this many recorded player rounds decide who is leading the lobby.
@@ -136,12 +136,12 @@ export function readLobby(match: MatchSnapshot, meta: MetaData): LobbyRead | und
 
   return {
     opponents,
-    checkpoints: CHECKPOINTS.map(label => checkpoint(match, label, opponents)).filter((c): c is LobbyCheckpoint => !!c),
+    checkpoints: CHECKPOINTS.map(label => checkpoint(match, label, opponents, meta)).filter((c): c is LobbyCheckpoint => !!c),
     scouting: scouting(match),
   };
 }
 
-function checkpoint(match: MatchSnapshot, label: string, opponents: OpponentRead[]): LobbyCheckpoint | undefined {
+function checkpoint(match: MatchSnapshot, label: string, opponents: OpponentRead[], meta: MetaData): LobbyCheckpoint | undefined {
   const i = match.rounds.findIndex(r => r.label === label);
   if (i < 0) return undefined;
   const round = match.rounds[i];
@@ -161,10 +161,11 @@ function checkpoint(match: MatchSnapshot, label: string, opponents: OpponentRead
   const best = Math.max(0, ...wins.values());
   const leaders = best > 0 ? [...wins].filter(([, n]) => n === best).map(([name]) => name).sort().slice(0, LEADERS_SHOWN) : [];
 
-  const core = new Map<string, { id: string; name: string; by: string[] }>();
+  const core = new Map<string, LobbyCheckpoint['contestedCore'][number]>();
   for (const o of opponents) for (const c of o.contested) {
     if (roundNumber(c.round) > cut) continue;
-    const e = core.get(c.id) ?? { id: c.id, name: c.name, by: [] };
+    const share = unitPrevalence(c.id, meta)?.share;
+    const e = core.get(c.id) ?? { id: c.id, name: c.name, by: [], ...(share !== undefined ? { share } : {}) };
     if (!e.by.includes(o.name)) e.by.push(o.name);
     core.set(c.id, e);
   }

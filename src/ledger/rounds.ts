@@ -727,8 +727,12 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
         }
         // The unit bought is whatever the newly "Sold" slot held a moment
         // ago. A slot already "Sold" in the previous update names nothing.
+        // Every slot "Sold" at once is the shop closing when the player is
+        // knocked out (seen right after battle_end on a recorded 8th), not
+        // five purchases.
         const names = rawSlots.map(slot => slot?.name);
-        if (isPurchase) {
+        const allSold = hasSlots && sold === rawSlots.length;
+        if (isPurchase && !allSold) {
           names.forEach((name, i) => {
             const before = prevRawSlots[i];
             if (name === 'Sold' && before && before !== 'Sold') boughtThisRound.push(before);
@@ -737,7 +741,7 @@ export function reconstructSnapshots(entries: LedgerEntry[]): MatchSnapshot {
           const last = shopsSeen[shopsSeen.length - 1];
           if (!last || last.length !== newShop.length || last.some((n, i) => n !== newShop[i])) shopsSeen.push(newShop);
         }
-        if (hasSlots) prevRawSlots = names;
+        if (hasSlots && !allSold) prevRawSlots = names;
         prevShop = shop;
         shop = newShop;
       }

@@ -33,6 +33,20 @@ export function upgradeCopiesOffered(round: RoundSnapshot, meta?: MetaData): Map
   return offered;
 }
 
+/**
+ * Copies of held units across EVERY shop the round showed (shopsSeen: the
+ * opening shop and one per roll), by champion id. Falls back to the
+ * end-of-round shop on snapshots built before shops were kept, so it never
+ * reads fewer than upgradeCopiesOffered does.
+ */
+export function upgradeCopiesAcrossShops(round: RoundSnapshot, meta?: MetaData): Map<string, number> {
+  const shops = round.shopsSeen && round.shopsSeen.length > 0 ? round.shopsSeen : [round.shop];
+  const held = new Set(heldUnits(round, meta).map(u => u.name));
+  const offered = new Map<string, number>();
+  for (const shop of shops) for (const id of shop) if (held.has(id)) offered.set(id, (offered.get(id) ?? 0) + 1);
+  return offered;
+}
+
 /** Champion ids held as exactly two 1-star copies — one copy from a 2-star. */
 export function pairsHeld(round: RoundSnapshot, meta?: MetaData): string[] {
   const oneStar = new Map<string, number>();

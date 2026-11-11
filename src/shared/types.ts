@@ -468,6 +468,12 @@ export interface CoachingReport {
   // Every player fight, both boards and who did the damage. Absent on reports
   // made before fights were read.
   fights?: FightRow[];
+  // The other seven players across the match (src/coach/lobby-map.ts). Absent
+  // when the recording holds no roster, and on older reports.
+  lobby?: LobbyRead;
+  // The whole spot at each planning round (src/coach/decision-windows.ts).
+  // Absent on older reports.
+  decisions?: DecisionWindow[];
 }
 
 // ─── Fights (src/coach/fights.ts) ───────────────────────────────────────────
@@ -504,6 +510,114 @@ export interface FightRow {
   opp?: BoardRead;     // only when GEP sent the opponent's whole board that round
   ownLead?: DamageLead;
   oppLead?: DamageLead;
+}
+
+// ─── Lobby read (src/coach/lobby-map.ts) ─────────────────────────────────────
+// The other seven players across the whole match, from what the recording
+// holds about each: HP and level every round (roster), their fights' results
+// (round_outcome names every player), the boards of theirs GEP sent when you
+// fought them, which of your committed units they fielded, and the rounds you
+// looked at their board before a fight.
+
+export interface OpponentPoint { round: string; health: number; level: number }
+
+export interface OpponentBoardSeen {
+  round: string;
+  units: Array<{ id: string; name: string; stars: number; items: number }>;
+  // Active traits, most units first.
+  traits: string[];
+  value: number;       // cost × copies, as BoardRead.value
+  items: number;       // finished items
+  carry?: string;      // display name of the unit that led their damage, when recorded
+}
+
+export interface OpponentRead {
+  name: string;
+  path: OpponentPoint[];
+  eliminatedAt?: string;
+  finalRank?: number;
+  // Their results across the lobby's rounds, where round_outcome named them.
+  wins: number;
+  losses: number;
+  // Your fights against them.
+  fights: Array<{ round: string; result: 'win' | 'loss'; hpBefore: number; hpAfter: number }>;
+  lastBoard?: OpponentBoardSeen;
+  // Units of your committed comp they fielded on a board GEP sent, with the
+  // highest star level seen and the round it was first seen.
+  contested: Array<{ id: string; name: string; stars: number; round: string }>;
+  // Rounds you looked at this board in the planning phase.
+  scoutedAt: string[];
+}
+
+export interface LobbyCheckpoint {
+  round: string;
+  alive: number;
+  hpRank: number;
+  levelRank: number;
+  // Living opponents with less HP than you, and the gap to the nearest one.
+  playersBelow: number;
+  closestBelow?: number;
+  // Opponents with the most wins over the last three recorded player rounds.
+  leaders: string[];
+  // Your committed units seen on others' boards up to this round.
+  contestedCore: Array<{ id: string; name: string; by: string[] }>;
+}
+
+export interface LobbyScouting {
+  // Player rounds that had the board_spectate feed, and how many of them you
+  // looked at at least one other board in before the fight.
+  rounds: number;
+  scoutedRounds: number;
+  // Distinct boards looked at across the match.
+  boards: number;
+  byStage: Record<string, { rounds: number; scouted: number }>;
+}
+
+export interface LobbyRead {
+  // Final rank first when known, else the living by HP.
+  opponents: OpponentRead[];
+  checkpoints: LobbyCheckpoint[];
+  // Absent when the match never sent board_spectate.
+  scouting?: LobbyScouting;
+}
+
+// ─── Decision windows (src/coach/decision-windows.ts) ────────────────────────
+// The whole spot at each round a plan is usually set (2-1, 3-2, 4-1, 4-2,
+// 5-1, and the round the player went out): what the recording shows, what the
+// player did, and the usual lines from that spot with their conditions.
+// Observations and conditional lines, never a verdict on the choice made.
+
+export interface DecisionWindowState {
+  hp: number;                 // entering the round
+  lossesLeft?: number;        // at this stage's prices (absent without the set's numbers)
+  hpRank?: number;
+  alive?: number;
+  playersBelow?: number;
+  gold: number;               // entering the round
+  goldEnd: number;
+  level: number;
+  medianLevel?: number;
+  levelRank?: number;
+  streak: string;             // "3 wins", "2 losses", "none"
+  board: string;              // describeBoard()
+  twoStars: number;
+  finishedItems: number;
+  looseComponents: number;    // unbuilt components on units or bench
+  pairs: string[];            // display names, one copy from a 2-star
+  recentFights: string;       // "lost 2 of the last 3 player fights (outclassed in 1)"
+  recentLosses: number;
+  contested: string[];        // "Veigar (2 opponents)"
+}
+
+export interface DecisionWindow {
+  round: string;
+  stage: number;
+  title: string;
+  state: DecisionWindowState;
+  // What the player did this round: rolls, XP, buys, scouting, upgrade copies offered.
+  did: string[];
+  // The usual lines from this spot, each with the condition that applies.
+  lines: string[];
 }
 
 // ─── Game story (rule network trace) ────────────────────────────────────────
@@ -563,6 +677,8 @@ export interface MatchBrief {
   flaggedCategories?: DecisionCategory[];
   gameStory?: GameStory;
   fights?: FightRow[];
+  lobby?: LobbyRead;
+  decisions?: DecisionWindow[];
   // Grades computed from the full, pre-truncation decision-point list (see
   // rule-engine.ts) — deliberately independent of what made it into
   // resolvedNotes/decisionPoints after the MAX_POINTS/MAX_PER_RULE cuts.

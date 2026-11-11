@@ -14,6 +14,8 @@ import { canGradeOverall, captureNotes, gradableCategories } from './coverage';
 import { boardUnits } from '../ledger/merge';
 import { traceGame } from './rule-network';
 import { readFights } from './fights';
+import { readLobby } from './lobby-map';
+import { readDecisionWindows } from './decision-windows';
 
 // Maximum decision points (resolved + pending combined) before truncating.
 const MAX_POINTS = 20;
@@ -91,6 +93,7 @@ export function buildBrief(
   console.log(`[brief] resolved:${resolvedNotes.length} pending:${pendingPoints.length} finalComp units:${Object.values(match.finalBoard).filter(c => c?.name && c.name !== '0').length}`);
 
   const notes = captureNotes(match);
+  const lobby = readLobby(match, meta);
 
   // A letter needs two things: this match recorded enough to judge the
   // category, and the category's letter has been shown to track results at all.
@@ -116,6 +119,8 @@ export function buildBrief(
     flaggedCategories: [...new Set(allPoints.map(p => p.category))],
     gameStory:       traceGame(match, allPoints, meta),
     fights:          readFights(match, meta).map(({ ownShares: _shares, ...row }) => row),
+    ...(lobby ? { lobby } : {}),
+    decisions:       readDecisionWindows(match, meta, undefined, lobby),
     // Graded from the FULL point list (pre-truncation, always-on rules
     // included) and normalized by round count — see src/coach/scoring.ts.
     // Always-on rules stay in on purpose: the S-D thresholds were set with them

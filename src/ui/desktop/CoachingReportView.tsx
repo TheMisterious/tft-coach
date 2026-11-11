@@ -6,6 +6,8 @@ import { MatchTrajectoryCharts } from './MatchTrajectoryCharts';
 import { GamePlanSummary } from './GamePlanSummary';
 import { GameStoryView } from './GameStoryView';
 import { FightsView } from './FightsView';
+import { DecisionWindowsView } from './DecisionWindowsView';
+import { LobbyView } from './LobbyView';
 import { EmptyState } from './EmptyState';
 import styles from './CoachingReportView.module.css';
 
@@ -156,6 +158,10 @@ export function CoachingReportView({ report, history, onSelectMatch, activeMatch
             <GamePlanSummary plan={report.plan} />
 
             {report.game_story && <GameStoryView story={report.game_story} />}
+
+            {report.decisions && report.decisions.length > 0 && <DecisionWindowsView decisions={report.decisions} />}
+
+            {report.lobby && <LobbyView lobby={report.lobby} />}
 
             {report.fights && report.fights.length > 0 && <FightsView fights={report.fights} />}
 

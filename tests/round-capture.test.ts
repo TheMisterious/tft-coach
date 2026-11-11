@@ -125,6 +125,26 @@ describe('round capture', () => {
     expect(reconstructSnapshots(ledger()).capture?.scoutingSeen).toBe(true);
   });
 
+  it('does not read the all-Sold shop the game sends on elimination as purchases', () => {
+    ts = 1000;
+    const snap = reconstructSnapshots([
+      info('match_info', 'game_mode', 'TFT'),
+      info('me', 'gold', 37),
+      info('match_info', 'round_type', { stage: '4-6', type: 'PVP' }),
+      event('round_start', 'PVP'),
+      shop('Taric', 'Camille', 'Caitlyn', 'Kennen', 'Vi'),
+      shop('Taric', 'Camille', 'Caitlyn', 'Sold', 'Vi'),
+      shop('Sold', 'Camille', 'Caitlyn', 'Sold', 'Vi'),
+      event('battle_start', 'PVP'),
+      event('battle_end'),
+      shop('Sold', 'Sold', 'Sold', 'Sold', 'Sold'),
+      info('me', 'health', -2),
+      event('match_end'),
+      event('round_end'),
+    ]);
+    expect(snap.rounds[0].bought).toEqual(['Kennen', 'Taric']);
+  });
+
   it('leaves scouting undefined when the match never sent board_spectate', () => {
     const snap = reconstructSnapshots(ledger(false));
     expect(snap.capture?.scoutingSeen).toBe(false);

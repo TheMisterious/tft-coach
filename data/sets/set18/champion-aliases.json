@@ -1,0 +1,9 @@
+{
+  "_comment": "GEP unit id for a champion's alternate form -> the champions.json id of the same champion. Riot's set data lists one id per champion, but GEP reports the form a unit is in, so these ids are in no table. Hand-curated from every Set 18 recording on 2026-11-12. Applied at load (meta-lookup.ts), so cost, traits, role and name all resolve.",
+  "DA_18_Akali_AP": "DA_18_Akali_AD",
+  "DA_18_MasterYi_AP": "DA_18_MasterYi_AD",
+  "DA_KogMaw18_AP": "DA_KogMaw18_AD",
+  "DA_NidaleeCougar18_AD": "DA_Nidalee18_AP",
+  "DA_18_EliseSpider": "DA_18_Elise",
+  "DA_18_GnarBig": "DA_18_GnarSmall"
+}

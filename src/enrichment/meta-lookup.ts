@@ -72,11 +72,12 @@ async function hasSetData(setId: string): Promise<boolean> {
 async function loadMetaFiles(setId: string): Promise<MetaData> {
   const base = `/data/sets/${setId}`;
   console.log('[meta] loading set data from:', base);
-  const [carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiersRaw, comps, augmentUnitGrants, augmentEffects, riotMetaSource] = await Promise.all([
+  const [carryBis, traitBreakpoints, econBenchmarks, champions, championAliasesRaw, items, itemData, itemAliases, augments, augmentNames, augmentModifiersRaw, comps, augmentUnitGrants, augmentEffects, riotMetaSource] = await Promise.all([
     fetchJson<Record<string, CarryBisEntry>>(`${base}/carry-bis.json`, {}),
     fetchJson<TraitBreakpoint[]>(`${base}/trait-breakpoints.json`, []),
     fetchJson<EconBenchmark[]>(`${base}/econ-benchmarks.json`, []),
     fetchJson<Record<string, ChampionMeta>>(`${base}/champions.json`, {}),
+    fetchJson<Record<string, string>>(`${base}/champion-aliases.json`, {}),
     fetchJson<Record<string, string>>(`/data/core/items.json`, {}),
     fetchJson<Record<string, ItemData>>(`/data/core/item-data.json`, {}),
     fetchJson<Record<string, string>>(`/data/core/item-aliases.json`, {}),
@@ -89,6 +90,7 @@ async function loadMetaFiles(setId: string): Promise<MetaData> {
     fetchJson<RiotMetaSource | null>(`${base}/riot-meta.source.json`, null),
   ]);
   const metaUnits = toMetaUnits(riotMetaSource);
+  const championAliases = withChampionForms(champions, championAliasesRaw);
   // Merge over defaults — a set without an augment-modifiers.json file (or a
   // file missing a bucket) falls back to "no overrides" for that bucket rather
   // than crashing every checker that reads meta.augmentModifiers.*.
@@ -99,7 +101,27 @@ async function loadMetaFiles(setId: string): Promise<MetaData> {
   // missing localStorage global, same as every other persistence accessor).
   const metaTierTable = loadAggregateMetaTable();
   console.log(`[meta] loaded — champions:${Object.keys(champions ?? {}).length} carryBis:${Object.keys(carryBis ?? {}).length} traits:${(traitBreakpoints as unknown[])?.length ?? 0} econBenchmarks:${(econBenchmarks as unknown[])?.length ?? 0} items:${Object.keys(items ?? {}).length} itemData:${Object.keys(itemData ?? {}).length} augments:${Object.keys(augments ?? {}).length} augmentNames:${Object.keys(augmentNames ?? {}).length} augmentModifiers:${Object.keys(augmentModifiers.itemBisOverrides).length} comps:${comps?.length ?? 0} augmentUnitGrants:${Object.keys(augmentUnitGrants ?? {}).length} augmentEffects:${Object.keys(augmentEffects ?? {}).length} metaTierTable:${metaTierTable ? metaTierTable.matchSampleCount : 'none'}`);
-  return { carryBis, traitBreakpoints, econBenchmarks, champions, items, itemData, itemAliases, augments, augmentNames, augmentModifiers, comps, augmentUnitGrants, augmentEffects, metaTierTable, ...(metaUnits ? { metaUnits } : {}) };
+  return { carryBis, traitBreakpoints, econBenchmarks, champions, ...(championAliases ? { championAliases } : {}), items, itemData, itemAliases, augments, augmentNames, augmentModifiers, comps, augmentUnitGrants, augmentEffects, metaTierTable, ...(metaUnits ? { metaUnits } : {}) };
+}
+
+// Copies each champion's entry under the ids of its alternate forms, so every
+// `meta.champions[unit.name]` lookup (cost, traits, role, name) resolves a
+// form GEP reports — "DA_18_Akali_AP" was costed at 1 and shown as
+// "DA 18 Akali AP" before this. Returns the aliases that resolved, or
+// undefined when there are none. A form already in champions.json wins.
+export function withChampionForms(
+  champions: Record<string, ChampionMeta>,
+  aliases: Record<string, string> | null | undefined,
+): Record<string, string> | undefined {
+  const resolved: Record<string, string> = {};
+  for (const [form, baseId] of Object.entries(aliases ?? {})) {
+    if (form.startsWith('_') || typeof baseId !== 'string') continue;
+    const entry = champions[baseId];
+    if (!entry) continue;
+    if (!champions[form]) champions[form] = entry;
+    resolved[form] = baseId;
+  }
+  return Object.keys(resolved).length ? resolved : undefined;
 }
 
 // The provenance file scripts/fetch-riot-meta.ts writes beside the derived
@@ -128,7 +150,7 @@ export function toMetaUnits(raw: RiotMetaSource | null | undefined): MetaUnits |
 export function unitPrevalence(championId: string, meta: MetaData): { share: number; boards: number; source: string } | undefined {
   const m = meta.metaUnits;
   if (!m || !m.boards) return undefined;
-  const u = m.units[championId];
+  const u = m.units[championId] ?? m.units[meta.championAliases?.[championId] ?? ''];
   if (!u) return undefined;
   return { share: u.appearances / m.boards, boards: m.boards, source: m.source };
 }

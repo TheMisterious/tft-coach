@@ -1058,6 +1058,11 @@ export interface MetaData {
   // Optional: a stale data/ folder without the file still loads, it just
   // resolves fewer ids. See meta-lookup.ts's resolveItemId.
   itemAliases?: Record<string, string>;
+  // GEP's id for a champion's alternate form -> the champions.json id of the
+  // same champion (data/sets/set{N}/champion-aliases.json). loadMeta already
+  // copies the base entry under each form id in `champions`; this map is kept
+  // for tables keyed by the base id only (metaUnits).
+  championAliases?: Record<string, string>;
   // Augment ids grouped by category (data/sets/set{N}/augments.json).
   augments: Record<string, string[]>;
   // Core, auto-fetched augment id -> friendly display name (data/core/augment-names.json).

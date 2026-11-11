@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "generated": "2026-11-08",
+    "generated": "2026-11-11",
     "by": "scripts/rule-audit.ts --write — do not hand-edit",
-    "matches": 74,
+    "matches": 77,
     "sets": [
       "set17",
       "set18"
     ],
     "split": {
-      "discovery": 44,
-      "holdout": 30,
-      "holdoutFrom": "2026-07-30"
+      "discovery": 46,
+      "holdout": 31,
+      "holdoutFrom": "2026-07-31"
     },
     "method": "Exploratory association in one player's games, not causation. Per rule: mean placement where it fired at or before a cut round vs matches that reached that round without it firing, 95% bootstrap CI, two-sided permutation test, Benjamini-Hochberg across rules. verdict is the full-data result (predictive = q < 0.1 with a worse finish). status is confirmed only when a rule discovered on the older 60% of matches (by date) shows a worse finish again on the newer 40% (one-sided, corrected); otherwise exploratory. See results/rule-audit/report.md."
   },
@@ -18,16 +18,16 @@
     "AUGMENT_001": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 2.03,
+      "placementDelta": 1.96,
       "ci": [
-        0.13,
-        3.68
+        0.09,
+        3.69
       ],
-      "matches": 71,
+      "matches": 74,
       "matchesFired": 6,
       "window": "4-5",
-      "p": 0.033,
-      "q": 0.113,
+      "p": 0.047,
+      "q": 0.166,
       "discovery": {
         "n": 0,
         "delta": null,
@@ -47,11 +47,11 @@
           "state": "HP at the cut round",
           "group": "HP under 50",
           "nFired": 6,
-          "nNot": 31,
-          "delta": 1.1,
+          "nNot": 34,
+          "delta": 1.03,
           "ci": [
-            -1.01,
-            2.92
+            -0.9,
+            2.84
           ]
         },
         {
@@ -66,11 +66,11 @@
           "state": "HP rank in the lobby",
           "group": "bottom half",
           "nFired": 6,
-          "nNot": 30,
-          "delta": 0.93,
+          "nNot": 33,
+          "delta": 0.88,
           "ci": [
-            -1.1,
-            2.77
+            -1.03,
+            2.71
           ]
         }
       ]
@@ -80,7 +80,7 @@
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 1,
       "window": null,
       "p": null,
@@ -94,8 +94,8 @@
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
-      "matchesFired": 74,
+      "matches": 77,
+      "matchesFired": 77,
       "window": null,
       "p": null,
       "q": null,
@@ -106,20 +106,20 @@
     "BOARD_003": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": -0.24,
+      "placementDelta": -0.22,
       "ci": [
-        -0.92,
-        0.4
+        -0.86,
+        0.41
       ],
-      "matches": 50,
-      "matchesFired": 31,
+      "matches": 51,
+      "matchesFired": 32,
       "window": "5-5",
-      "p": 0.579,
-      "q": 0.817,
+      "p": 0.575,
+      "q": 0.805,
       "discovery": {
-        "n": 32,
+        "n": 34,
         "delta": -0.14,
-        "q": 0.939
+        "q": 1
       },
       "holdout": null,
       "context": [
@@ -134,23 +134,23 @@
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 15,
+          "nFired": 16,
           "nNot": 26,
-          "delta": -0.46,
+          "delta": -0.44,
           "ci": [
-            -1.21,
+            -1.18,
             0.31
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "top half",
-          "nFired": 9,
+          "nFired": 10,
           "nNot": 16,
-          "delta": 0.13,
+          "delta": 0.19,
           "ci": [
-            -0.56,
-            0.79
+            -0.5,
+            0.85
           ]
         },
         {
@@ -160,29 +160,29 @@
           "nNot": 17,
           "delta": -0.52,
           "ci": [
-            -1.52,
-            0.41
+            -1.54,
+            0.43
           ]
         }
       ]
     },
     "BOARD_004": {
-      "verdict": "predictive",
+      "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 1.63,
+      "placementDelta": 1.47,
       "ci": [
-        0.45,
-        2.75
+        0.34,
+        2.55
       ],
-      "matches": 71,
-      "matchesFired": 24,
+      "matches": 74,
+      "matchesFired": 27,
       "window": "4-5",
-      "p": 0.006,
-      "q": 0.036,
+      "p": 0.011,
+      "q": 0.105,
       "discovery": null,
       "holdout": {
         "kind": "prospective",
-        "n": 0,
+        "n": 2,
         "delta": null,
         "p": null,
         "q": null
@@ -192,20 +192,23 @@
         {
           "state": "HP at the cut round",
           "group": "HP 50+",
-          "nFired": 4,
-          "nNot": 30,
-          "delta": null,
-          "ci": null
+          "nFired": 5,
+          "nNot": 29,
+          "delta": 1.5,
+          "ci": [
+            0.16,
+            2.64
+          ]
         },
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 17,
-          "nNot": 20,
-          "delta": 0.5,
+          "nFired": 18,
+          "nNot": 22,
+          "delta": 0.58,
           "ci": [
-            -1.13,
-            2.06
+            -1.02,
+            2.05
           ]
         },
         {
@@ -213,21 +216,21 @@
           "group": "top half",
           "nFired": 5,
           "nNot": 30,
-          "delta": 1.6,
+          "delta": 1.13,
           "ci": [
-            0.97,
-            2.23
+            0,
+            2.1
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 16,
-          "nNot": 20,
-          "delta": 0.61,
+          "nFired": 18,
+          "nNot": 21,
+          "delta": 0.56,
           "ci": [
-            -1.06,
-            2.17
+            -0.93,
+            2.05
           ]
         }
       ]
@@ -237,7 +240,7 @@
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 2,
       "window": null,
       "p": null,
@@ -251,7 +254,7 @@
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 1,
       "window": null,
       "p": null,
@@ -265,8 +268,8 @@
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
-      "matchesFired": 71,
+      "matches": 77,
+      "matchesFired": 74,
       "window": null,
       "p": null,
       "q": null,
@@ -275,18 +278,18 @@
       "context": []
     },
     "ECON_002": {
-      "verdict": "predictive",
+      "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 1.95,
+      "placementDelta": 1.88,
       "ci": [
-        0.54,
-        3.29
+        0.39,
+        3.2
       ],
-      "matches": 71,
+      "matches": 74,
       "matchesFired": 9,
       "window": "4-5",
-      "p": 0.021,
-      "q": 0.085,
+      "p": 0.034,
+      "q": 0.135,
       "discovery": {
         "n": 0,
         "delta": null,
@@ -306,11 +309,11 @@
           "state": "HP at the cut round",
           "group": "HP under 50",
           "nFired": 6,
-          "nNot": 31,
-          "delta": 0.9,
+          "nNot": 34,
+          "delta": 0.83,
           "ci": [
-            -1.05,
-            2.73
+            -1.1,
+            2.64
           ]
         },
         {
@@ -325,11 +328,11 @@
           "state": "HP rank in the lobby",
           "group": "bottom half",
           "nFired": 7,
-          "nNot": 29,
-          "delta": 0.79,
+          "nNot": 32,
+          "delta": 0.73,
           "ci": [
-            -0.93,
-            2.45
+            -0.94,
+            2.35
           ]
         }
       ]
@@ -337,20 +340,20 @@
     "ECON_003": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 0.34,
+      "placementDelta": 0.27,
       "ci": [
-        -0.92,
-        1.6
+        -0.97,
+        1.57
       ],
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 16,
       "window": "3-2",
-      "p": 0.633,
-      "q": 0.844,
+      "p": 0.72,
+      "q": 0.84,
       "discovery": {
-        "n": 44,
-        "delta": -0.83,
-        "q": 0.801
+        "n": 46,
+        "delta": -0.95,
+        "q": 0.804
       },
       "holdout": null,
       "context": [
@@ -358,11 +361,11 @@
           "state": "HP at the cut round",
           "group": "HP 50+",
           "nFired": 15,
-          "nNot": 58,
-          "delta": 0.24,
+          "nNot": 61,
+          "delta": 0.17,
           "ci": [
-            -1.05,
-            1.57
+            -1.09,
+            1.5
           ]
         },
         {
@@ -380,19 +383,19 @@
           "nNot": 33,
           "delta": -0.72,
           "ci": [
-            -1.97,
-            0.6
+            -2,
+            0.63
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
           "nFired": 8,
-          "nNot": 25,
-          "delta": 1.28,
+          "nNot": 28,
+          "delta": 1.18,
           "ci": [
-            -0.43,
-            2.89
+            -0.45,
+            2.75
           ]
         }
       ]
@@ -400,20 +403,20 @@
     "ECON_004": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 0.55,
+      "placementDelta": 0.29,
       "ci": [
-        -0.66,
-        1.72
+        -0.87,
+        1.41
       ],
-      "matches": 71,
+      "matches": 74,
       "matchesFired": 60,
       "window": "4-5",
-      "p": 0.376,
-      "q": 0.564,
+      "p": 0.653,
+      "q": 0.831,
       "discovery": {
-        "n": 43,
-        "delta": 0.67,
-        "q": 0.801
+        "n": 45,
+        "delta": 0.91,
+        "q": 0.775
       },
       "holdout": null,
       "context": [
@@ -432,11 +435,11 @@
           "state": "HP at the cut round",
           "group": "HP under 50",
           "nFired": 27,
-          "nNot": 10,
-          "delta": -0.16,
+          "nNot": 13,
+          "delta": -0.27,
           "ci": [
-            -1.73,
-            1.37
+            -1.74,
+            1.15
           ]
         },
         {
@@ -454,11 +457,11 @@
           "state": "HP rank in the lobby",
           "group": "bottom half",
           "nFired": 28,
-          "nNot": 8,
-          "delta": -0.36,
+          "nNot": 11,
+          "delta": -0.4,
           "ci": [
-            -2.05,
-            1.38
+            -1.92,
+            1.18
           ]
         }
       ]
@@ -466,20 +469,20 @@
     "ECON_005": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 0.79,
+      "placementDelta": 0.87,
       "ci": [
-        -0.46,
-        2.11
+        -0.33,
+        2.09
       ],
-      "matches": 66,
-      "matchesFired": 24,
+      "matches": 68,
+      "matchesFired": 27,
       "window": "5-1",
-      "p": 0.235,
-      "q": 0.433,
+      "p": 0.157,
+      "q": 0.318,
       "discovery": null,
       "holdout": {
         "kind": "prospective",
-        "n": 0,
+        "n": 2,
         "delta": null,
         "p": null,
         "q": null
@@ -497,31 +500,34 @@
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 12,
+          "nFired": 14,
           "nNot": 36,
-          "delta": 0.36,
+          "delta": 0.45,
           "ci": [
-            -1.14,
-            1.86
+            -0.87,
+            1.83
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "top half",
-          "nFired": 4,
+          "nFired": 5,
           "nNot": 31,
-          "delta": null,
-          "ci": null
+          "delta": 0.43,
+          "ci": [
+            -0.82,
+            1.64
+          ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 10,
+          "nFired": 11,
           "nNot": 21,
-          "delta": -0.1,
+          "delta": 0.13,
           "ci": [
-            -1.73,
-            1.55
+            -1.43,
+            1.69
           ]
         }
       ]
@@ -529,31 +535,31 @@
     "HP_001": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 1.1,
+      "placementDelta": 1.16,
       "ci": [
-        0,
-        2.16
+        0.14,
+        2.26
       ],
-      "matches": 74,
-      "matchesFired": 29,
+      "matches": 77,
+      "matchesFired": 32,
       "window": "3-2",
-      "p": 0.05,
-      "q": 0.15,
+      "p": 0.033,
+      "q": 0.135,
       "discovery": {
-        "n": 44,
-        "delta": 0.55,
-        "q": 0.801
+        "n": 46,
+        "delta": 0.6,
+        "q": 0.836
       },
       "holdout": null,
       "context": [
         {
           "state": "HP at the cut round",
           "group": "HP 50+",
-          "nFired": 28,
+          "nFired": 31,
           "nNot": 45,
-          "delta": 1.06,
+          "delta": 1.13,
           "ci": [
-            -0.07,
+            0.06,
             2.18
           ]
         },
@@ -576,12 +582,12 @@
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 26,
+          "nFired": 29,
           "nNot": 7,
-          "delta": 0.04,
+          "delta": 0.1,
           "ci": [
-            -1.85,
-            1.84
+            -1.75,
+            1.92
           ]
         }
       ]
@@ -589,27 +595,27 @@
     "HP_002": {
       "verdict": "predictive",
       "status": "confirmed",
-      "placementDelta": 2.01,
+      "placementDelta": 2.03,
       "ci": [
-        1,
-        2.98
+        1.05,
+        2.95
       ],
-      "matches": 74,
-      "matchesFired": 32,
+      "matches": 77,
+      "matchesFired": 35,
       "window": "4-1",
-      "p": 0,
-      "q": 0.005,
+      "p": 0.001,
+      "q": 0.008,
       "discovery": {
-        "n": 44,
-        "delta": 2.1,
-        "q": 0.061
+        "n": 46,
+        "delta": 2.13,
+        "q": 0.043
       },
       "holdout": {
         "kind": "held-out",
-        "n": 30,
-        "delta": 2.13,
-        "p": 0.009,
-        "q": 0.009
+        "n": 31,
+        "delta": 2.14,
+        "p": 0.01,
+        "q": 0.01
       },
       "context": [
         {
@@ -626,7 +632,7 @@
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 24,
+          "nFired": 27,
           "nNot": 0,
           "delta": null,
           "ci": null
@@ -642,7 +648,7 @@
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 31,
+          "nFired": 34,
           "nNot": 3,
           "delta": null,
           "ci": null
@@ -652,27 +658,27 @@
     "HP_003": {
       "verdict": "predictive",
       "status": "confirmed",
-      "placementDelta": 2.29,
+      "placementDelta": 2.31,
       "ci": [
-        1.29,
-        3.28
+        1.28,
+        3.27
       ],
-      "matches": 66,
-      "matchesFired": 24,
+      "matches": 68,
+      "matchesFired": 25,
       "window": "5-1",
       "p": 0,
-      "q": 0.005,
+      "q": 0.006,
       "discovery": {
-        "n": 42,
-        "delta": 2.63,
-        "q": 0.003
+        "n": 44,
+        "delta": 2.64,
+        "q": 0.011
       },
       "holdout": {
         "kind": "held-out",
         "n": 24,
-        "delta": 1.97,
-        "p": 0.006,
-        "q": 0.009
+        "delta": 2.08,
+        "p": 0.002,
+        "q": 0.004
       },
       "context": [
         {
@@ -686,31 +692,31 @@
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 24,
-          "nNot": 24,
-          "delta": 2.04,
+          "nFired": 25,
+          "nNot": 25,
+          "delta": 2.08,
           "ci": [
-            0.92,
-            3.12
+            0.96,
+            3.08
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "top half",
           "nFired": 0,
-          "nNot": 35,
+          "nNot": 36,
           "delta": null,
           "ci": null
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 24,
+          "nFired": 25,
           "nNot": 7,
-          "delta": 1.19,
+          "delta": 1.22,
           "ci": [
-            -0.24,
-            2.48
+            -0.14,
+            2.47
           ]
         }
       ]
@@ -718,16 +724,16 @@
     "ITEM_001": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 1.25,
+      "placementDelta": 1.17,
       "ci": [
-        -0.5,
-        2.94
+        -0.67,
+        2.86
       ],
-      "matches": 71,
+      "matches": 74,
       "matchesFired": 10,
       "window": "4-5",
-      "p": 0.162,
-      "q": 0.38,
+      "p": 0.187,
+      "q": 0.327,
       "discovery": {
         "n": 0,
         "delta": null,
@@ -747,11 +753,11 @@
           "state": "HP at the cut round",
           "group": "HP under 50",
           "nFired": 5,
-          "nNot": 32,
-          "delta": 2.22,
+          "nNot": 35,
+          "delta": 2.14,
           "ci": [
-            1.09,
-            3.32
+            1.03,
+            3.29
           ]
         },
         {
@@ -766,11 +772,11 @@
           "state": "HP rank in the lobby",
           "group": "bottom half",
           "nFired": 5,
-          "nNot": 31,
-          "delta": 2.06,
+          "nNot": 34,
+          "delta": 2,
           "ci": [
-            0.92,
-            3.21
+            0.86,
+            3.11
           ]
         }
       ]
@@ -780,7 +786,7 @@
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 4,
       "window": null,
       "p": null,
@@ -792,65 +798,65 @@
     "ITEM_003": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 0.16,
+      "placementDelta": -0.15,
       "ci": [
-        -0.85,
-        1.26
+        -1.19,
+        0.85
       ],
-      "matches": 74,
-      "matchesFired": 34,
+      "matches": 77,
+      "matchesFired": 37,
       "window": "4-1",
-      "p": 0.809,
-      "q": 0.916,
+      "p": 0.813,
+      "q": 0.91,
       "discovery": {
-        "n": 44,
-        "delta": 0.43,
-        "q": 0.801
+        "n": 46,
+        "delta": 0.57,
+        "q": 0.836
       },
       "holdout": null,
       "context": [
         {
           "state": "HP at the cut round",
           "group": "HP 50+",
-          "nFired": 19,
-          "nNot": 31,
-          "delta": -0.35,
+          "nFired": 20,
+          "nNot": 30,
+          "delta": -0.4,
           "ci": [
-            -1.34,
-            0.63
+            -1.43,
+            0.58
           ]
         },
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 15,
-          "nNot": 9,
-          "delta": -0.18,
+          "nFired": 17,
+          "nNot": 10,
+          "delta": -1.01,
           "ci": [
-            -2.16,
-            2
+            -2.75,
+            0.97
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "top half",
-          "nFired": 14,
-          "nNot": 26,
-          "delta": 0.27,
+          "nFired": 15,
+          "nNot": 25,
+          "delta": 0.23,
           "ci": [
-            -0.66,
-            1.19
+            -0.68,
+            1.12
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 20,
-          "nNot": 14,
-          "delta": -1.07,
+          "nFired": 22,
+          "nNot": 15,
+          "delta": -1.58,
           "ci": [
-            -2.71,
-            0.61
+            -3.09,
+            -0.01
           ]
         }
       ]
@@ -858,20 +864,20 @@
     "ITEM_005": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 0.58,
+      "placementDelta": 0.49,
       "ci": [
-        -0.64,
-        1.77
+        -0.7,
+        1.67
       ],
-      "matches": 74,
-      "matchesFired": 29,
+      "matches": 77,
+      "matchesFired": 31,
       "window": "4-1",
-      "p": 0.316,
-      "q": 0.541,
+      "p": 0.38,
+      "q": 0.624,
       "discovery": {
-        "n": 44,
-        "delta": -0.84,
-        "q": 0.801
+        "n": 46,
+        "delta": -1.16,
+        "q": 0.775
       },
       "holdout": null,
       "context": [
@@ -882,19 +888,19 @@
           "nNot": 42,
           "delta": -1.21,
           "ci": [
-            -2.22,
-            -0.18
+            -2.24,
+            -0.21
           ]
         },
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 17,
-          "nNot": 7,
-          "delta": -0.07,
+          "nFired": 19,
+          "nNot": 8,
+          "delta": -0.47,
           "ci": [
-            -2.23,
-            2.04
+            -2.49,
+            1.55
           ]
         },
         {
@@ -904,19 +910,82 @@
           "nNot": 34,
           "delta": -0.77,
           "ci": [
-            -1.8,
-            0.24
+            -1.81,
+            0.26
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 19,
-          "nNot": 15,
-          "delta": -0.28,
+          "nFired": 21,
+          "nNot": 16,
+          "delta": -0.51,
           "ci": [
-            -2.05,
-            1.4
+            -2.09,
+            1.15
+          ]
+        }
+      ]
+    },
+    "ITEM_006": {
+      "verdict": "unproven",
+      "status": "exploratory",
+      "placementDelta": 1.99,
+      "ci": [
+        0.56,
+        3.32
+      ],
+      "matches": 74,
+      "matchesFired": 11,
+      "window": "4-5",
+      "p": 0.032,
+      "q": 0.135,
+      "discovery": null,
+      "holdout": {
+        "kind": "prospective",
+        "n": 0,
+        "delta": null,
+        "p": null,
+        "q": null
+      },
+      "candidateSince": "2026-11-11",
+      "context": [
+        {
+          "state": "HP at the cut round",
+          "group": "HP 50+",
+          "nFired": 0,
+          "nNot": 34,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP at the cut round",
+          "group": "HP under 50",
+          "nFired": 7,
+          "nNot": 33,
+          "delta": 1.06,
+          "ci": [
+            -0.52,
+            2.56
+          ]
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "top half",
+          "nFired": 0,
+          "nNot": 35,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "bottom half",
+          "nFired": 7,
+          "nNot": 32,
+          "delta": 0.91,
+          "ci": [
+            -0.71,
+            2.39
           ]
         }
       ]
@@ -924,32 +993,32 @@
     "LEVEL_001": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": -0.13,
+      "placementDelta": 0.88,
       "ci": [
-        -1.19,
-        0.99
+        -0.43,
+        2.09
       ],
-      "matches": 74,
-      "matchesFired": 35,
+      "matches": 77,
+      "matchesFired": 20,
       "window": "3-2",
-      "p": 0.84,
-      "q": 0.916,
+      "p": 0.165,
+      "q": 0.318,
       "discovery": {
-        "n": 44,
-        "delta": -0.34,
-        "q": 0.847
+        "n": 46,
+        "delta": 0.27,
+        "q": 1
       },
       "holdout": null,
       "context": [
         {
           "state": "HP at the cut round",
           "group": "HP 50+",
-          "nFired": 34,
-          "nNot": 39,
-          "delta": -0.18,
+          "nFired": 19,
+          "nNot": 57,
+          "delta": 0.82,
           "ci": [
-            -1.26,
-            0.87
+            -0.47,
+            2.14
           ]
         },
         {
@@ -963,86 +1032,23 @@
         {
           "state": "HP rank in the lobby",
           "group": "top half",
-          "nFired": 18,
-          "nNot": 23,
-          "delta": -0.47,
+          "nFired": 6,
+          "nNot": 35,
+          "delta": 1.51,
           "ci": [
-            -1.69,
-            0.77
+            -0.49,
+            3.28
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 17,
-          "nNot": 16,
-          "delta": 0.06,
-          "ci": [
-            -1.62,
-            1.64
-          ]
-        }
-      ]
-    },
-    "LEVEL_002": {
-      "verdict": "unproven",
-      "status": "exploratory",
-      "placementDelta": -0.81,
-      "ci": [
-        -1.87,
-        0.35
-      ],
-      "matches": 74,
-      "matchesFired": 25,
-      "window": "4-1",
-      "p": 0.174,
-      "q": 0.38,
-      "discovery": {
-        "n": 44,
-        "delta": 0.18,
-        "q": 0.939
-      },
-      "holdout": null,
-      "context": [
-        {
-          "state": "HP at the cut round",
-          "group": "HP 50+",
-          "nFired": 23,
-          "nNot": 27,
-          "delta": -0.46,
-          "ci": [
-            -1.49,
-            0.65
-          ]
-        },
-        {
-          "state": "HP at the cut round",
-          "group": "HP under 50",
-          "nFired": 2,
+          "nFired": 14,
           "nNot": 22,
-          "delta": null,
-          "ci": null
-        },
-        {
-          "state": "HP rank in the lobby",
-          "group": "top half",
-          "nFired": 18,
-          "nNot": 22,
-          "delta": -0.89,
+          "delta": -0.14,
           "ci": [
-            -1.72,
-            -0.04
-          ]
-        },
-        {
-          "state": "HP rank in the lobby",
-          "group": "bottom half",
-          "nFired": 7,
-          "nNot": 27,
-          "delta": 0.88,
-          "ci": [
-            -1.42,
-            2.86
+            -1.86,
+            1.56
           ]
         }
       ]
@@ -1050,65 +1056,62 @@
     "LEVEL_003": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": -0.23,
+      "placementDelta": -0.07,
       "ci": [
         -1.34,
-        0.82
+        1.14
       ],
-      "matches": 71,
-      "matchesFired": 27,
+      "matches": 74,
+      "matchesFired": 14,
       "window": "4-5",
-      "p": 0.699,
-      "q": 0.883,
+      "p": 0.952,
+      "q": 0.952,
       "discovery": {
-        "n": 43,
-        "delta": 0.1,
-        "q": 0.939
+        "n": 45,
+        "delta": 0,
+        "q": 1
       },
       "holdout": null,
       "context": [
         {
           "state": "HP at the cut round",
           "group": "HP 50+",
-          "nFired": 15,
-          "nNot": 19,
-          "delta": 0.03,
+          "nFired": 5,
+          "nNot": 29,
+          "delta": 1.27,
           "ci": [
-            -0.93,
-            1.03
+            -0.63,
+            2.87
           ]
         },
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 12,
-          "nNot": 25,
-          "delta": 0,
+          "nFired": 9,
+          "nNot": 31,
+          "delta": -1.31,
           "ci": [
-            -1.73,
-            1.68
+            -2.97,
+            0.36
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "top half",
-          "nFired": 14,
-          "nNot": 21,
-          "delta": -0.17,
-          "ci": [
-            -1.05,
-            0.81
-          ]
+          "nFired": 4,
+          "nNot": 31,
+          "delta": null,
+          "ci": null
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 13,
-          "nNot": 23,
-          "delta": -0.11,
+          "nFired": 10,
+          "nNot": 29,
+          "delta": -1.29,
           "ci": [
-            -1.88,
-            1.52
+            -2.91,
+            0.27
           ]
         }
       ]
@@ -1116,20 +1119,20 @@
     "LEVEL_004": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": -1,
+      "placementDelta": -1.06,
       "ci": [
-        -2.04,
-        0.09
+        -2.11,
+        0.05
       ],
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 27,
       "window": "3-2",
-      "p": 0.098,
-      "q": 0.261,
+      "p": 0.073,
+      "q": 0.197,
       "discovery": {
-        "n": 44,
-        "delta": -1.1,
-        "q": 0.51
+        "n": 46,
+        "delta": -1,
+        "q": 0.775
       },
       "holdout": null,
       "context": [
@@ -1137,11 +1140,11 @@
           "state": "HP at the cut round",
           "group": "HP 50+",
           "nFired": 23,
-          "nNot": 50,
-          "delta": -0.97,
+          "nNot": 53,
+          "delta": -1.03,
           "ci": [
-            -1.98,
-            0.1
+            -2.08,
+            0.04
           ]
         },
         {
@@ -1159,19 +1162,19 @@
           "nNot": 25,
           "delta": -1.37,
           "ci": [
-            -2.41,
-            -0.25
+            -2.48,
+            -0.28
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
           "nFired": 7,
-          "nNot": 26,
-          "delta": 0.32,
+          "nNot": 29,
+          "delta": 0.25,
           "ci": [
-            -1.76,
-            2.34
+            -1.87,
+            2.23
           ]
         }
       ]
@@ -1179,62 +1182,59 @@
     "LEVEL_005": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": -0.16,
+      "placementDelta": 0.26,
       "ci": [
-        -0.88,
-        0.57
+        -0.9,
+        1.34
       ],
-      "matches": 50,
-      "matchesFired": 17,
+      "matches": 51,
+      "matchesFired": 8,
       "window": "5-5",
-      "p": 0.736,
-      "q": 0.883,
+      "p": 0.651,
+      "q": 0.831,
       "discovery": {
-        "n": 32,
-        "delta": -0.47,
-        "q": 0.801
+        "n": 34,
+        "delta": 0.04,
+        "q": 1
       },
       "holdout": null,
       "context": [
         {
           "state": "HP at the cut round",
           "group": "HP 50+",
-          "nFired": 5,
-          "nNot": 4,
+          "nFired": 1,
+          "nNot": 8,
           "delta": null,
           "ci": null
         },
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 11,
-          "nNot": 30,
-          "delta": 0.09,
+          "nFired": 6,
+          "nNot": 36,
+          "delta": 0.17,
           "ci": [
-            -0.81,
-            0.95
+            -1.14,
+            1.39
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "top half",
-          "nFired": 10,
-          "nNot": 15,
-          "delta": 0.07,
-          "ci": [
-            -0.73,
-            0.8
-          ]
+          "nFired": 2,
+          "nNot": 24,
+          "delta": null,
+          "ci": null
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 6,
-          "nNot": 19,
-          "delta": 0.03,
+          "nFired": 5,
+          "nNot": 20,
+          "delta": 0.15,
           "ci": [
-            -1.22,
-            1.13
+            -1.25,
+            1.3
           ]
         }
       ]
@@ -1242,86 +1242,86 @@
     "LEVEL_006": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 0,
+      "placementDelta": 1.16,
       "ci": [
-        -1.26,
-        1.36
+        -0.22,
+        2.52
       ],
-      "matches": 74,
-      "matchesFired": 17,
+      "matches": 77,
+      "matchesFired": 12,
       "window": "4-1",
-      "p": 1,
-      "q": 1,
+      "p": 0.131,
+      "q": 0.305,
       "discovery": {
-        "n": 44,
-        "delta": -1.52,
-        "q": 0.51
+        "n": 46,
+        "delta": 0.23,
+        "q": 1
       },
       "holdout": null,
       "context": [
         {
           "state": "HP at the cut round",
           "group": "HP 50+",
-          "nFired": 10,
-          "nNot": 40,
-          "delta": -0.8,
+          "nFired": 7,
+          "nNot": 43,
+          "delta": 0.75,
           "ci": [
-            -1.72,
-            0.13
+            -0.7,
+            2.19
           ]
         },
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 7,
-          "nNot": 17,
-          "delta": 0.67,
+          "nFired": 5,
+          "nNot": 22,
+          "delta": 1.39,
           "ci": [
-            -1.77,
-            2.83
+            -0.77,
+            3.16
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "top half",
-          "nFired": 10,
-          "nNot": 30,
-          "delta": -0.43,
+          "nFired": 6,
+          "nNot": 34,
+          "delta": 0.6,
           "ci": [
-            -1.33,
-            0.43
+            -0.86,
+            1.92
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 7,
-          "nNot": 27,
-          "delta": 0.88,
+          "nFired": 6,
+          "nNot": 31,
+          "delta": 1.64,
           "ci": [
-            -1.51,
-            2.89
+            -0.17,
+            3.15
           ]
         }
       ]
     },
     "LOBBY_001": {
-      "verdict": "predictive",
+      "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 1.68,
+      "placementDelta": -0.44,
       "ci": [
-        0.23,
-        3.07
+        -2.13,
+        1.3
       ],
-      "matches": 66,
-      "matchesFired": 14,
+      "matches": 68,
+      "matchesFired": 7,
       "window": "5-1",
-      "p": 0.011,
-      "q": 0.053,
+      "p": 0.691,
+      "q": 0.84,
       "discovery": {
-        "n": 42,
-        "delta": 1.91,
-        "q": 0.204
+        "n": 0,
+        "delta": null,
+        "q": null
       },
       "holdout": null,
       "context": [
@@ -1336,48 +1336,48 @@
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 13,
-          "nNot": 35,
-          "delta": 1.26,
+          "nFired": 6,
+          "nNot": 44,
+          "delta": -0.93,
           "ci": [
-            -0.29,
-            2.69
+            -2.67,
+            0.87
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "top half",
-          "nFired": 1,
-          "nNot": 34,
+          "nFired": 0,
+          "nNot": 36,
           "delta": null,
           "ci": null
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 12,
-          "nNot": 19,
-          "delta": 0.57,
+          "nFired": 6,
+          "nNot": 26,
+          "delta": -1.96,
           "ci": [
-            -1.07,
-            2.15
+            -3.74,
+            -0.1
           ]
         }
       ]
     },
     "LOBBY_002": {
-      "verdict": "predictive",
+      "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 2.32,
+      "placementDelta": 1.9,
       "ci": [
-        0.86,
-        3.69
+        0.39,
+        3.32
       ],
-      "matches": 74,
-      "matchesFired": 9,
+      "matches": 77,
+      "matchesFired": 10,
       "window": "3-2",
-      "p": 0.006,
-      "q": 0.036,
+      "p": 0.019,
+      "q": 0.134,
       "discovery": {
         "n": 0,
         "delta": null,
@@ -1388,12 +1388,12 @@
         {
           "state": "HP at the cut round",
           "group": "HP 50+",
-          "nFired": 8,
-          "nNot": 65,
-          "delta": 2.36,
+          "nFired": 9,
+          "nNot": 67,
+          "delta": 1.9,
           "ci": [
-            0.75,
-            3.82
+            0.28,
+            3.41
           ]
         },
         {
@@ -1415,23 +1415,38 @@
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 9,
-          "nNot": 24,
-          "delta": 1.79,
+          "nFired": 10,
+          "nNot": 26,
+          "delta": 1.27,
           "ci": [
-            0.18,
-            3.35
+            -0.37,
+            2.86
           ]
         }
       ]
+    },
+    "LOBBY_003": {
+      "verdict": "rare",
+      "status": "exploratory",
+      "placementDelta": null,
+      "ci": null,
+      "matches": 77,
+      "matchesFired": 8,
+      "window": null,
+      "p": null,
+      "q": null,
+      "discovery": null,
+      "holdout": null,
+      "candidateSince": "2026-11-11",
+      "context": []
     },
     "POSITION_001": {
       "verdict": "always-on",
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
-      "matchesFired": 73,
+      "matches": 77,
+      "matchesFired": 76,
       "window": null,
       "p": null,
       "q": null,
@@ -1444,8 +1459,8 @@
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
-      "matchesFired": 4,
+      "matches": 77,
+      "matchesFired": 3,
       "window": null,
       "p": null,
       "q": null,
@@ -1458,7 +1473,7 @@
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 2,
       "window": null,
       "p": null,
@@ -1470,19 +1485,19 @@
     "ROLL_003": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": -0.08,
+      "placementDelta": -0.14,
       "ci": [
-        -1.3,
-        1.14
+        -1.33,
+        1.01
       ],
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 17,
       "window": "4-1",
-      "p": 0.954,
-      "q": 0.995,
+      "p": 0.848,
+      "q": 0.913,
       "discovery": {
-        "n": 44,
-        "delta": -0.01,
+        "n": 46,
+        "delta": -0.38,
         "q": 1
       },
       "holdout": null,
@@ -1494,15 +1509,15 @@
           "nNot": 40,
           "delta": 0.45,
           "ci": [
-            -0.87,
-            1.68
+            -0.83,
+            1.67
           ]
         },
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
           "nFired": 3,
-          "nNot": 21,
+          "nNot": 24,
           "delta": null,
           "ci": null
         },
@@ -1514,42 +1529,82 @@
           "delta": 1.34,
           "ci": [
             -0.12,
-            2.58
+            2.64
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
           "nFired": 6,
-          "nNot": 28,
-          "delta": -1.75,
+          "nNot": 31,
+          "delta": -1.74,
           "ci": [
-            -3.61,
-            0.2
+            -3.49,
+            0.29
           ]
         }
       ]
     },
     "ROLL_004": {
-      "verdict": "rare",
+      "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": null,
-      "ci": null,
-      "matches": 74,
-      "matchesFired": 4,
-      "window": null,
-      "p": null,
-      "q": null,
-      "discovery": null,
+      "placementDelta": 1.55,
+      "ci": [
+        -0.57,
+        3.6
+      ],
+      "matches": 77,
+      "matchesFired": 5,
+      "window": "4-1",
+      "p": 0.17,
+      "q": 0.318,
+      "discovery": {
+        "n": 0,
+        "delta": null,
+        "q": null
+      },
       "holdout": null,
-      "context": []
+      "context": [
+        {
+          "state": "HP at the cut round",
+          "group": "HP 50+",
+          "nFired": 3,
+          "nNot": 47,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP at the cut round",
+          "group": "HP under 50",
+          "nFired": 2,
+          "nNot": 25,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "top half",
+          "nFired": 1,
+          "nNot": 39,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "bottom half",
+          "nFired": 4,
+          "nNot": 33,
+          "delta": null,
+          "ci": null
+        }
+      ]
     },
     "ROLL_005": {
       "verdict": "rare",
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 2,
       "window": null,
       "p": null,
@@ -1561,20 +1616,20 @@
     "ROLL_006": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 0.8,
+      "placementDelta": 0.74,
       "ci": [
         -1.17,
-        2.62
+        2.63
       ],
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 10,
       "window": "4-1",
-      "p": 0.354,
-      "q": 0.564,
+      "p": 0.401,
+      "q": 0.624,
       "discovery": null,
       "holdout": {
         "kind": "prospective",
-        "n": 0,
+        "n": 3,
         "delta": null,
         "p": null,
         "q": null
@@ -1593,11 +1648,11 @@
           "state": "HP at the cut round",
           "group": "HP under 50",
           "nFired": 7,
-          "nNot": 17,
-          "delta": -1.95,
+          "nNot": 20,
+          "delta": -1.86,
           "ci": [
-            -4.25,
-            0.43
+            -4.05,
+            0.45
           ]
         },
         {
@@ -1612,11 +1667,140 @@
           "state": "HP rank in the lobby",
           "group": "bottom half",
           "nFired": 9,
-          "nNot": 25,
-          "delta": -0.6,
+          "nNot": 28,
+          "delta": -0.61,
           "ci": [
-            -2.74,
-            1.49
+            -2.77,
+            1.48
+          ]
+        }
+      ]
+    },
+    "SCOUT_001": {
+      "verdict": "unproven",
+      "status": "exploratory",
+      "placementDelta": 0.13,
+      "ci": [
+        -1.03,
+        1.26
+      ],
+      "matches": 68,
+      "matchesFired": 13,
+      "window": "5-1",
+      "p": 0.886,
+      "q": 0.919,
+      "discovery": null,
+      "holdout": {
+        "kind": "prospective",
+        "n": 0,
+        "delta": null,
+        "p": null,
+        "q": null
+      },
+      "candidateSince": "2026-11-11",
+      "context": [
+        {
+          "state": "HP at the cut round",
+          "group": "HP 50+",
+          "nFired": 1,
+          "nNot": 17,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP at the cut round",
+          "group": "HP under 50",
+          "nFired": 12,
+          "nNot": 38,
+          "delta": -0.31,
+          "ci": [
+            -1.66,
+            0.94
+          ]
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "top half",
+          "nFired": 5,
+          "nNot": 31,
+          "delta": -0.74,
+          "ci": [
+            -1.73,
+            0.21
+          ]
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "bottom half",
+          "nFired": 8,
+          "nNot": 24,
+          "delta": 0.04,
+          "ci": [
+            -1.33,
+            1.25
+          ]
+        }
+      ]
+    },
+    "SHOP_001": {
+      "verdict": "unproven",
+      "status": "exploratory",
+      "placementDelta": 0.51,
+      "ci": [
+        -1.08,
+        2.14
+      ],
+      "matches": 74,
+      "matchesFired": 14,
+      "window": "4-5",
+      "p": 0.513,
+      "q": 0.756,
+      "discovery": null,
+      "holdout": {
+        "kind": "prospective",
+        "n": 0,
+        "delta": null,
+        "p": null,
+        "q": null
+      },
+      "candidateSince": "2026-11-11",
+      "context": [
+        {
+          "state": "HP at the cut round",
+          "group": "HP 50+",
+          "nFired": 1,
+          "nNot": 33,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP at the cut round",
+          "group": "HP under 50",
+          "nFired": 10,
+          "nNot": 30,
+          "delta": -0.43,
+          "ci": [
+            -2.27,
+            1.33
+          ]
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "top half",
+          "nFired": 2,
+          "nNot": 33,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "bottom half",
+          "nFired": 9,
+          "nNot": 30,
+          "delta": -0.04,
+          "ci": [
+            -1.88,
+            1.77
           ]
         }
       ]
@@ -1624,20 +1808,20 @@
     "STREAK_001": {
       "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": 0.5,
+      "placementDelta": 1.07,
       "ci": [
-        -0.24,
-        1.25
+        0.28,
+        1.87
       ],
-      "matches": 50,
-      "matchesFired": 50,
+      "matches": 51,
+      "matchesFired": 63,
       "window": "5-5",
-      "p": 0.218,
-      "q": 0.433,
+      "p": 0.061,
+      "q": 0.19,
       "discovery": {
-        "n": 32,
-        "delta": 0.57,
-        "q": 0.801
+        "n": 0,
+        "delta": null,
+        "q": null
       },
       "holdout": null,
       "context": [
@@ -1652,59 +1836,96 @@
         {
           "state": "HP at the cut round",
           "group": "HP under 50",
-          "nFired": 25,
-          "nNot": 16,
-          "delta": 0.55,
+          "nFired": 36,
+          "nNot": 6,
+          "delta": 1,
           "ci": [
-            -0.25,
-            1.36
+            0.17,
+            1.86
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "top half",
-          "nFired": 19,
-          "nNot": 6,
-          "delta": 0.25,
+          "nFired": 21,
+          "nNot": 5,
+          "delta": 0.48,
           "ci": [
-            -0.55,
-            1.13
+            -0.37,
+            1.36
           ]
         },
         {
           "state": "HP rank in the lobby",
           "group": "bottom half",
-          "nFired": 14,
-          "nNot": 11,
-          "delta": 1.18,
-          "ci": [
-            0.16,
-            2.21
-          ]
+          "nFired": 23,
+          "nNot": 2,
+          "delta": null,
+          "ci": null
         }
       ]
     },
     "STREAK_002": {
-      "verdict": "rare",
+      "verdict": "unproven",
       "status": "exploratory",
-      "placementDelta": null,
-      "ci": null,
+      "placementDelta": 1.93,
+      "ci": [
+        0.17,
+        3.57
+      ],
       "matches": 74,
-      "matchesFired": 3,
-      "window": null,
-      "p": null,
-      "q": null,
-      "discovery": null,
+      "matchesFired": 5,
+      "window": "4-5",
+      "p": 0.078,
+      "q": 0.197,
+      "discovery": {
+        "n": 0,
+        "delta": null,
+        "q": null
+      },
       "holdout": null,
-      "context": []
+      "context": [
+        {
+          "state": "HP at the cut round",
+          "group": "HP 50+",
+          "nFired": 1,
+          "nNot": 33,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP at the cut round",
+          "group": "HP under 50",
+          "nFired": 4,
+          "nNot": 36,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "top half",
+          "nFired": 1,
+          "nNot": 34,
+          "delta": null,
+          "ci": null
+        },
+        {
+          "state": "HP rank in the lobby",
+          "group": "bottom half",
+          "nFired": 4,
+          "nNot": 35,
+          "delta": null,
+          "ci": null
+        }
+      ]
     },
     "STREAK_003": {
       "verdict": "whole-match",
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
-      "matchesFired": 27,
+      "matches": 77,
+      "matchesFired": 15,
       "window": null,
       "p": null,
       "q": null,
@@ -1717,8 +1938,8 @@
       "status": "exploratory",
       "placementDelta": null,
       "ci": null,
-      "matches": 74,
-      "matchesFired": 71,
+      "matches": 77,
+      "matchesFired": 74,
       "window": null,
       "p": null,
       "q": null,
@@ -1730,84 +1951,91 @@
       "verdict": "never-fired",
       "status": "exploratory",
       "placementDelta": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 0
     },
     "AUGMENT_003": {
       "verdict": "never-fired",
       "status": "exploratory",
       "placementDelta": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 0
     },
     "ITEM_004": {
       "verdict": "never-fired",
       "status": "exploratory",
       "placementDelta": null,
-      "matches": 74,
+      "matches": 77,
+      "matchesFired": 0
+    },
+    "LEVEL_002": {
+      "verdict": "never-fired",
+      "status": "exploratory",
+      "placementDelta": null,
+      "matches": 77,
       "matchesFired": 0
     },
     "POSITION_002": {
       "verdict": "never-fired",
       "status": "exploratory",
       "placementDelta": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 0
     },
     "SET17_001": {
       "verdict": "never-fired",
       "status": "exploratory",
       "placementDelta": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 0
     },
     "SET17_002": {
       "verdict": "never-fired",
       "status": "exploratory",
       "placementDelta": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 0
     },
     "SET17_003": {
       "verdict": "never-fired",
       "status": "exploratory",
       "placementDelta": null,
-      "matches": 74,
+      "matches": 77,
       "matchesFired": 0
     }
   },
   "categoryGrades": {
     "econ": {
       "verdict": "tracks",
-      "n": 74,
-      "rho": 0.44,
+      "n": 77,
+      "rho": 0.41,
       "ci": [
-        0.26,
-        0.6
+        0.22,
+        0.58
       ]
     },
     "streak": {
       "verdict": "unproven",
-      "n": 74,
-      "rho": -0.21,
+      "n": 77,
+      "rho": -0.2,
       "ci": [
-        -0.46,
+        -0.43,
         0.04
       ]
     },
     "leveling": {
       "verdict": "unproven",
-      "n": 74,
-      "rho": 0.01,
+      "n": 77,
+      "rho": 0.02,
       "ci": [
-        -0.23,
-        0.26
+        -0.21,
+        0.25
       ]
     },
     "items": {
       "verdict": "unproven",
-      "n": 74,
-      "rho": 0.15,
+      "n": 77,
+      "rho": 0.14,
       "ci": [
         -0.1,
         0.38
@@ -1815,58 +2043,58 @@
     },
     "rolling": {
       "verdict": "unproven",
-      "n": 74,
-      "rho": 0.1,
+      "n": 77,
+      "rho": 0.13,
       "ci": [
-        -0.13,
-        0.33
+        -0.09,
+        0.38
       ]
     },
     "traits": {
       "verdict": "untestable",
-      "n": 74,
+      "n": 77,
       "rho": null,
       "ci": null
     },
     "augments": {
       "verdict": "untestable",
-      "n": 69,
+      "n": 70,
       "rho": null,
       "ci": null
     },
     "positioning": {
       "verdict": "untestable",
-      "n": 74,
+      "n": 77,
       "rho": null,
       "ci": null
     },
     "hp": {
       "verdict": "tracks",
-      "n": 74,
-      "rho": 0.51,
+      "n": 77,
+      "rho": 0.53,
       "ci": [
-        0.3,
+        0.34,
         0.68
       ]
     },
     "board": {
       "verdict": "tracks",
-      "n": 74,
-      "rho": 0.36,
+      "n": 77,
+      "rho": 0.32,
       "ci": [
-        0.13,
-        0.56
+        0.1,
+        0.52
       ]
     },
     "comp": {
       "verdict": "untestable",
-      "n": 74,
+      "n": 77,
       "rho": null,
       "ci": null
     },
     "combat": {
       "verdict": "untestable",
-      "n": 74,
+      "n": 77,
       "rho": null,
       "ci": null
     },

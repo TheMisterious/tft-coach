@@ -28,6 +28,10 @@ function brief(resolvedNotes: CoachingNote[]): MatchBrief {
   };
 }
 
+const vector = (hp: number): FeatureVector => ({ schemaVersion: FEATURE_SCHEMA_VERSION, hpAtStage4Entry: hp } as unknown as FeatureVector);
+const history: MatchHistoryEntry[] = [40, 50, 70, 30, 35, 80].map((hp, i) => ({ matchId: `m${i}`, featureVector: vector(hp), placement: 5 }));
+const point: DecisionPoint = { ruleId: 'HP_002', round: '4-1', category: 'hp', severity: 'moderate', observed: 'o', recommended: 'r', reasonMetrics: {}, coaching_text: 'why.' };
+
 describe('habit-weighted priority fix', () => {
   it('prefers the habitual note over a more severe one-off in the same category', async () => {
     const report = await generateCoachingReport(brief([
@@ -47,6 +51,16 @@ describe('habit-weighted priority fix', () => {
     expect(report.priority_fix?.habit).toBe('This also happened in 2 of your previous 10 matches.');
   });
 
+  it('says the recurrence once: the note text loses the clause the habit line repeats', async () => {
+    const [p] = attachHistoryContext([{ ...point, coaching_text: 'why x.' }], history);
+    const withClause = p.coaching_text!;
+    const report = await generateCoachingReport(brief([note({ why: withClause, habit: p.habit })]));
+    expect(withClause).toContain('4 of your previous 6 matches');
+    expect(report.priority_fix?.why).toBe('why x.');
+    expect(report.priority_fix?.habit).toContain('4 of your previous 6 matches');
+    expect(report.notes[0].why).toBe(withClause);
+  });
+
   it('has no habit line without history', async () => {
     const report = await generateCoachingReport(brief([note({})]));
     expect(report.priority_fix?.habit).toBeUndefined();
@@ -54,9 +68,6 @@ describe('habit-weighted priority fix', () => {
 });
 
 describe('attachHistoryContext sets the recurrence on the point', () => {
-  const vector = (hp: number): FeatureVector => ({ schemaVersion: FEATURE_SCHEMA_VERSION, hpAtStage4Entry: hp } as unknown as FeatureVector);
-  const history: MatchHistoryEntry[] = [40, 50, 70, 30, 35, 80].map((hp, i) => ({ matchId: `m${i}`, featureVector: vector(hp), placement: 5 }));
-  const point: DecisionPoint = { ruleId: 'HP_002', round: '4-1', category: 'hp', severity: 'moderate', observed: 'o', recommended: 'r', reasonMetrics: {}, coaching_text: 'why.' };
 
   it('counts the prior matches that showed the behaviour', () => {
     const [p] = attachHistoryContext([point], history);

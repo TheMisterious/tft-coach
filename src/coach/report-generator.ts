@@ -5,7 +5,7 @@
 import type { MatchBrief, CoachingReport, CoachingNote, DecisionPoint, DecisionCategory, PriorityFix, Grade, Severity } from '../shared/types';
 import { CATEGORY_LABELS } from './scoring';
 import { getRuleEvidence } from './rules-loader';
-import { isHabit } from './history-context';
+import { isHabit, withoutHistoryClause } from './history-context';
 
 export async function generateCoachingReport(brief: MatchBrief): Promise<CoachingReport> {
   const allNotes = [...brief.resolvedNotes, ...brief.decisionPoints.map(toCoachingNote)]
@@ -81,7 +81,7 @@ function buildPriorityFix(brief: MatchBrief, notes: CoachingNote[]): PriorityFix
     category,
     occurrences: categoryNotes.length,
     action: topNote.what_should_have_happened,
-    why: topNote.why,
+    why: topNote.habit ? withoutHistoryClause(topNote.why, topNote.habit) : topNote.why,
     patterns: buildPatterns(categoryNotes, topNote),
     ...(topNote.habit ? {
       habit: `This also happened in ${topNote.habit.count} of your previous ${topNote.habit.sample} matches` +

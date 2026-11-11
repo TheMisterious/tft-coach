@@ -143,6 +143,16 @@ function clauseFor(recurrence: Recurrence): string {
 }
 
 /**
+ * `text` without the clause attachHistoryContext appended for this recurrence.
+ * The priority fix states the recurrence on its own line, so its copy of the
+ * note text drops the clause rather than say it twice.
+ */
+export function withoutHistoryClause(text: string, recurrence: Recurrence): string {
+  const clause = clauseFor(recurrence);
+  return text.endsWith(clause) ? text.slice(0, -clause.length) : text;
+}
+
+/**
  * Appends the history clause to every note whose rule has a matching feature.
  * Only `coaching_text` is touched — severity, ruleId and reasonMetrics are left
  * alone, so scoring and the rule-coverage tests are unaffected.
